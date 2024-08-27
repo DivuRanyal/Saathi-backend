@@ -64,7 +64,7 @@ public class AdminUsersController {
         adminUser.setLastName(lastName);
         adminUser.setEmail(email);
  //       adminUser.setDob(dob);
-        adminUser.setContactNo(contactNo);
+ //       adminUser.setContactNo(contactNo);
         adminUser.setCountryCode(countryCode);
         adminUser.setBriefBio(briefBio != null ? briefBio : "");
 
