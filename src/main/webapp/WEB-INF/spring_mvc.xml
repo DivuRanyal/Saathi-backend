@@ -56,7 +56,7 @@
 <bean id="transactionManager" class="org.springframework.orm.jpa.JpaTransactionManager">
     <property name="entityManagerFactory" ref="entityManagerFactory" />
 </bean>
-    
+    <bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver" />
     <!-- Enable JPA repositories -->
     <jpa:repositories base-package="repository" />
 
