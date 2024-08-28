@@ -1,6 +1,11 @@
 package model.dto;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Date;
+
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
 
 import org.springframework.web.multipart.MultipartFile;
 
@@ -9,6 +14,7 @@ public class AdminUsersDto {
     private String firstName;
     private String lastName;
     private String email;
+    
     private Date dob; // Or use java.util.Date if preferred
     private String contactNo;
     private String countryCode;
@@ -19,6 +25,10 @@ public class AdminUsersDto {
     private Integer createdBy;
     private Integer updatedBy;
     private MultipartFile picture;
+    
+ // Date format to be used for date fields
+    private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
+
 	public String getFirstName() {
 		return firstName;
 	}
@@ -37,12 +47,19 @@ public class AdminUsersDto {
 	public void setEmail(String email) {
 		this.email = email;
 	}
-	public Date getDob() {
-		return dob;
-	}
-	public void setDob(Date dob) {
-		this.dob = dob;
-	}
+	  // Custom getter for DOB to return a formatted date string
+    public String getDob() {
+        return dob != null ? DATE_FORMAT.format(dob) : null;
+    }
+
+    // Custom setter for DOB to parse a date string and set the Date object
+    public void setDob(String dobStr) {
+        try {
+            this.dob = dobStr != null ? DATE_FORMAT.parse(dobStr) : null;
+        } catch (ParseException e) {
+            throw new IllegalArgumentException("Invalid date format. Please use yyyy-MM-dd.");
+        }
+    }
 	public String getContactNo() {
 		return contactNo;
 	}

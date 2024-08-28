@@ -13,6 +13,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -66,12 +67,19 @@ public class AdminUsersController {
            
     		
             @RequestParam(value = "picture", required = false) MultipartFile picture) {
+    	
+    	// Date format to convert Date to String
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+
         // Create AdminUsers instance and set fields from request parameters
+    	
         AdminUser adminUser = new AdminUser();
         adminUser.setFirstName(firstName);
         adminUser.setLastName(lastName);
         adminUser.setEmail(email);
-        adminUser.setDob(dob);
+        String dobStr = dob != null ? dateFormat.format(dob) : null;
+        adminUser.setDob(dobStr);
+
         adminUser.setContactNo(contactNo);
         adminUser.setCountryCode(countryCode);
         adminUser.setBriefBio(briefBio != null ? briefBio : "");

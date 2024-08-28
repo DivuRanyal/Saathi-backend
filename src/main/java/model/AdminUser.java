@@ -1,6 +1,8 @@
 package model;
 
 import javax.persistence.*;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 
 @Entity
@@ -23,7 +25,7 @@ public class AdminUser {
 
     @Temporal(TemporalType.DATE)
     @Column(name = "DOB")
-    private Date dob;
+    private Date dob; 
 
     @Column(name = "ContactNo")
     private String contactNo;
@@ -43,39 +45,41 @@ public class AdminUser {
     @Column(name = "Password")
     private String password;
 
+    @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "CreatedDate")
     private Date createdDate;
 
+    @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "LastUpdatedDate")
     private Date lastUpdatedDate;
 
     @Column(name = "Status")
     private Integer status;
 
-   
     @Column(name = "CreatedBy")
     private Integer createdBy;
-
 
     @Column(name = "UpdatedBy")
     private Integer updatedBy;
 
+    // Date format to be used for date fields
+    private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
+
     // Getters and Setters
-  
+
+    public int getAdminUserID() {
+        return adminUserID;
+    }
+
+    public void setAdminUserID(int adminUserID) {
+        this.adminUserID = adminUserID;
+    }
 
     public String getFirstName() {
         return firstName;
     }
 
-    public int getAdminUserID() {
-		return adminUserID;
-	}
-
-	public void setAdminUserID(int adminUserID) {
-		this.adminUserID = adminUserID;
-	}
-
-	public void setFirstName(String firstName) {
+    public void setFirstName(String firstName) {
         this.firstName = firstName;
     }
 
@@ -95,12 +99,18 @@ public class AdminUser {
         this.email = email;
     }
 
-    public Date getDob() {
-        return dob;
+    // Custom getter for DOB to return a formatted date string
+    public String getDob() {
+        return dob != null ? DATE_FORMAT.format(dob) : null;
     }
 
-    public void setDob(Date dob) {
-        this.dob = dob;
+    // Custom setter for DOB to parse a date string and set the Date object
+    public void setDob(String dobStr) {
+        try {
+            this.dob = dobStr != null ? DATE_FORMAT.parse(dobStr) : null;
+        } catch (ParseException e) {
+            throw new IllegalArgumentException("Invalid date format. Please use yyyy-MM-dd.");
+        }
     }
 
     public String getContactNo() {
@@ -151,16 +161,18 @@ public class AdminUser {
         this.password = password;
     }
 
-    public Date getCreatedDate() {
-        return createdDate;
+    // Custom getter for CreatedDate to return a formatted date string
+    public String getCreatedDate() {
+        return createdDate != null ? DATE_FORMAT.format(createdDate) : null;
     }
 
     public void setCreatedDate(Date createdDate) {
         this.createdDate = createdDate;
     }
 
-    public Date getLastUpdatedDate() {
-        return lastUpdatedDate;
+    // Custom getter for LastUpdatedDate to return a formatted date string
+    public String getLastUpdatedDate() {
+        return lastUpdatedDate != null ? DATE_FORMAT.format(lastUpdatedDate) : null;
     }
 
     public void setLastUpdatedDate(Date lastUpdatedDate) {
@@ -190,7 +202,7 @@ public class AdminUser {
     public void setUpdatedBy(Integer updatedBy) {
         this.updatedBy = updatedBy;
     }
-    
+
     @PrePersist
     protected void onCreate() {
         createdDate = new Date();  // Set the current timestamp for createdDate
