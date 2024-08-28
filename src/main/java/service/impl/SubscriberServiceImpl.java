@@ -6,8 +6,10 @@ import model.Subscriber;
 import repository.SubscriberRepository;
 import service.SubscriberService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -16,6 +18,10 @@ public class SubscriberServiceImpl implements SubscriberService {
 
     @Autowired
     private SubscriberRepository subscriberRepository;
+    
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
 
     @Override
     public SubscriberDTO createSubscriber(SubscriberDTO subscriberDTO) {
@@ -88,8 +94,17 @@ public class SubscriberServiceImpl implements SubscriberService {
     }
 
     @Override
-    public Subscriber findByEmailAndPassword(String email, String password) {
-        return subscriberRepository.findByEmailAndPassword(email, password);
+    public Subscriber findByEmailAndPassword(String email, String rawPassword) {
+    	Subscriber subscriber = subscriberRepository.findByEmail(email);
+
+        // Check if user exists and if the raw password matches the encoded password
+        if (subscriber != null && passwordEncoder.matches(rawPassword, subscriber.getPassword())) {
+        	 // Update lastLoginTime with the current date and time
+        	subscriber.setLastLoginTime(new Date());
+            return subscriber;
+        }
+
+        return null; // Return null if credentials are invalid
     }
     // Utility methods to convert between entity and DTO
     private SubscriberDTO convertToDTO(Subscriber subscriber) {
