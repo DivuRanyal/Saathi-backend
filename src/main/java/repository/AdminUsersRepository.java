@@ -1,6 +1,6 @@
 package repository;
 
-import model.AdminUsers;
+import model.AdminUser;
 
 import java.util.List;
 
@@ -8,10 +8,12 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface AdminUsersRepository extends JpaRepository<AdminUsers, Integer> {
+public interface AdminUsersRepository extends JpaRepository<AdminUser, Integer> {
 
     // You can define custom query methods here if needed, e.g.,
-    AdminUsers findByEmail(String email);
+    AdminUser findByEmail(String email);
     
-    List<AdminUsers> findByStatus(Integer status);
+    List<AdminUser> findByStatus(Integer status);
+    
+    AdminUser findByEmailAndPassword(String email, String password);
 }

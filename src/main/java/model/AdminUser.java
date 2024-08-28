@@ -5,7 +5,7 @@ import java.util.Date;
 
 @Entity
 @Table(name = "AdminUsers")
-public class AdminUsers {
+public class AdminUser {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -21,6 +21,7 @@ public class AdminUsers {
     @Column(name = "Email")
     private String email;
 
+    @Temporal(TemporalType.DATE)
     @Column(name = "DOB")
     private Date dob;
 

@@ -30,10 +30,10 @@ public class Patron {
     @Column(name = "DOB")
     private Date dob;
 
- //   @ManyToOne
- //   @JoinColumn(name = "SubscriberID")
-//    private Subscribers subscriber;
-
+    @ManyToOne
+    @JoinColumn(name = "SubscriberID")
+    private Subscriber subscriber;
+    
     @Column(name = "Address1")
     private String address1;
 
@@ -118,15 +118,15 @@ public class Patron {
     public void setDob(Date dob) {
         this.dob = dob;
     }
-/*
-    public Subscribers getSubscriber() {
+
+    public Subscriber getSubscriber() {
         return subscriber;
     }
 
-    public void setSubscriber(Subscribers subscriber) {
+    public void setSubscriber(Subscriber subscriber) {
         this.subscriber = subscriber;
     }
-*/
+
     public String getAddress1() {
         return address1;
     }
