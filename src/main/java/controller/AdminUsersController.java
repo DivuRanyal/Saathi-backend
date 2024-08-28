@@ -85,7 +85,8 @@ public class AdminUsersController {
         // Handle picture upload 
 		if (picture != null && !picture.isEmpty()) {
 			String fileName = picture.getOriginalFilename();
-			String storageLocation = "C:\\Users\\ether\\OneDrive\\Documents\\PROJECT\\" + fileName;
+	//		String storageLocation = "C:\\Users\\ether\\OneDrive\\Documents\\PROJECT\\" + fileName;
+			String storageLocation = "/home/saathi/tomcat/webapps/saathi_images/" + fileName;
 
 			try {
 				picture.transferTo(new File(storageLocation));
@@ -148,8 +149,8 @@ public class AdminUsersController {
             MultipartFile file = adminUserUpdateDto.getPicture();
             if (file != null && !file.isEmpty()) {
                 String fileName = file.getOriginalFilename();
-                String storageLocation = "C:\\Users\\ether\\OneDrive\\Documents\\PROJECT\\" + fileName;
-
+  //              String storageLocation = "C:\\Users\\ether\\OneDrive\\Documents\\PROJECT\\" + fileName;
+                String storageLocation = "/home/saathi/tomcat/webapps/saathi_images/" + fileName;
                 try {
                     file.transferTo(new File(storageLocation));
                     existingAdminUser.setPicture(storageLocation);
