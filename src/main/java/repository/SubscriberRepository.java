@@ -1,7 +1,7 @@
 package repository;
 
+import model.AdminUser;
 import model.Subscriber;
-import model.dto.SubscriberDTO;
 
 import java.util.List;
 import java.util.Optional;
@@ -18,6 +18,7 @@ public interface SubscriberRepository extends JpaRepository<Subscriber, Integer>
 	
 	List<Subscriber> findByStatus(Integer status);
 	 Optional<Subscriber> findByEmail(String email);
+	 List<Subscriber> findBySaathi(AdminUser saathi);
     
     
 }

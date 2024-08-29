@@ -195,5 +195,15 @@ public class SubscriberServiceImpl implements SubscriberService {
         return subscriber;
     }
     
+    @Override
+    public List<SubscriberDTO> getSubscribersBySaathi(int saathiId) {
+        AdminUser saathi = adminUserRepository.findById(saathiId)
+            .orElseThrow(() -> new RuntimeException("Saathi not found with ID: " + saathiId));
+        
+        List<Subscriber> subscribers = subscriberRepository.findBySaathi(saathi);
+        return subscribers.stream()
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
+    }
     
 }

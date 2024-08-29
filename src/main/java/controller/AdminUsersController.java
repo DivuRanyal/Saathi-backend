@@ -2,7 +2,10 @@ package controller;
 
 import model.AdminUser;
 import model.dto.AdminUsersDto;
+import model.dto.SubscriberDTO;
 import service.AdminUsersService;
+import service.SubscriberService;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
@@ -24,13 +27,16 @@ public class AdminUsersController {
 
     private final AdminUsersService adminUsersService;
     
+    private final SubscriberService subscriberService;
+    
     @Autowired
     private PasswordEncoder passwordEncoder;
 
 
     @Autowired
-    public AdminUsersController(AdminUsersService adminUsersService) {
+    public AdminUsersController(AdminUsersService adminUsersService, SubscriberService subscriberService) {
         this.adminUsersService = adminUsersService;
+		this.subscriberService = subscriberService;
     }
 
     // GET: /admin-users
@@ -192,5 +198,11 @@ public class AdminUsersController {
     public ResponseEntity<List<AdminUser>> getActiveAdminUsers() {
         List<AdminUser> activeUsers = adminUsersService.getActiveAdminUsers();
         return ResponseEntity.ok(activeUsers);
+    }
+    
+    @GetMapping("/{saathiId}/subscribers")
+    public ResponseEntity<List<SubscriberDTO>> getSubscribersBySaathi(@PathVariable int saathiId) {
+        List<SubscriberDTO> subscribers = subscriberService.getSubscribersBySaathi(saathiId);
+        return ResponseEntity.ok(subscribers);
     }
 }

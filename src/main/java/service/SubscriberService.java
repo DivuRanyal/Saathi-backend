@@ -12,4 +12,5 @@ public interface SubscriberService {
     void deleteSubscriber(int subscriberId);
      List<SubscriberDTO> getActiveSubscribers();
     Subscriber findByEmailAndPassword(String email, String password);
+    List<SubscriberDTO> getSubscribersBySaathi(int saathiId);
 }

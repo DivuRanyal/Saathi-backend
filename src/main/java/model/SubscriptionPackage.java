@@ -34,7 +34,28 @@ public class SubscriptionPackage {
     @Column(name = "Status", nullable = false)
     private int status;
 
-    @PrePersist
+    @Column(name = "CreatedBy")
+    private Integer createdBy;
+
+    @Column(name = "UpdatedBy")
+    private Integer updatedBy;
+    public Integer getCreatedBy() {
+		return createdBy;
+	}
+
+	public void setCreatedBy(Integer createdBy) {
+		this.createdBy = createdBy;
+	}
+
+	public Integer getUpdatedBy() {
+		return updatedBy;
+	}
+
+	public void setUpdatedBy(Integer updatedBy) {
+		this.updatedBy = updatedBy;
+	}
+
+	@PrePersist
     protected void onCreate() {
         createdDate = new Date();  // Set the current timestamp for createdDate
     }

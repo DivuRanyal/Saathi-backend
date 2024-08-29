@@ -56,6 +56,8 @@ public class SubscriptionPackageServiceImpl implements SubscriptionPackageServic
             if (subscriptionPackage.getStatus() != 0) {
                 existingPackage.setStatus(subscriptionPackage.getStatus());
             }
+         // Set the updatedBy field
+            existingPackage.setUpdatedBy(subscriptionPackage.getUpdatedBy());
 
             return subscriptionPackageRepository.save(existingPackage);
         } else {

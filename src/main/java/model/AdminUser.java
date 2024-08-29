@@ -3,7 +3,9 @@ package model;
 import javax.persistence.*;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 @Entity
 @Table(name = "AdminUsers")
@@ -61,6 +63,9 @@ public class AdminUser {
 
     @Column(name = "UpdatedBy")
     private Integer updatedBy;
+
+    @OneToMany(mappedBy = "saathi")
+    private List<Subscriber> subscribers = new ArrayList<>();
 
     // Date format to be used for date fields
     private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
@@ -201,6 +206,14 @@ public class AdminUser {
 
     public void setUpdatedBy(Integer updatedBy) {
         this.updatedBy = updatedBy;
+    }
+
+    public List<Subscriber> getSubscribers() {
+        return subscribers;
+    }
+
+    public void setSubscribers(List<Subscriber> subscribers) {
+        this.subscribers = subscribers;
     }
 
     @PrePersist
