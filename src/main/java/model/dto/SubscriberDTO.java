@@ -1,10 +1,12 @@
 package model.dto;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 
 public class SubscriberDTO {
 
-    private int subscriberId;
+    private int subscriberID;
     private String firstName;
     private String lastName;
     private String email;
@@ -12,20 +14,25 @@ public class SubscriberDTO {
     private String countryCode;
     private String password;
     private Date lastLoginTime;
-    private Integer packageId; // Assume this is the ID only, you can also have the entire object if needed
+    private Integer packageID; // Assume this is the ID only, you can also have the entire object if needed
     private Date startDate;
     private Date endDate;
     private Integer billingStatus;
-    private Integer saathiId; // Assume this is the ID only, you can also have the entire object if needed
+    private Integer saathiID; // Assume this is the ID only, you can also have the entire object if needed
     private Date createdDate;
     private Date lastUpdatedDate;
     private Integer status;
-	public int getSubscriberId() {
-		return subscriberId;
+    private Integer createdBy;
+	
+ public Integer getCreatedBy() {
+		return createdBy;
 	}
-	public void setSubscriberId(int subscriberId) {
-		this.subscriberId = subscriberId;
+	public void setCreatedBy(Integer createdBy) {
+		this.createdBy = createdBy;
 	}
+	// Date format to be used for date fields
+    private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
+
 	public String getFirstName() {
 		return firstName;
 	}
@@ -68,48 +75,77 @@ public class SubscriberDTO {
 	public void setLastLoginTime(Date lastLoginTime) {
 		this.lastLoginTime = lastLoginTime;
 	}
-	public Integer getPackageId() {
-		return packageId;
+	public Integer getPackageID() {
+		return packageID;
 	}
-	public void setPackageId(Integer packageId) {
-		this.packageId = packageId;
+	public void setPackageID(Integer packageId) {
+		this.packageID = packageId;
 	}
-	public Date getStartDate() {
-		return startDate;
-	}
-	public void setStartDate(Date startDate) {
-		this.startDate = startDate;
-	}
-	public Date getEndDate() {
-		return endDate;
-	}
-	public void setEndDate(Date endDate) {
-		this.endDate = endDate;
-	}
+	
+	
+	 public String getStartDate() {
+	        return startDate != null ? DATE_FORMAT.format(startDate) : null;
+	    }
+
+	    // Custom setter for DOB to parse a date string and set the Date object
+	    public void setStartDate(String startDate) {
+	        try {
+	            this.startDate = startDate != null ? DATE_FORMAT.parse(startDate) : null;
+	        } catch (ParseException e) {
+	            throw new IllegalArgumentException("Invalid date format. Please use yyyy-MM-dd.");
+	        }
+	    }
+	    
+	    public String getEndDate() {
+	        return endDate != null ? DATE_FORMAT.format(endDate) : null;
+	    }
+
+	    // Custom setter for DOB to parse a date string and set the Date object
+	    public void setEndDate(String endDate) {
+	        try {
+	            this.endDate = endDate != null ? DATE_FORMAT.parse(endDate) : null;
+	        } catch (ParseException e) {
+	            throw new IllegalArgumentException("Invalid date format. Please use yyyy-MM-dd.");
+	        }
+	    }
+	    
 	public Integer getBillingStatus() {
 		return billingStatus;
 	}
 	public void setBillingStatus(Integer billingStatus) {
 		this.billingStatus = billingStatus;
 	}
-	public int getSaathiId() {
-		return saathiId;
+	
+	public int getSubscriberID() {
+		return subscriberID;
 	}
-	public void setSaathiId(int saathiId) {
-		this.saathiId = saathiId;
+	public void setSubscriberID(int subscriberID) {
+		this.subscriberID = subscriberID;
 	}
-	public Date getCreatedDate() {
-		return createdDate;
+	public Integer getSaathiID() {
+		return saathiID;
 	}
-	public void setCreatedDate(Date createdDate) {
-		this.createdDate = createdDate;
+	public void setSaathiID(Integer saathiID) {
+		this.saathiID = saathiID;
 	}
-	public Date getLastUpdatedDate() {
-		return lastUpdatedDate;
-	}
-	public void setLastUpdatedDate(Date lastUpdatedDate) {
-		this.lastUpdatedDate = lastUpdatedDate;
-	}
+	// Custom getter for CreatedDate to return a formatted date string
+    public String getCreatedDate() {
+        return createdDate != null ? DATE_FORMAT.format(createdDate) : null;
+    }
+
+    public void setCreatedDate(Date createdDate) {
+        this.createdDate = createdDate;
+    }
+
+    // Custom getter for LastUpdatedDate to return a formatted date string
+    public String getLastUpdatedDate() {
+        return lastUpdatedDate != null ? DATE_FORMAT.format(lastUpdatedDate) : null;
+    }
+
+    public void setLastUpdatedDate(Date lastUpdatedDate) {
+        this.lastUpdatedDate = lastUpdatedDate;
+    }
+
 	public Integer getStatus() {
 		return status;
 	}

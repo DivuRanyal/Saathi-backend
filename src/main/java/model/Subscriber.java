@@ -1,6 +1,12 @@
 package model;
 
 import javax.persistence.*;
+
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotNull;
+
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 
 @Entity
@@ -12,12 +18,15 @@ public class Subscriber {
     @Column(name = "SubscriberID")
     private int subscriberID;
 
+    @NotNull(message = "First name is required")
     @Column(name = "FirstName")
     private String firstName;
 
     @Column(name = "LastName")
     private String lastName;
 
+    @NotNull(message = "Email is required")
+    @Email(message = "Email should be valid")
     @Column(name = "Email")
     private String email;
 
@@ -63,6 +72,9 @@ public class Subscriber {
 
     @Column(name = "Status")
     private int status;
+
+ // Date format to be used for date fields
+    private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
 
 	public int getSubscriberId() {
 		return subscriberID;
@@ -136,21 +148,31 @@ public class Subscriber {
 		this.subscriptionPackage = subscriptionPackage;
 	}
 
-	public Date getStartDate() {
-		return startDate;
-	}
+	 public String getStartDate() {
+	        return startDate != null ? DATE_FORMAT.format(startDate) : null;
+	    }
 
-	public void setStartDate(Date startDate) {
-		this.startDate = startDate;
-	}
+	    // Custom setter for DOB to parse a date string and set the Date object
+	    public void setStartDate(String startDate) {
+	        try {
+	            this.startDate = startDate != null ? DATE_FORMAT.parse(startDate) : null;
+	        } catch (ParseException e) {
+	            throw new IllegalArgumentException("Invalid date format. Please use yyyy-MM-dd.");
+	        }
+	    }
+	    
+	    public String getEndDate() {
+	        return endDate != null ? DATE_FORMAT.format(endDate) : null;
+	    }
 
-	public Date getEndDate() {
-		return endDate;
-	}
-
-	public void setEndDate(Date endDate) {
-		this.endDate = endDate;
-	}
+	    // Custom setter for DOB to parse a date string and set the Date object
+	    public void setEndDate(String endDate) {
+	        try {
+	            this.endDate = endDate != null ? DATE_FORMAT.parse(endDate) : null;
+	        } catch (ParseException e) {
+	            throw new IllegalArgumentException("Invalid date format. Please use yyyy-MM-dd.");
+	        }
+	    }
 
 	public int getBillingStatus() {
 		return billingStatus;
@@ -191,6 +213,16 @@ public class Subscriber {
 	public void setStatus(int status) {
 		this.status = status;
 	}
+	
+	@PrePersist
+    protected void onCreate() {
+        createdDate = new Date();  // Set the current timestamp for createdDate
+    }
+
+    @PreUpdate
+    protected void onUpdate() {
+        lastUpdatedDate = new Date();  // Set the current timestamp for lastUpdatedDate
+    }
 
     // Getters and Setters
     

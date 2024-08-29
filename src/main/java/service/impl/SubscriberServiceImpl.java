@@ -3,7 +3,10 @@ package service.impl;
 import model.dto.SubscriberDTO;
 import model.AdminUser;
 import model.Subscriber;
+import model.SubscriptionPackage;
+import repository.AdminUsersRepository;
 import repository.SubscriberRepository;
+import repository.SubscriptionPackageRepository;
 import service.SubscriberService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -15,6 +18,11 @@ import java.util.stream.Collectors;
 
 @Service
 public class SubscriberServiceImpl implements SubscriberService {
+
+	@Autowired
+	private AdminUsersRepository adminUserRepository;
+	@Autowired
+	private  SubscriptionPackageRepository subscriptionPackageRepository;
 
     @Autowired
     private SubscriberRepository subscriberRepository;
@@ -109,7 +117,7 @@ public class SubscriberServiceImpl implements SubscriberService {
     // Utility methods to convert between entity and DTO
     private SubscriberDTO convertToDTO(Subscriber subscriber) {
         SubscriberDTO subscriberDTO = new SubscriberDTO();
-        subscriberDTO.setSubscriberId(subscriber.getSubscriberId());
+        subscriberDTO.setSubscriberID(subscriber.getSubscriberId());
         subscriberDTO.setFirstName(subscriber.getFirstName());
         subscriberDTO.setLastName(subscriber.getLastName());
         subscriberDTO.setEmail(subscriber.getEmail());
@@ -117,12 +125,12 @@ public class SubscriberServiceImpl implements SubscriberService {
         subscriberDTO.setCountryCode(subscriber.getCountryCode());
         subscriberDTO.setPassword(subscriber.getPassword());
         subscriberDTO.setLastLoginTime(subscriber.getLastLoginTime());
-        subscriberDTO.setPackageId(subscriber.getSubscriptionPackage() != null ? subscriber.getSubscriptionPackage().getPackageID() : null);
+        subscriberDTO.setPackageID(subscriber.getSubscriptionPackage() != null ? subscriber.getSubscriptionPackage().getPackageID() : null);
         subscriberDTO.setStartDate(subscriber.getStartDate());
         subscriberDTO.setEndDate(subscriber.getEndDate());
         subscriberDTO.setBillingStatus(subscriber.getBillingStatus());
      // Correctly mapping SaathiID from AdminUser's UserID
-        subscriberDTO.setSaathiId(subscriber.getSaathi() != null ? subscriber.getSaathi().getAdminUserID() : null);
+        subscriberDTO.setSaathiID(subscriber.getSaathi() != null ? subscriber.getSaathi().getAdminUserID() : null);
 
         subscriberDTO.setCreatedDate(subscriber.getCreatedDate());
         subscriberDTO.setLastUpdatedDate(subscriber.getLastUpdatedDate());
@@ -130,18 +138,32 @@ public class SubscriberServiceImpl implements SubscriberService {
         return subscriberDTO;
     }
 
-    private Subscriber convertToEntity(SubscriberDTO subscriberDTO) {
+    private Subscriber convertToEntity(SubscriberDTO subscriberDTO) throws RuntimeException {
         Subscriber subscriber = new Subscriber();
         subscriber.setFirstName(subscriberDTO.getFirstName());
         subscriber.setLastName(subscriberDTO.getLastName());
         subscriber.setEmail(subscriberDTO.getEmail());
         subscriber.setContactNo(subscriberDTO.getContactNo());
         subscriber.setCountryCode(subscriberDTO.getCountryCode());
-        subscriber.setPassword(subscriberDTO.getPassword());
+        subscriber.setPassword(passwordEncoder.encode(subscriberDTO.getPassword()));
+        
         subscriber.setLastLoginTime(subscriberDTO.getLastLoginTime());
         subscriber.setStartDate(subscriberDTO.getStartDate());
         subscriber.setEndDate(subscriberDTO.getEndDate());
         subscriber.setBillingStatus(subscriberDTO.getBillingStatus());
+        // Fetch the SubscriptionPackage entity by packageId and set it
+        if (subscriberDTO.getPackageID() != null) {
+            SubscriptionPackage subscriptionPackage = subscriptionPackageRepository.findById(subscriberDTO.getPackageID())
+                .orElseThrow(() -> new RuntimeException("Subscription Package not found"));
+            subscriber.setSubscriptionPackage(subscriptionPackage);
+        }
+
+        // Fetch the AdminUser entity by saathiId and set it
+        if (subscriberDTO.getSaathiID() != null) {
+            AdminUser saathi = adminUserRepository.findById(subscriberDTO.getSaathiID())
+                .orElseThrow(() -> new RuntimeException("Admin User (Saathi) not found"));
+            subscriber.setSaathi(saathi);
+        }
         subscriber.setStatus(subscriberDTO.getStatus());
         // Additional fields can be set here
         return subscriber;
