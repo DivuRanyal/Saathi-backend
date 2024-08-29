@@ -13,7 +13,7 @@ public class WebConfig {
             @Override
             public void addCorsMappings(CorsRegistry registry) {
                 registry.addMapping("/**")
-                        .allowedOrigins("http://localhost:3000")  // Allow specific origin
+                        .allowedOrigins("http://192.168.29.160:3000")  // Allow specific origin
                         .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS") // Allow specific methods
                         .allowedHeaders("*") // Allow specific headers
                         .allowCredentials(true); // Allow cookies or credentials
