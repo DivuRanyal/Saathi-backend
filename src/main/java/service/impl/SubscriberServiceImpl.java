@@ -68,7 +68,10 @@ public class SubscriberServiceImpl implements SubscriberService {
             existingSubscriber.setCountryCode(subscriberDTO.getCountryCode());
         }
         if (subscriberDTO.getPassword() != null) {
-            existingSubscriber.setPassword(subscriberDTO.getPassword());
+            // Check if the incoming password is different from the existing password
+            if (!passwordEncoder.matches(subscriberDTO.getPassword(), existingSubscriber.getPassword())) {
+                existingSubscriber.setPassword(passwordEncoder.encode(subscriberDTO.getPassword()));
+            }
         }
         if (subscriberDTO.getLastLoginTime() != null) {
             existingSubscriber.setLastLoginTime(subscriberDTO.getLastLoginTime());
