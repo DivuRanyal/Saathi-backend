@@ -28,6 +28,7 @@ public class LogginFilters implements Filter {
         res.setHeader("Access-Control-Allow-Credentials", "true");
 
         String origin = req.getHeader("Origin");
+        System.out.println("Request Origin: " + origin);
         if (origin != null) {
             // Set the Origin header to allow cross-origin requests
             res.setHeader("Access-Control-Allow-Origin", origin);
