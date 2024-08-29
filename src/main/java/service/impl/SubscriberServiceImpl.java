@@ -97,6 +97,14 @@ public class SubscriberServiceImpl implements SubscriberService {
     }
 
     @Override
+    public List<SubscriberDTO> getActiveSubscribers() {
+        List<Subscriber> subscribers = subscriberRepository.findByStatus(1);
+        return subscribers.stream()
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
+        
+    }
+    @Override
     public void deleteSubscriber(int subscriberId) {
         subscriberRepository.deleteById(subscriberId);
     }
@@ -168,4 +176,6 @@ public class SubscriberServiceImpl implements SubscriberService {
         // Additional fields can be set here
         return subscriber;
     }
+    
+    
 }

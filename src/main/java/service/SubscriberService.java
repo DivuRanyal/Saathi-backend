@@ -10,6 +10,6 @@ public interface SubscriberService {
     SubscriberDTO getSubscriberById(int subscriberId);
     List<SubscriberDTO> getAllSubscribers();
     void deleteSubscriber(int subscriberId);
-    
+     List<SubscriberDTO> getActiveSubscribers();
     Subscriber findByEmailAndPassword(String email, String password);
 }

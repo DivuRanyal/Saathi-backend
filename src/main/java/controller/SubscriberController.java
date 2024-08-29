@@ -1,5 +1,6 @@
 package controller;
 
+import model.AdminUser;
 import model.dto.SubscriberDTO;
 import service.SubscriberService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,6 +43,11 @@ public class SubscriberController {
         return new ResponseEntity<>(subscribers, HttpStatus.OK);
     }
 
+    @GetMapping("/active")
+    public ResponseEntity<List<SubscriberDTO>> getActiveSubscribers() {
+        List<SubscriberDTO> subscribers = subscriberService.getActiveSubscribers();
+        return ResponseEntity.ok(subscribers);
+    }
     @DeleteMapping("/{subscriberId}")
     public ResponseEntity<Void> deleteSubscriber(@PathVariable int subscriberId) {
         subscriberService.deleteSubscriber(subscriberId);
