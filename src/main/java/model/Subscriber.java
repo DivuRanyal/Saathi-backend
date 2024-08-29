@@ -214,6 +214,7 @@ public class Subscriber {
 		this.status = status;
 	}
 	
+	
 	@PrePersist
     protected void onCreate() {
         createdDate = new Date();  // Set the current timestamp for createdDate

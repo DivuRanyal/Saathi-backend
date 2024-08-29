@@ -143,6 +143,7 @@ public class SubscriberServiceImpl implements SubscriberService {
         subscriberDTO.setCreatedDate(subscriber.getCreatedDate());
         subscriberDTO.setLastUpdatedDate(subscriber.getLastUpdatedDate());
         subscriberDTO.setStatus(subscriber.getStatus());
+        
         return subscriberDTO;
     }
 

@@ -22,14 +22,6 @@ public class SubscriberDTO {
     private Date createdDate;
     private Date lastUpdatedDate;
     private Integer status;
-    private Integer createdBy;
-	
- public Integer getCreatedBy() {
-		return createdBy;
-	}
-	public void setCreatedBy(Integer createdBy) {
-		this.createdBy = createdBy;
-	}
 	// Date format to be used for date fields
     private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
 
