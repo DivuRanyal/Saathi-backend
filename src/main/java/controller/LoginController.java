@@ -29,7 +29,7 @@ public class LoginController {
         }
     }
 
-    @PostMapping("/subscriber/login")
+    @PostMapping("/subscribers/login")
     public ResponseEntity<?> loginSubscriber(@RequestParam String email, @RequestParam String password) {
         Subscriber subscriber = subscriberService.findByEmailAndPassword(email, password);
 

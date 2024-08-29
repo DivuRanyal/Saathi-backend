@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -33,6 +34,14 @@ public class SubscriberServiceImpl implements SubscriberService {
 
     @Override
     public SubscriberDTO createSubscriber(SubscriberDTO subscriberDTO) {
+    	// Check if the email is already registered
+        Optional<Subscriber> existingSubscriber = subscriberRepository.findByEmail(subscriberDTO.getEmail());
+        
+        if (existingSubscriber.isPresent()) {
+            throw new RuntimeException("Email is already registered");
+        }
+
+        // If the email is not registered, proceed to create a new subscriber
         Subscriber subscriber = convertToEntity(subscriberDTO);
         Subscriber savedSubscriber = subscriberRepository.save(subscriber);
         return convertToDTO(savedSubscriber);
@@ -111,16 +120,21 @@ public class SubscriberServiceImpl implements SubscriberService {
 
     @Override
     public Subscriber findByEmailAndPassword(String email, String rawPassword) {
-    	Subscriber subscriber = subscriberRepository.findByEmail(email);
+        // Use Optional to safely handle the possibility that the subscriber does not exist
+        Optional<Subscriber> optionalSubscriber = subscriberRepository.findByEmail(email);
 
-        // Check if user exists and if the raw password matches the encoded password
-        if (subscriber != null && passwordEncoder.matches(rawPassword, subscriber.getPassword())) {
-        	 // Update lastLoginTime with the current date and time
-        	subscriber.setLastLoginTime(new Date());
-            return subscriber;
+        if (optionalSubscriber.isPresent()) {
+            Subscriber subscriber = optionalSubscriber.get();
+
+            // Check if the raw password matches the encoded password
+            if (passwordEncoder.matches(rawPassword, subscriber.getPassword())) {
+                // Update lastLoginTime with the current date and time
+                subscriber.setLastLoginTime(new Date());
+                return subscriber;
+            }
         }
 
-        return null; // Return null if credentials are invalid
+        return null; // Return null if credentials are invalid or subscriber does not exist
     }
     // Utility methods to convert between entity and DTO
     private SubscriberDTO convertToDTO(Subscriber subscriber) {

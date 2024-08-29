@@ -1,6 +1,7 @@
 package service.impl;
 
 import model.AdminUser;
+import model.Subscriber;
 import repository.AdminUsersRepository;
 import service.AdminUsersService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,11 +36,17 @@ public class AdminUsersServiceImpl implements AdminUsersService {
         return adminUsersRepository.findById(userId);
     }
 
-    @Override
     public AdminUser createAdminUser(AdminUser adminUser) {
+        // Check if email already exists
+        Optional<AdminUser> existingAdminUser = adminUsersRepository.findByEmail(adminUser.getEmail());
+
+        if (existingAdminUser.isPresent()) {
+            throw new RuntimeException("Email is already registered");
+        }
+
+        // Proceed with saving the new AdminUser
         return adminUsersRepository.save(adminUser);
     }
-
     @Override
     public AdminUser updateAdminUser(AdminUser adminUser) {
         return adminUsersRepository.save(adminUser);
@@ -55,17 +62,22 @@ public class AdminUsersServiceImpl implements AdminUsersService {
         return adminUsersRepository.findByStatus(1);
     }
 
+    
     @Override
     public AdminUser findByEmailAndPassword(String email, String rawPassword) {
-        AdminUser adminUser = adminUsersRepository.findByEmail(email);
+        // Use Optional to safely handle the possibility that the subscriber does not exist
+        Optional<AdminUser> optionalAdminUser = adminUsersRepository.findByEmail(email);
 
-        // Check if user exists and if the raw password matches the encoded password
-        if (adminUser != null && passwordEncoder.matches(rawPassword, adminUser.getPassword())) {
-        	
-            return adminUser;
+        if (optionalAdminUser.isPresent()) {
+        	AdminUser adminUser = optionalAdminUser.get();
+
+            // Check if the raw password matches the encoded password
+            if (passwordEncoder.matches(rawPassword, adminUser.getPassword())) {
+
+                return adminUser;
+            }
         }
 
-        return null; // Return null if credentials are invalid
+        return null; // Return null if credentials are invalid or subscriber does not exist
     }
-	
 }

@@ -4,6 +4,7 @@ import model.Subscriber;
 import model.dto.SubscriberDTO;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
@@ -14,8 +15,9 @@ public interface SubscriberRepository extends JpaRepository<Subscriber, Integer>
 	
 	Subscriber findByEmailAndPassword(String email, String password);
 	// You can define custom query methods here if needed, e.g.,
-	Subscriber findByEmail(String email);
+	
 	List<Subscriber> findByStatus(Integer status);
+	 Optional<Subscriber> findByEmail(String email);
     
     
 }

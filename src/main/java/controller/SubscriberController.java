@@ -18,9 +18,14 @@ public class SubscriberController {
     private SubscriberService subscriberService;
 
     @PostMapping
-    public ResponseEntity<SubscriberDTO> createSubscriber(@RequestBody SubscriberDTO subscriberDTO) {
-        SubscriberDTO createdSubscriber = subscriberService.createSubscriber(subscriberDTO);
-        return new ResponseEntity<>(createdSubscriber, HttpStatus.CREATED);
+    public ResponseEntity<?> createSubscriber(@RequestBody SubscriberDTO subscriberDTO) {
+        try {
+            SubscriberDTO createdSubscriber = subscriberService.createSubscriber(subscriberDTO);
+            return new ResponseEntity<>(createdSubscriber, HttpStatus.CREATED);
+        } catch (RuntimeException e) {
+            // Return a 409 Conflict response if the email is already registered
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
+        }
     }
 
     @PutMapping("/{subscriberId}")
