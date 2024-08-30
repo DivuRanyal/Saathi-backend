@@ -80,4 +80,9 @@ public class AdminUsersServiceImpl implements AdminUsersService {
 
         return null; // Return null if credentials are invalid or subscriber does not exist
     }
+    
+    @Override
+    public List<AdminUser> getAllSaathiUsers() {
+        return adminUsersRepository.findAllByUserType("Saathi");
+    }
 }

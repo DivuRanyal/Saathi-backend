@@ -19,4 +19,6 @@ public interface AdminUsersService {
     void deleteAdminUser(int userId);
     
     AdminUser findByEmailAndPassword(String email, String password);
+    
+    public List<AdminUser> getAllSaathiUsers();
 }

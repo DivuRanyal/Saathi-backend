@@ -205,4 +205,11 @@ public class AdminUsersController {
         List<SubscriberDTO> subscribers = subscriberService.getSubscribersBySaathi(saathiId);
         return ResponseEntity.ok(subscribers);
     }
+    
+    @GetMapping("/saathi")
+    public List<AdminUser> getSaathiUsers() {
+        return adminUsersService.getAllSaathiUsers();
+    }
 }
+
+

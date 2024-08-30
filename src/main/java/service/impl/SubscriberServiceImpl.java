@@ -153,7 +153,10 @@ public class SubscriberServiceImpl implements SubscriberService {
         subscriberDTO.setPackageID(subscriber.getSubscriptionPackage() != null ? subscriber.getSubscriptionPackage().getPackageID() : null);
         subscriberDTO.setStartDate(subscriber.getStartDate());
         subscriberDTO.setEndDate(subscriber.getEndDate());
-        subscriberDTO.setBillingStatus(subscriber.getBillingStatus());
+        // Safely handling BillingStatus in case it's null
+      
+        Integer billingStatus = subscriber.getBillingStatus();
+        subscriberDTO.setBillingStatus(billingStatus != null ? billingStatus : null);
      // Correctly mapping SaathiID from AdminUser's UserID
         subscriberDTO.setSaathiID(subscriber.getSaathi() != null ? subscriber.getSaathi().getAdminUserID() : null);
 
@@ -194,7 +197,6 @@ public class SubscriberServiceImpl implements SubscriberService {
         // Additional fields can be set here
         return subscriber;
     }
-    
     @Override
     public List<SubscriberDTO> getSubscribersBySaathi(int saathiId) {
         AdminUser saathi = adminUserRepository.findById(saathiId)

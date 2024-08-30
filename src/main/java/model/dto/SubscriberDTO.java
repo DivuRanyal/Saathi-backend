@@ -17,11 +17,11 @@ public class SubscriberDTO {
     private Integer packageID; // Assume this is the ID only, you can also have the entire object if needed
     private Date startDate;
     private Date endDate;
-    private Integer billingStatus;
+    private int billingStatus;
     private Integer saathiID; // Assume this is the ID only, you can also have the entire object if needed
     private Date createdDate;
     private Date lastUpdatedDate;
-    private Integer status;
+    private int status;
 	// Date format to be used for date fields
     private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
 
