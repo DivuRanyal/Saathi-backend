@@ -12,6 +12,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import exception.EmailAlreadyRegisteredException;
+
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -38,7 +40,7 @@ public class SubscriberServiceImpl implements SubscriberService {
         Optional<Subscriber> existingSubscriber = subscriberRepository.findByEmail(subscriberDTO.getEmail());
         
         if (existingSubscriber.isPresent()) {
-            throw new RuntimeException("Email is already registered");
+        	throw new EmailAlreadyRegisteredException("The email address is already registered.");
         }
 
         // If the email is not registered, proceed to create a new subscriber

@@ -14,6 +14,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import exception.EmailAlreadyRegisteredException;
+
 import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
@@ -56,7 +58,7 @@ public class AdminUsersController {
 
  // POST: /admin-users
     @PostMapping
-    public ResponseEntity<AdminUser> createAdminUser(
+    public ResponseEntity<?> createAdminUser(
             @RequestParam("firstName") String firstName,
             @RequestParam("lastName") String lastName,
             @RequestParam("email") String email,
@@ -78,7 +80,7 @@ public class AdminUsersController {
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 
         // Create AdminUsers instance and set fields from request parameters
-    	
+    	try {
         AdminUser adminUser = new AdminUser();
         adminUser.setFirstName(firstName);
         adminUser.setLastName(lastName);
@@ -112,6 +114,10 @@ public class AdminUsersController {
         
         AdminUser createdAdminUser = adminUsersService.createAdminUser(adminUser);
         return ResponseEntity.ok(createdAdminUser);
+    } catch (EmailAlreadyRegisteredException e) {
+        // Handle the exception and return a custom message with a 409 Conflict status
+        return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
+    }
     }
 
  // PUT: /admin-users/{id}

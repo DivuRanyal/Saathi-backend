@@ -8,6 +8,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import exception.EmailAlreadyRegisteredException;
+
 import java.util.List;
 
 @RestController
@@ -22,7 +24,7 @@ public class SubscriberController {
         try {
             SubscriberDTO createdSubscriber = subscriberService.createSubscriber(subscriberDTO);
             return new ResponseEntity<>(createdSubscriber, HttpStatus.CREATED);
-        } catch (RuntimeException e) {
+        } catch (EmailAlreadyRegisteredException e) {
             // Return a 409 Conflict response if the email is already registered
             return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
         }

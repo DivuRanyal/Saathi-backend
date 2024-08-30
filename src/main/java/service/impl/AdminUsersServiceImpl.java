@@ -8,6 +8,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import exception.EmailAlreadyRegisteredException;
+
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -41,12 +43,13 @@ public class AdminUsersServiceImpl implements AdminUsersService {
         Optional<AdminUser> existingAdminUser = adminUsersRepository.findByEmail(adminUser.getEmail());
 
         if (existingAdminUser.isPresent()) {
-            throw new RuntimeException("Email is already registered");
+        	throw new EmailAlreadyRegisteredException("The email address is already registered.");
         }
 
         // Proceed with saving the new AdminUser
         return adminUsersRepository.save(adminUser);
     }
+    
     @Override
     public AdminUser updateAdminUser(AdminUser adminUser) {
         return adminUsersRepository.save(adminUser);

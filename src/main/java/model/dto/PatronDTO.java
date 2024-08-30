@@ -1,86 +1,46 @@
-package model;
-
-import javax.persistence.*;
+package model.dto;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-@Entity
-@Table(name = "Patrons")
-public class Patron {
+public class PatronDTO {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "PatronID")
     private int patronID;
-
-    @Column(name = "FirstName")
     private String firstName;
-
-    @Column(name = "LastName")
     private String lastName;
-
-    @Column(name = "Email")
     private String email;
-
-    @Column(name = "ContactNo")
     private String contactNo;
-
-    @Column(name = "CountryCode")
     private String countryCode;
-
-    @Column(name = "DOB")
     private Date dob;
-
-    @ManyToOne
-    @JoinColumn(name = "SubscriberID")
-    private Subscriber subscriber;
-    
-    @Column(name = "Address1")
+    private Integer subscriberID;  // Assuming you want to include the ID of the subscriber instead of the entire object
     private String address1;
-
-    @Column(name = "Address2")
     private String address2;
-
-    @Column(name = "City")
     private String city;
-
-    @Column(name = "State")
     private String state;
-
-    @Column(name = "Country")
     private String country;
-
-    @Column(name = "Relation")
     private String relation;
-
-    @Column(name = "CreatedDate")
-    @Temporal(TemporalType.TIMESTAMP)
     private Date createdDate;
-
-    @Column(name = "LastUpdatedDate")
-    @Temporal(TemporalType.TIMESTAMP)
     private Date lastUpdatedDate;
 
-    // Getters and Setters
  // Date format to be used for date fields
     private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
 
-  
+    // Getters and Setters
+
+    public int getPatronID() {
+        return patronID;
+    }
+
+    public void setPatronID(int patronID) {
+        this.patronID = patronID;
+    }
+
     public String getFirstName() {
         return firstName;
     }
 
-    public int getPatronID() {
-		return patronID;
-	}
-
-	public void setPatronID(int patronID) {
-		this.patronID = patronID;
-	}
-
-	public void setFirstName(String firstName) {
+    public void setFirstName(String firstName) {
         this.firstName = firstName;
     }
 
@@ -130,12 +90,12 @@ public class Patron {
         }
     }
 
-    public Subscriber getSubscriber() {
-        return subscriber;
+    public Integer getSubscriberID() {
+        return subscriberID;
     }
 
-    public void setSubscriber(Subscriber subscriber) {
-        this.subscriber = subscriber;
+    public void setSubscriberID(Integer subscriberID) {
+        this.subscriberID = subscriberID;
     }
 
     public String getAddress1() {
@@ -186,22 +146,22 @@ public class Patron {
         this.relation = relation;
     }
 
-    public Date getCreatedDate() {
-        return createdDate;
+ // Custom getter for CreatedDate to return a formatted date string
+    public String getCreatedDate() {
+        return createdDate != null ? DATE_FORMAT.format(createdDate) : null;
     }
 
-    public Date getLastUpdatedDate() {
-        return lastUpdatedDate;
+    public void setCreatedDate(Date createdDate) {
+        this.createdDate = createdDate;
     }
 
-    @PrePersist
-    protected void onCreate() {
-        createdDate = new Date();  // Set the current timestamp for createdDate
+    // Custom getter for LastUpdatedDate to return a formatted date string
+    public String getLastUpdatedDate() {
+        return lastUpdatedDate != null ? DATE_FORMAT.format(lastUpdatedDate) : null;
     }
 
-    @PreUpdate
-    protected void onUpdate() {
-        lastUpdatedDate = new Date();  // Set the current timestamp for lastUpdatedDate
+    public void setLastUpdatedDate(Date lastUpdatedDate) {
+        this.lastUpdatedDate = lastUpdatedDate;
     }
-    
+
 }
