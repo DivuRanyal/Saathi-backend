@@ -1,6 +1,9 @@
 package model;
 
 import javax.persistence.*;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -65,6 +68,7 @@ public class AdminUser {
     private Integer updatedBy;
 
     @OneToMany(mappedBy = "saathi")
+    @JsonIgnore
     private List<Subscriber> subscribers = new ArrayList<>();
 
     // Date format to be used for date fields
