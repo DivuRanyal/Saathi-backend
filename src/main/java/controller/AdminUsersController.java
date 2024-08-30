@@ -124,7 +124,7 @@ public class AdminUsersController {
     @PutMapping("/{id}")
     public ResponseEntity<AdminUser> updateAdminUser(
             @PathVariable int id,
-            @RequestBody AdminUsersDTO adminUserUpdateDto) {
+            @RequestBody AdminUsersDTO adminUserUpdateDto,@RequestParam(value = "picture", required = false) MultipartFile picture) {
 
         Optional<AdminUser> existingAdminUserOptional = adminUsersService.getAdminUserById(id);
 
@@ -166,17 +166,17 @@ public class AdminUsersController {
             existingAdminUser.setStatus(adminUserUpdateDto.getStatus());
         }
         if (adminUserUpdateDto.getUpdatedBy() != null) {
-        	System.out.println(adminUserUpdateDto.getUpdatedBy());
+      //  	System.out.println(adminUserUpdateDto.getUpdatedBy());
             existingAdminUser.setUpdatedBy(adminUserUpdateDto.getUpdatedBy());
         }
 
         // Handle picture upload if present
-        MultipartFile file = adminUserUpdateDto.getPicture();
-        if (file != null && !file.isEmpty()) {
-            String fileName = file.getOriginalFilename();
+      
+        if (picture != null && !picture.isEmpty()) {
+            String fileName = picture.getOriginalFilename();
             String storageLocation = "/home/saathi/tomcat/webapps/saathi_images/" + fileName;
             try {
-                file.transferTo(new File(storageLocation));
+            	picture.transferTo(new File(storageLocation));
                 existingAdminUser.setPicture(storageLocation);
             } catch (IOException e) {
                 return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
