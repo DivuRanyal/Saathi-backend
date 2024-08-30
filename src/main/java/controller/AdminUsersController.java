@@ -1,7 +1,7 @@
 package controller;
 
 import model.AdminUser;
-import model.dto.AdminUsersDto;
+import model.dto.AdminUsersDTO;
 import model.dto.SubscriberDTO;
 import service.AdminUsersService;
 import service.SubscriberService;
@@ -62,7 +62,7 @@ public class AdminUsersController {
             @RequestParam("firstName") String firstName,
             @RequestParam("lastName") String lastName,
             @RequestParam("email") String email,
-           @RequestParam(value = "dob") 
+            @RequestParam(value = "dob") 
             @DateTimeFormat(pattern = "yyyy-MM-dd") Date dob,
 
             @RequestParam("contactNo") String contactNo,
@@ -122,70 +122,72 @@ public class AdminUsersController {
 
  // PUT: /admin-users/{id}
     @PutMapping("/{id}")
-    public ResponseEntity<AdminUser> updateAdminUser(@PathVariable int id, @ModelAttribute AdminUsersDto adminUserUpdateDto) {
+    public ResponseEntity<AdminUser> updateAdminUser(
+            @PathVariable int id,
+            @RequestBody AdminUsersDTO adminUserUpdateDto) {
+
         Optional<AdminUser> existingAdminUserOptional = adminUsersService.getAdminUserById(id);
 
-        if (existingAdminUserOptional.isPresent()) {
-            AdminUser existingAdminUser = existingAdminUserOptional.get();
-
-            // Update only the fields that are provided in the DTO
-            if (adminUserUpdateDto.getFirstName() != null) {
-                existingAdminUser.setFirstName(adminUserUpdateDto.getFirstName());
-            }
-            if (adminUserUpdateDto.getLastName() != null) {
-                existingAdminUser.setLastName(adminUserUpdateDto.getLastName());
-            }
-            if (adminUserUpdateDto.getEmail() != null) {
-                existingAdminUser.setEmail(adminUserUpdateDto.getEmail());
-            }
-            if (adminUserUpdateDto.getDob() != null) {
-                existingAdminUser.setDob(adminUserUpdateDto.getDob());
-            }
-            if (adminUserUpdateDto.getContactNo() != null) {
-                existingAdminUser.setContactNo(adminUserUpdateDto.getContactNo());
-            }
-            if (adminUserUpdateDto.getCountryCode() != null) {
-                existingAdminUser.setCountryCode(adminUserUpdateDto.getCountryCode());
-            }
-            if (adminUserUpdateDto.getBriefBio() != null) {
-                existingAdminUser.setBriefBio(adminUserUpdateDto.getBriefBio());
-            }
-            if (adminUserUpdateDto.getUserType() != null) {
-            	System.out.println(adminUserUpdateDto.getUserType());
-                existingAdminUser.setUserType(adminUserUpdateDto.getUserType());
-            }
-            if (adminUserUpdateDto.getPassword() != null) {
-                existingAdminUser.setPassword(adminUserUpdateDto.getPassword());
-            }
-            if (adminUserUpdateDto.getStatus() != null) {
-                existingAdminUser.setStatus(adminUserUpdateDto.getStatus());
-            }
-            
-            if (adminUserUpdateDto.getUpdatedBy() != null) {
-                // Set the updatedBy based on your application's logic
-                 existingAdminUser.setUpdatedBy(adminUserUpdateDto.getUpdatedBy());
-            }
-
-            // Handle picture upload if present
-            MultipartFile file = adminUserUpdateDto.getPicture();
-            if (file != null && !file.isEmpty()) {
-                String fileName = file.getOriginalFilename();
-  //              String storageLocation = "C:\\Users\\ether\\OneDrive\\Documents\\PROJECT\\" + fileName;
-                String storageLocation = "/home/saathi/tomcat/webapps/saathi_images/" + fileName;
-                try {
-                    file.transferTo(new File(storageLocation));
-                    existingAdminUser.setPicture(storageLocation);
-                } catch (IOException e) {
-                    return ResponseEntity.status(500).body(null);
-                }
-            }
-            
-            AdminUser updatedAdminUser = adminUsersService.updateAdminUser(existingAdminUser);
-            return ResponseEntity.ok(updatedAdminUser);
-        } else {
+        if (!existingAdminUserOptional.isPresent()) {
             return ResponseEntity.notFound().build();
         }
+
+        AdminUser existingAdminUser = existingAdminUserOptional.get();
+
+        // Update only the fields that are provided in the DTO
+        if (adminUserUpdateDto.getFirstName() != null) {
+            existingAdminUser.setFirstName(adminUserUpdateDto.getFirstName());
+        }
+        if (adminUserUpdateDto.getLastName() != null) {
+            existingAdminUser.setLastName(adminUserUpdateDto.getLastName());
+        }
+        if (adminUserUpdateDto.getEmail() != null) {
+            existingAdminUser.setEmail(adminUserUpdateDto.getEmail());
+        }
+        if (adminUserUpdateDto.getDob() != null) {
+            existingAdminUser.setDob(adminUserUpdateDto.getDob());
+        }
+        if (adminUserUpdateDto.getContactNo() != null) {
+            existingAdminUser.setContactNo(adminUserUpdateDto.getContactNo());
+        }
+        if (adminUserUpdateDto.getCountryCode() != null) {
+            existingAdminUser.setCountryCode(adminUserUpdateDto.getCountryCode());
+        }
+        if (adminUserUpdateDto.getBriefBio() != null) {
+            existingAdminUser.setBriefBio(adminUserUpdateDto.getBriefBio());
+        }
+        if (adminUserUpdateDto.getUserType() != null) {
+            existingAdminUser.setUserType(adminUserUpdateDto.getUserType());
+        }
+        if (adminUserUpdateDto.getPassword() != null) {
+            existingAdminUser.setPassword(passwordEncoder.encode(adminUserUpdateDto.getPassword()));
+        }
+        if (adminUserUpdateDto.getStatus() != null) {
+            existingAdminUser.setStatus(adminUserUpdateDto.getStatus());
+        }
+        if (adminUserUpdateDto.getUpdatedBy() != null) {
+        	System.out.println(adminUserUpdateDto.getUpdatedBy());
+            existingAdminUser.setUpdatedBy(adminUserUpdateDto.getUpdatedBy());
+        }
+
+        // Handle picture upload if present
+        MultipartFile file = adminUserUpdateDto.getPicture();
+        if (file != null && !file.isEmpty()) {
+            String fileName = file.getOriginalFilename();
+            String storageLocation = "/home/saathi/tomcat/webapps/saathi_images/" + fileName;
+            try {
+                file.transferTo(new File(storageLocation));
+                existingAdminUser.setPicture(storageLocation);
+            } catch (IOException e) {
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                        .body(null);
+            }
+        }
+
+        AdminUser updatedAdminUser = adminUsersService.updateAdminUser(existingAdminUser);
+        return ResponseEntity.ok(updatedAdminUser);
     }
+
 
     // DELETE: /admin-users/{id}
     @DeleteMapping("/{id}")

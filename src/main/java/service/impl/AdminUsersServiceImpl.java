@@ -88,4 +88,9 @@ public class AdminUsersServiceImpl implements AdminUsersService {
     public List<AdminUser> getAllSaathiUsers() {
         return adminUsersRepository.findAllByUserType("Saathi");
     }
+    
+    @Override
+    public boolean isEmailAlreadyRegistered(String email) {
+        return adminUsersRepository.findByEmail(email).isPresent();
+    }
 }

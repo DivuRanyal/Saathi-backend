@@ -9,7 +9,7 @@ import javax.persistence.TemporalType;
 
 import org.springframework.web.multipart.MultipartFile;
 
-public class AdminUsersDto {
+public class AdminUsersDTO {
     
     private String firstName;
     private String lastName;

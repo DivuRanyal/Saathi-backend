@@ -21,4 +21,6 @@ public interface AdminUsersService {
     AdminUser findByEmailAndPassword(String email, String password);
     
     public List<AdminUser> getAllSaathiUsers();
+    
+    boolean isEmailAlreadyRegistered(String email);
 }
