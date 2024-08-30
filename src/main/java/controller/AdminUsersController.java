@@ -145,6 +145,7 @@ public class AdminUsersController {
                 existingAdminUser.setBriefBio(adminUserUpdateDto.getBriefBio());
             }
             if (adminUserUpdateDto.getUserType() != null) {
+            	System.out.println(adminUserUpdateDto.getUserType());
                 existingAdminUser.setUserType(adminUserUpdateDto.getUserType());
             }
             if (adminUserUpdateDto.getPassword() != null) {
@@ -172,7 +173,7 @@ public class AdminUsersController {
                     return ResponseEntity.status(500).body(null);
                 }
             }
-
+            
             AdminUser updatedAdminUser = adminUsersService.updateAdminUser(existingAdminUser);
             return ResponseEntity.ok(updatedAdminUser);
         } else {

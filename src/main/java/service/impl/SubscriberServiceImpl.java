@@ -88,7 +88,18 @@ public class SubscriberServiceImpl implements SubscriberService {
         if (subscriberDTO.getStatus() != null) {
             existingSubscriber.setStatus(subscriberDTO.getStatus());
         }
-
+        if (subscriberDTO.getSaathiID() != null) {
+            AdminUser saathi = adminUserRepository.findById(subscriberDTO.getSaathiID())
+                    .orElseThrow(() -> new RuntimeException("AdminUser not found with ID: " + subscriberDTO.getSaathiID()));
+            existingSubscriber.setSaathi(saathi);
+        }
+		if (subscriberDTO.getPackageID() != null) {
+			SubscriptionPackage subscriptionPackage = subscriptionPackageRepository
+					.findById(subscriberDTO.getPackageID()).orElseThrow(() -> new RuntimeException(
+							"Subscription Package not found with ID: " + subscriberDTO.getPackageID()));
+			existingSubscriber.setSubscriptionPackage(subscriptionPackage);
+		}
+        
         Subscriber updatedSubscriber = subscriberRepository.save(existingSubscriber);
         return convertToDTO(updatedSubscriber);
     }
