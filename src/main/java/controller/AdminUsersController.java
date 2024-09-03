@@ -98,20 +98,17 @@ public class AdminUsersController {
         adminUser.setCreatedBy(createdBy);
       System.out.println(dob);
        
-        // Handle picture upload 
-		if (picture != null && !picture.isEmpty()) {
-			String fileName = picture.getOriginalFilename();
-	//		String storageLocation = "C:\\Users\\ether\\OneDrive\\Documents\\PROJECT\\" + fileName;
-			String storageLocation = "/home/saathi/tomcat/webapps/saathi_images/" + fileName;
-
-			try {
-				picture.transferTo(new File(storageLocation));
-				adminUser.setPicture(storageLocation);
-			} catch (IOException e) {
-				return ResponseEntity.status(500).body(null);
-			}
-		}
-        
+	      // Handle picture upload if present
+        if (picture != null && !picture.isEmpty()) {
+            String fileName = picture.getOriginalFilename();
+            String storageLocation = "/home/saathi/tomcat/webapps/saathi_images/" + fileName;
+            try {
+                picture.transferTo(new File(storageLocation));
+                adminUser.setPicture(storageLocation);
+            } catch (IOException e) {
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+            }
+        }
         AdminUser createdAdminUser = adminUsersService.createAdminUser(adminUser);
         return ResponseEntity.ok(createdAdminUser);
     } catch (EmailAlreadyRegisteredException e) {
@@ -171,7 +168,7 @@ public class AdminUsersController {
             existingAdminUser.setBriefBio(briefBio);
         }
         if (userType != null) {
-        	System.out.println(userType);
+        	
             existingAdminUser.setUserType(userType);
         }
         if (password != null) {
