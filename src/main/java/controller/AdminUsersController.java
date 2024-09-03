@@ -121,7 +121,7 @@ public class AdminUsersController {
     }
 
  // PUT: /admin-users/{id}
-    @PutMapping("/{id}")
+    @PostMapping("/{id}")
     public ResponseEntity<AdminUser> updateAdminUser(
             @PathVariable int id,
             @RequestParam(value="firstName",required=false) String firstName,
