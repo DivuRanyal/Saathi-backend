@@ -1,7 +1,6 @@
 package model;
 
 import javax.persistence.*;
-
 import java.math.BigDecimal;
 import java.util.Date;
 
@@ -20,11 +19,14 @@ public class SubscriptionPackage {
     @Column(name = "PackageDescription")
     private String packageDescription;
 
-    @Column(name = "Price", nullable = false)
-    private BigDecimal  price;
+    @Column(name = "PriceUSD", nullable = false)
+    private BigDecimal priceUSD;
+
+    @Column(name = "PriceINR", nullable = false)
+    private BigDecimal priceINR;
 
     @Temporal(TemporalType.TIMESTAMP)
-    @Column(name = "CreatedDate",nullable=false)
+    @Column(name = "CreatedDate", nullable = false)
     private Date createdDate;
 
     @Temporal(TemporalType.TIMESTAMP)
@@ -39,23 +41,24 @@ public class SubscriptionPackage {
 
     @Column(name = "UpdatedBy")
     private Integer updatedBy;
+
     public Integer getCreatedBy() {
-		return createdBy;
-	}
+        return createdBy;
+    }
 
-	public void setCreatedBy(Integer createdBy) {
-		this.createdBy = createdBy;
-	}
+    public void setCreatedBy(Integer createdBy) {
+        this.createdBy = createdBy;
+    }
 
-	public Integer getUpdatedBy() {
-		return updatedBy;
-	}
+    public Integer getUpdatedBy() {
+        return updatedBy;
+    }
 
-	public void setUpdatedBy(Integer updatedBy) {
-		this.updatedBy = updatedBy;
-	}
+    public void setUpdatedBy(Integer updatedBy) {
+        this.updatedBy = updatedBy;
+    }
 
-	@PrePersist
+    @PrePersist
     protected void onCreate() {
         createdDate = new Date();  // Set the current timestamp for createdDate
     }
@@ -64,13 +67,15 @@ public class SubscriptionPackage {
     protected void onUpdate() {
         lastUpdatedDate = new Date();  // Set the current timestamp for lastUpdatedDate
     }
+
     // Constructors
     public SubscriptionPackage() {}
 
-    public SubscriptionPackage(String packageName, String packageDescription, BigDecimal price, Date createdDate, Date lastUpdatedDate, int status) {
+    public SubscriptionPackage(String packageName, String packageDescription, BigDecimal priceUSD, BigDecimal priceINR, Date createdDate, Date lastUpdatedDate, int status) {
         this.packageName = packageName;
         this.packageDescription = packageDescription;
-        this.price = price;
+        this.priceUSD = priceUSD;
+        this.priceINR = priceINR;
         this.createdDate = createdDate;
         this.lastUpdatedDate = lastUpdatedDate;
         this.status = status;
@@ -101,12 +106,20 @@ public class SubscriptionPackage {
         this.packageDescription = packageDescription;
     }
 
-    public BigDecimal  getPrice() {
-        return price;
+    public BigDecimal getPriceUSD() {
+        return priceUSD;
     }
 
-    public void setPrice(BigDecimal  price) {
-        this.price = price;
+    public void setPriceUSD(BigDecimal priceUSD) {
+        this.priceUSD = priceUSD;
+    }
+
+    public BigDecimal getPriceINR() {
+        return priceINR;
+    }
+
+    public void setPriceINR(BigDecimal priceINR) {
+        this.priceINR = priceINR;
     }
 
     public Date getCreatedDate() {
@@ -140,7 +153,8 @@ public class SubscriptionPackage {
                 "packageID=" + packageID +
                 ", packageName='" + packageName + '\'' +
                 ", packageDescription='" + packageDescription + '\'' +
-                ", price=" + price +
+                ", priceUSD=" + priceUSD +
+                ", priceINR=" + priceINR +
                 ", createdDate=" + createdDate +
                 ", lastUpdatedDate=" + lastUpdatedDate +
                 ", status=" + status +

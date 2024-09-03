@@ -50,13 +50,17 @@ public class SubscriptionPackageServiceImpl implements SubscriptionPackageServic
             if (subscriptionPackage.getPackageDescription() != null) {
                 existingPackage.setPackageDescription(subscriptionPackage.getPackageDescription());
             }
-            if (subscriptionPackage.getPrice() != null && subscriptionPackage.getPrice().compareTo(BigDecimal.ZERO) != 0) {
-                existingPackage.setPrice(subscriptionPackage.getPrice());
+            if (subscriptionPackage.getPriceUSD() != null && subscriptionPackage.getPriceUSD().compareTo(BigDecimal.ZERO) != 0) {
+                existingPackage.setPriceUSD(subscriptionPackage.getPriceUSD());
+            }
+            if (subscriptionPackage.getPriceINR() != null && subscriptionPackage.getPriceINR().compareTo(BigDecimal.ZERO) != 0) {
+                existingPackage.setPriceINR(subscriptionPackage.getPriceINR());
             }
             if (subscriptionPackage.getStatus() != 0) {
                 existingPackage.setStatus(subscriptionPackage.getStatus());
             }
-         // Set the updatedBy field
+
+            // Set the updatedBy field
             existingPackage.setUpdatedBy(subscriptionPackage.getUpdatedBy());
 
             return subscriptionPackageRepository.save(existingPackage);
@@ -64,6 +68,7 @@ public class SubscriptionPackageServiceImpl implements SubscriptionPackageServic
             throw new RuntimeException("Package with ID " + packageID + " not found.");
         }
     }
+
 
     @Override
     public void deleteById(int packageID) {

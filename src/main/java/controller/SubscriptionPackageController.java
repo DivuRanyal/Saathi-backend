@@ -45,4 +45,6 @@ public class SubscriptionPackageController {
     public void deletePackage(@PathVariable int id) {
         subscriptionPackageService.deleteById(id);
     }
+    
+    
 }
