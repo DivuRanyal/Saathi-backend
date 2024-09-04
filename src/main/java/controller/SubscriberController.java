@@ -95,22 +95,27 @@ public class SubscriberController {
     
   
     @PostMapping("/savePatronAndService")
-    public ResponseEntity<String> savePatronAndService(@RequestBody PatronServiceDTO patronServiceDTO) {
+    public ResponseEntity<PatronServiceDTO> savePatronAndService(@RequestBody PatronServiceDTO patronServiceDTO) {
         // Ensure that the incoming DTO is not null
         if (patronServiceDTO == null || patronServiceDTO.getSubscriberAlaCarteServices() == null) {
-            return new ResponseEntity<>("Invalid request body", HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
 
         // Save Patron
-        patronService.savePatron(patronServiceDTO.getPatronDTO());
+        PatronDTO savedPatron = patronService.savePatron(patronServiceDTO.getPatronDTO());
 
         // Save SubscriberAlaCarteServices
         SubscriberAlaCarteServices serviceRequest = patronServiceDTO.getSubscriberAlaCarteServices();
-        service.createOrUpdateService(serviceRequest);
+        SubscriberAlaCarteServices savedService = service.createOrUpdateService(serviceRequest);
 
-        return new ResponseEntity<>("Patron and Service Details Saved Successfully", HttpStatus.CREATED);
+        // Construct the response DTO with saved data
+        PatronServiceDTO responseDTO = new PatronServiceDTO();
+        responseDTO.setPatronDTO(savedPatron);
+        responseDTO.setSubscriberAlaCarteServices(savedService);
+
+        return new ResponseEntity<>(responseDTO, HttpStatus.CREATED);
     }
-    
+
     @GetMapping("/{id}/saathi")
     public ResponseEntity<SubscriberDTO> getSubscriberDetails(@PathVariable int id) {
         SubscriberDTO details = subscriberService.getSubscriberDetails(id);
