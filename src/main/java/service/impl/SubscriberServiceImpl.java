@@ -222,19 +222,16 @@ public class SubscriberServiceImpl implements SubscriberService {
     }
     
     @Override
-    public SubscriberDTO getSubscriberDetails(int subscriberId) {
+    public AdminUser getSubscriberDetails(int subscriberId) {
+        // Fetch the subscriber from the repository or throw an exception if not found
         Subscriber subscriber = subscriberRepository.findById(subscriberId)
             .orElseThrow(() -> new RuntimeException("Subscriber not found"));
 
+        // Get the Saathi (AdminUser) associated with the subscriber
         AdminUser saathi = subscriber.getSaathi();
 
-        return new SubscriberDTO(
-            subscriber.getSubscriberId(),
-            subscriber.getFirstName(),
-            subscriber.getLastName(),
-            subscriber.getEmail(),
-            subscriber.getContactNo(),
-            saathi != null ? saathi : null // Check if Saathi is assigned, otherwise pass null
-        );
+        // Return only Saathi details, or null if Saathi is not assigned
+        return saathi;
     }
+
 }

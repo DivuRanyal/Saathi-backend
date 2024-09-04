@@ -1,5 +1,6 @@
 package controller;
 
+import model.AdminUser;
 import model.SubscriberAlaCarteServices;
 import model.dto.PatronDTO;
 import model.dto.PatronServiceDTO;
@@ -117,9 +118,9 @@ public class SubscriberController {
     }
 
     @GetMapping("/{id}/saathi")
-    public ResponseEntity<SubscriberDTO> getSubscriberDetails(@PathVariable int id) {
-        SubscriberDTO details = subscriberService.getSubscriberDetails(id);
-        return new ResponseEntity<>(details, HttpStatus.OK);
+    public ResponseEntity<AdminUser> getSubscriberDetails(@PathVariable int id) {
+    	AdminUser adminUser = subscriberService.getSubscriberDetails(id);
+        return new ResponseEntity<>(adminUser, HttpStatus.OK);
     }
     
     @GetMapping("/sendTestEmail")

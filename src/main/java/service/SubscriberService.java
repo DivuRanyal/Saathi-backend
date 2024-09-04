@@ -1,5 +1,6 @@
 package service;
 
+import model.AdminUser;
 import model.Subscriber;
 import model.dto.SubscriberDTO;
 import java.util.List;
@@ -13,5 +14,5 @@ public interface SubscriberService {
      List<SubscriberDTO> getActiveSubscribers();
     Subscriber findByEmailAndPassword(String email, String password);
     List<SubscriberDTO> getSubscribersBySaathi(int saathiId);
-    SubscriberDTO getSubscriberDetails(int subscriberId);
+    AdminUser getSubscriberDetails(int subscriberId);
 }
