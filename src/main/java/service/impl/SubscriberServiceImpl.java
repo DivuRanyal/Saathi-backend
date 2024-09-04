@@ -221,4 +221,20 @@ public class SubscriberServiceImpl implements SubscriberService {
                 .collect(Collectors.toList());
     }
     
+    @Override
+    public SubscriberDTO getSubscriberDetails(int subscriberId) {
+        Subscriber subscriber = subscriberRepository.findById(subscriberId)
+            .orElseThrow(() -> new RuntimeException("Subscriber not found"));
+
+        AdminUser saathi = subscriber.getSaathi();
+
+        return new SubscriberDTO(
+            subscriber.getSubscriberId(),
+            subscriber.getFirstName(),
+            subscriber.getLastName(),
+            subscriber.getEmail(),
+            subscriber.getContactNo(),
+            saathi != null ? saathi : null // Check if Saathi is assigned, otherwise pass null
+        );
+    }
 }

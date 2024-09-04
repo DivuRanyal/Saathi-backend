@@ -4,6 +4,8 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+import model.AdminUser;
+
 public class SubscriberDTO {
 
     private int subscriberID;
@@ -22,6 +24,7 @@ public class SubscriberDTO {
     private Date createdDate;
     private Date lastUpdatedDate;
     private int status;
+    private AdminUser saathi; 
 	// Date format to be used for date fields
     private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
 
@@ -145,6 +148,24 @@ public class SubscriberDTO {
 		this.status = status;
 	}
 
-    
+	public AdminUser getSaathi() {
+        return saathi;
+    }
+
+    public void setSaathi(AdminUser saathi) {
+        this.saathi = saathi;
+    }
+	// Constructor
+    public SubscriberDTO(int subscriberID, String firstName, String lastName, String email, String contactNo, AdminUser saathi) {
+        this.subscriberID = subscriberID;
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.email = email;
+        this.contactNo = contactNo;
+        this.saathi = saathi;
+    }
     // Getters and Setters
+	public SubscriberDTO() {
+		// TODO Auto-generated constructor stub
+	}
 }

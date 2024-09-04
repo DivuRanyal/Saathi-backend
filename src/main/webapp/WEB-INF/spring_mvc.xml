@@ -62,4 +62,29 @@
 
     <!-- Enable annotation-driven transaction management -->
     <tx:annotation-driven transaction-manager="transactionManager" />
+    
+    <!-- FreeMarker Configuration -->
+    <bean id="freemarkerConfig" class="org.springframework.ui.freemarker.FreeMarkerConfigurationFactoryBean">
+        <property name="templateLoaderPath" value="/WEB-INF/templates/" />
+        <property name="defaultEncoding" value="UTF-8" />
+    </bean>
+    
+    <bean id="mailSender" class="org.springframework.mail.javamail.JavaMailSenderImpl">
+    <property name="host" value="smtpout.secureserver.net"/>
+    <property name="port" value="465"/>
+    <property name="username" value="info@etheriumtech.com"/>
+    <property name="password" value="Admin@1234"/>
+   
+    <property name="javaMailProperties">
+        <props>
+            <prop key="mail.transport.protocol">smtp</prop>
+            <prop key="mail.smtp.auth">true</prop>
+            <prop key="mail.smtp.ssl.enable">true</prop> <!-- Enable SSL for port 465 -->
+            <prop key="mail.smtp.socketFactory.port">465</prop> <!-- Use socket factory for SSL -->
+            <prop key="mail.smtp.socketFactory.class">javax.net.ssl.SSLSocketFactory</prop> <!-- Use SSL socket factory -->
+            <prop key="mail.debug">true</prop> <!-- Enable debugging for detailed logs -->
+        </props>
+    </property>
+</bean>
+    
 </beans>

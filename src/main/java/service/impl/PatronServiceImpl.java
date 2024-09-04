@@ -6,7 +6,7 @@ import model.Subscriber;
 import repository.PatronRepository;
 import repository.SubscriberRepository;
 import service.PatronService;
-import service.SubscriberService; // Assuming you have this service to fetch Subscriber
+ // Assuming you have this service to fetch Subscriber
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

@@ -1,7 +1,6 @@
 package controller;
 
 import model.AdminUser;
-import model.dto.AdminUsersDTO;
 import model.dto.SubscriberDTO;
 import service.AdminUsersService;
 import service.SubscriberService;
@@ -228,5 +227,3 @@ public class AdminUsersController {
         return adminUsersService.getAllSaathiUsers();
     }
 }
-
-
