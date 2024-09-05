@@ -2,6 +2,7 @@ package model;
 
 import javax.persistence.*;
 import java.math.BigDecimal;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 
 @Entity
@@ -59,6 +60,8 @@ public class SubscriptionPackage {
     public void setUpdatedBy(Integer updatedBy) {
         this.updatedBy = updatedBy;
     }
+ // Date format to be used for date fields
+    private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
 
     @PrePersist
     protected void onCreate() {
@@ -140,16 +143,24 @@ public class SubscriptionPackage {
         this.priceINR = priceINR;
     }
 
-    public Date getCreatedDate() {
+ /*   public Date getCreatedDate() {
         return createdDate;
     }
 
     public void setCreatedDate(Date createdDate) {
         this.createdDate = createdDate;
     }
+*/
+    public String getCreatedDate() {
+        return createdDate != null ? DATE_FORMAT.format(createdDate) : null;
+    }
 
-    public Date getLastUpdatedDate() {
-        return lastUpdatedDate;
+    public void setCreatedDate(Date createdDate) {
+        this.createdDate = createdDate;
+    }
+    public String getLastUpdatedDate() {
+    	return lastUpdatedDate != null ? DATE_FORMAT.format(lastUpdatedDate) : null;
+       
     }
 
     public void setLastUpdatedDate(Date lastUpdatedDate) {
