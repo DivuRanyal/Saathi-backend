@@ -20,10 +20,10 @@ public class SubscriptionPackage {
     private String packageDescription;
 
     // Setting default values for price fields to 0.00
-    @Column(name = "PriceUSD", columnDefinition = "DECIMAL(10, 2) default '0.00'")
+    @Column(name = "PriceUSD")
     private BigDecimal priceUSD = BigDecimal.valueOf(0.00);
 
-    @Column(name = "PriceINR", columnDefinition = "DECIMAL(10, 2) default '0.00'")
+    @Column(name = "PriceINR")
     private BigDecimal priceINR = BigDecimal.valueOf(0.00);
 
 
@@ -63,11 +63,27 @@ public class SubscriptionPackage {
     @PrePersist
     protected void onCreate() {
         createdDate = new Date();  // Set the current timestamp for createdDate
+        
+        // Ensure default values for price fields
+        if (priceUSD == null) {
+            priceUSD = BigDecimal.valueOf(0.00);
+        }
+        if (priceINR == null) {
+            priceINR = BigDecimal.valueOf(0.00);
+        }
     }
 
     @PreUpdate
     protected void onUpdate() {
         lastUpdatedDate = new Date();  // Set the current timestamp for lastUpdatedDate
+        
+        // Ensure default values for price fields
+        if (priceUSD == null) {
+            priceUSD = BigDecimal.valueOf(0.00);
+        }
+        if (priceINR == null) {
+            priceINR = BigDecimal.valueOf(0.00);
+        }
     }
 
     // Constructors
