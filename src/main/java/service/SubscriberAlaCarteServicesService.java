@@ -9,4 +9,5 @@ public interface SubscriberAlaCarteServicesService {
     SubscriberAlaCarteServices getServiceById(int id);
     SubscriberAlaCarteServices createOrUpdateService(SubscriberAlaCarteServices service);
     void deleteService(int id);
+   
 }

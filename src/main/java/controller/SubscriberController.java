@@ -125,24 +125,36 @@ public class SubscriberController {
     
     @GetMapping("/sendTestEmail")
     public String sendTestEmail(@RequestParam String saathiEmail) throws TemplateNotFoundException, MalformedTemplateNameException, ParseException, IOException, TemplateException {
-        Map<String, Object> model = new HashMap();
+        Map<String, Object> model = new HashMap<>();
         model.put("saathiName", "John Doe");
         model.put("subscriberName", "Jane Smith");
         model.put("subscriberPhone", "123-456-7890");
         model.put("subscriberEmail", "ranyal123divya@gmail.com");
         model.put("subscriptionPackage", "Gold");
 
-        // If there are patron details
+        // Patron details
         model.put("patronName", "Mr. Smith");
         model.put("patronRelationship", "Father");
         model.put("patronAddress", "123 Rural St, Village, Country");
 
         try {
+            // Send email using the email service
             emailService.sendSaathiAssignedEmail(saathiEmail, model);
             return "Email sent successfully!";
         } catch (MessagingException e) {
             e.printStackTrace();
             return "Failed to send email.";
         }
+    }
+
+   
+    @GetMapping("/sendEmail")
+    public String sendEmail(
+        @RequestParam String to, 
+        @RequestParam String subject, 
+        @RequestParam String body) {
+
+        emailService.sendSimpleEmail(to, subject, body);
+        return "Email sent successfully!";
     }
 }

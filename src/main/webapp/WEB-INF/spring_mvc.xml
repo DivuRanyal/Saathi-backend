@@ -68,8 +68,8 @@
         <property name="templateLoaderPath" value="/WEB-INF/templates/" />
         <property name="defaultEncoding" value="UTF-8" />
     </bean>
-    
-    <bean id="mailSender" class="org.springframework.mail.javamail.JavaMailSenderImpl">
+      
+   <bean id="mailSender" class="org.springframework.mail.javamail.JavaMailSenderImpl">
     <property name="host" value="smtpout.secureserver.net"/>
     <property name="port" value="465"/>
     <property name="username" value="info@etheriumtech.com"/>
@@ -79,12 +79,14 @@
         <props>
             <prop key="mail.transport.protocol">smtp</prop>
             <prop key="mail.smtp.auth">true</prop>
-            <prop key="mail.smtp.ssl.enable">true</prop> <!-- Enable SSL for port 465 -->
-            <prop key="mail.smtp.socketFactory.port">465</prop> <!-- Use socket factory for SSL -->
-            <prop key="mail.smtp.socketFactory.class">javax.net.ssl.SSLSocketFactory</prop> <!-- Use SSL socket factory -->
-            <prop key="mail.debug">true</prop> <!-- Enable debugging for detailed logs -->
+            <prop key="mail.smtp.ssl.enable">true</prop> 
+            <prop key="mail.smtp.socketFactory.port">465</prop> 
+            <prop key="mail.smtp.socketFactory.class">javax.net.ssl.SSLSocketFactory</prop> 
+            <prop key="mail.smtp.from">divyasharma@etheriumtech.com</prop> <!-- Add this line -->
+            <prop key="mail.debug">true</prop>   
         </props>
     </property>
 </bean>
+
     
 </beans>

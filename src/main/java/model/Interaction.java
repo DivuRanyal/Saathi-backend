@@ -1,11 +1,8 @@
 package model;
 
 import javax.persistence.*;
-
-import service.SubscriberService;
-
 import java.util.Date;
-/*
+
 @Entity
 @Table(name = "Interactions")
 public class Interaction {
@@ -20,7 +17,7 @@ public class Interaction {
     private Subscriber subscriber;
 
     @ManyToOne
-    @JoinColumn(name = "OverrideSaathiID", referencedColumnName = "UserID")
+    @JoinColumn(name = "OverrideSaathiID", referencedColumnName = "AdminUserID")
     private AdminUser overrideSaathi;
 
     @Column(name = "InteractionType")
@@ -46,23 +43,7 @@ public class Interaction {
 
     @ManyToOne
     @JoinColumn(name = "SubscriberAlaCarteServicesID", referencedColumnName = "SubscriberAlaCarteServicesID")
-    private SubscriberService subscriberService;
-
-    // Default constructor
-    public Interaction() {}
-
-    // Constructor with all fields
-    public Interaction(Subscriber subscriber, AdminUser overrideSaathi, String interactionType, String documents, Date createdDate, Date lastUpdatedDate, Integer completionStatus, PackageService packageService, SubscriberService subscriberService) {
-        this.subscriber = subscriber;
-        this.overrideSaathi = overrideSaathi;
-        this.interactionType = interactionType;
-        this.documents = documents;
-        this.createdDate = createdDate;
-        this.lastUpdatedDate = lastUpdatedDate;
-        this.completionStatus = completionStatus;
-        this.packageService = packageService;
-        this.subscriberService = subscriberService;
-    }
+    private SubscriberAlaCarteServices subscriberAlaCarteServices;
 
     // Getters and Setters
     public Integer getInteractionID() {
@@ -137,14 +118,11 @@ public class Interaction {
         this.packageService = packageService;
     }
 
-	public SubscriberService getSubscriberService() {
-		return subscriberService;
-	}
+    public SubscriberAlaCarteServices getSubscriberAlaCarteServices() {
+        return subscriberAlaCarteServices;
+    }
 
-	public void setSubscriberService(SubscriberService subscriberService) {
-		this.subscriberService = subscriberService;
-	}
-
-  
+    public void setSubscriberAlaCarteServices(SubscriberAlaCarteServices subscriberAlaCarteServices) {
+        this.subscriberAlaCarteServices = subscriberAlaCarteServices;
+    }
 }
-*/

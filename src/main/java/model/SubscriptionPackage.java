@@ -19,11 +19,13 @@ public class SubscriptionPackage {
     @Column(name = "PackageDescription")
     private String packageDescription;
 
-    @Column(name = "PriceUSD", nullable = false)
-    private BigDecimal priceUSD;
+    // Setting default values for price fields to 0.00
+    @Column(name = "PriceUSD", nullable = false, columnDefinition = "DECIMAL(10, 2) default '0.00'")
+    private BigDecimal priceUSD = BigDecimal.valueOf(0.00);
 
-    @Column(name = "PriceINR", nullable = false)
-    private BigDecimal priceINR;
+    @Column(name = "PriceINR", nullable = false, columnDefinition = "DECIMAL(10, 2) default '0.00'")
+    private BigDecimal priceINR = BigDecimal.valueOf(0.00);
+
 
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "CreatedDate", nullable = false)

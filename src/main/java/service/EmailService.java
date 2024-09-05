@@ -1,6 +1,7 @@
 package service;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
@@ -16,6 +17,7 @@ import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
 
 import java.io.IOException;
+import java.io.StringWriter;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -28,18 +30,39 @@ public class EmailService {
     @Autowired
     private Configuration freemarkerConfig;
 
-    public void sendSaathiAssignedEmail(String to, Map<String, Object> model) throws MessagingException, TemplateNotFoundException, MalformedTemplateNameException, ParseException, IOException, TemplateException {
+    public void sendSaathiAssignedEmail(String saathiEmail, Map<String, Object> model) throws MessagingException, IOException, TemplateException {
         MimeMessage message = mailSender.createMimeMessage();
         MimeMessageHelper helper = new MimeMessageHelper(message, true);
 
-        helper.setTo(to);
+        // Set the From, To, and Subject headers
+        helper.setFrom("info@etheriumtech.com");  // Set a valid "From" email
+        helper.setTo(saathiEmail);
         helper.setSubject("You Have Been Assigned a New Subscriber!");
 
-        Template t = freemarkerConfig.getTemplate("saathi-assigned.ftlh");
-        String text = FreeMarkerTemplateUtils.processTemplateIntoString(t, model);
+        // Process the email template with the provided model
+        String emailContent = processTemplateIntoString("saathi-assigned.ftlh", model);  // Process Freemarker template
 
-        helper.setText(text, true);
+        // Set the email content
+        helper.setText(emailContent, true);  // true for HTML content
 
+        // Send the email
+        mailSender.send(message);
+    }
+
+    private String processTemplateIntoString(String templateName, Map<String, Object> model) throws IOException, TemplateException {
+        Template template = freemarkerConfig.getTemplate(templateName);  // Get the template
+        StringWriter stringWriter = new StringWriter();  // Create a StringWriter to capture the output
+        template.process(model, stringWriter);  // Process the template with the model and output to the StringWriter
+        return stringWriter.toString();  // Return the resulting string
+    }
+
+    
+    public void sendSimpleEmail(String to, String subject, String text) {
+        SimpleMailMessage message = new SimpleMailMessage();
+ //       message.setFrom("divyasharma@etheriumtech.com"); // Set your sender email address
+        message.setTo(to);
+        message.setSubject(subject);
+        message.setText(text);
         mailSender.send(message);
     }
 }

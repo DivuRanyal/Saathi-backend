@@ -2,11 +2,14 @@ package repository;
 
 import model.AdminUser;
 import model.Subscriber;
+import model.dto.SubscriberServiceDetailsDTO;
 
 import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 @Repository
@@ -20,5 +23,5 @@ public interface SubscriberRepository extends JpaRepository<Subscriber, Integer>
 	 Optional<Subscriber> findByEmail(String email);
 	 List<Subscriber> findBySaathi(AdminUser saathi);
     
-    
+	
 }

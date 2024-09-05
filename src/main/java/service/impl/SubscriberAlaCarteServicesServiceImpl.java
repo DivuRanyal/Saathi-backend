@@ -3,6 +3,7 @@ package service.impl;
 import model.AlaCarteService;
 import model.SubscriberAlaCarteServices;
 import repository.AlaCarteServiceRepository;
+import repository.InteractionRepository;
 import repository.SubscriberAlaCarteServicesRepository;
 import repository.SubscriberRepository;
 import service.SubscriberAlaCarteServicesService;
@@ -20,6 +21,9 @@ public class SubscriberAlaCarteServicesServiceImpl implements SubscriberAlaCarte
     
     @Autowired
     private AlaCarteServiceRepository repository;
+    
+    @Autowired
+    private InteractionRepository interactionRepository;
 
     @Override
     public List<SubscriberAlaCarteServices> getAllServices() {
@@ -49,4 +53,10 @@ public class SubscriberAlaCarteServicesServiceImpl implements SubscriberAlaCarte
     public void deleteService(int id) {
     	servicerepository.deleteById(id);
     }
+/*    
+    @Override
+    public List<Object[]> getAlaCarteServicesWithCompletionStatusAndServiceDetails(Integer subscriberID) {
+        return interactionRepository.findAlaCarteServicesWithCompletionStatusAndServiceDetails(subscriberID);
+    }
+   */
 }

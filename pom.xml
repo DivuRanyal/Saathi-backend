@@ -179,6 +179,9 @@
         <configuration>
           <source>1.8</source>
           <target>1.8</target>
+           <compilerArgs>
+                    <arg>-parameters</arg> <!-- This enables Spring Data JPA to infer parameter names automatically -->
+                </compilerArgs>
         </configuration>
       </plugin>
       <plugin>

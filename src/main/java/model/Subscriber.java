@@ -36,6 +36,7 @@ public class Subscriber {
     @Column(name = "CountryCode")
     private String countryCode;
 
+    @NotNull(message = "Password is required")
     @Column(name = "Password")
     private String password;
 

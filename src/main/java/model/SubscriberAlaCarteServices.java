@@ -123,5 +123,11 @@ public class SubscriberAlaCarteServices {
     protected void onUpdate() {
         lastUpdatedDate = new Date();  // Set the current timestamp for lastUpdatedDate
     }
+    
+    @ManyToOne
+    @JoinColumn(name = "ServiceID", referencedColumnName = "ServiceID", insertable = false, updatable = false)
+    private AlaCarteService service;
     // Getters and Setters
+    
+
 }
