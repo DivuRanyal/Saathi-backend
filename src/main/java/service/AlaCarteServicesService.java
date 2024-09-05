@@ -1,20 +1,13 @@
 package service;
 
+import model.dto.AlaCarteServiceDTO;
 import java.util.List;
-import java.util.Optional;
-
-import model.AlaCarteService;
 
 public interface AlaCarteServicesService {
 
-    AlaCarteService createService(AlaCarteService service);
-
-    AlaCarteService updateService(AlaCarteService service);
-
-    void deleteService(Integer serviceId);
-
-    Optional<AlaCarteService> getServiceById(Integer serviceId);
-
-    List<AlaCarteService> getAllServices();
-
+    List<AlaCarteServiceDTO> getAllServices();
+    AlaCarteServiceDTO getServiceById(Integer id);
+    AlaCarteServiceDTO createService(AlaCarteServiceDTO alaCarteServiceDTO);
+    AlaCarteServiceDTO updateService(Integer id, AlaCarteServiceDTO alaCarteServiceDTO);
+    void deleteService(Integer id);
 }

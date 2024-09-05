@@ -2,7 +2,6 @@ package model.dto;
 
 import java.math.BigDecimal;
 import java.sql.Time;
-import java.util.Date;
 
 public class AlaCarteServiceDTO {
 
@@ -90,7 +89,11 @@ public class AlaCarteServiceDTO {
     }
 
     public void setCreatedBy(Integer createdBy) {
-        this.createdBy = createdBy;
+        if (createdBy != null) {
+            this.createdBy = createdBy;
+        } else {
+            this.createdBy = -1;  // or handle null case based on your business needs
+        }
     }
 
     public Integer getUpdatedBy() {
@@ -98,6 +101,10 @@ public class AlaCarteServiceDTO {
     }
 
     public void setUpdatedBy(Integer updatedBy) {
-        this.updatedBy = updatedBy;
+        if (updatedBy != null) {
+            this.updatedBy = updatedBy;
+        } else {
+            this.updatedBy = -1;  // Handle null case
+        }
     }
 }

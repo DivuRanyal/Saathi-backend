@@ -17,7 +17,8 @@ public class AlaCarteService {
     @Column(name = "ServiceName")
     private String serviceName;
 
-    @Column(name = "ServiceDesciption", columnDefinition = "TEXT")
+    // Corrected the typo from "ServiceDesciption" to "ServiceDescription"
+    @Column(name = "ServiceDescription", columnDefinition = "TEXT")
     private String serviceDescription;
 
     @Column(name = "FrequencyInHours")
@@ -43,11 +44,11 @@ public class AlaCarteService {
     @Column(name = "Status")
     private Integer status;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "CreatedBy", referencedColumnName = "AdminUserID")
     private AdminUser createdBy;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "UpdatedBy", referencedColumnName = "AdminUserID")
     private AdminUser updatedBy;
 
@@ -150,14 +151,14 @@ public class AlaCarteService {
     public void setUpdatedBy(AdminUser updatedBy) {
         this.updatedBy = updatedBy;
     }
-    
+
     @PrePersist
     protected void onCreate() {
-        createdDate = new Date();  // Set the current timestamp for createdDate
+        createdDate = new Date();
     }
 
     @PreUpdate
     protected void onUpdate() {
-        lastUpdatedDate = new Date();  // Set the current timestamp for lastUpdatedDate
+        lastUpdatedDate = new Date();
     }
 }
