@@ -13,17 +13,17 @@ public class SubscriptionPackage {
     @Column(name = "PackageID")
     private int packageID;
 
-    @Column(name = "PackageName", nullable = false)
+    @Column(name = "PackageName")
     private String packageName;
 
     @Column(name = "PackageDescription")
     private String packageDescription;
 
     // Setting default values for price fields to 0.00
-    @Column(name = "PriceUSD", nullable = false, columnDefinition = "DECIMAL(10, 2) default '0.00'")
+    @Column(name = "PriceUSD", columnDefinition = "DECIMAL(10, 2) default '0.00'")
     private BigDecimal priceUSD = BigDecimal.valueOf(0.00);
 
-    @Column(name = "PriceINR", nullable = false, columnDefinition = "DECIMAL(10, 2) default '0.00'")
+    @Column(name = "PriceINR", columnDefinition = "DECIMAL(10, 2) default '0.00'")
     private BigDecimal priceINR = BigDecimal.valueOf(0.00);
 
 
