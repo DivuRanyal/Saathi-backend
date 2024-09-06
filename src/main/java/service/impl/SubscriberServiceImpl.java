@@ -106,12 +106,34 @@ public class SubscriberServiceImpl implements SubscriberService {
         return convertToDTO(updatedSubscriber);
     }
 
-    @Override
+ //   @Override
     public SubscriberDTO getSubscriberById(int subscriberId) {
+    	// Fetch the Subscriber from the database
         Subscriber subscriber = subscriberRepository.findById(subscriberId)
                 .orElseThrow(() -> new RuntimeException("Subscriber not found with ID: " + subscriberId));
-        return convertToDTO(subscriber);
+
+        SubscriberDTO dto = new SubscriberDTO();
+        dto.setSubscriberID(subscriber.getSubscriberId());
+        dto.setFirstName(subscriber.getFirstName());
+        dto.setLastName(subscriber.getLastName());
+        dto.setEmail(subscriber.getEmail());
+        dto.setContactNo(subscriber.getContactNo());
+        dto.setCountryCode(subscriber.getCountryCode());
+        dto.setStartDate(subscriber.getStartDate());
+        dto.setEndDate(subscriber.getEndDate());
+        dto.setBillingStatus(subscriber.getBillingStatus());
+        dto.setStatus(subscriber.getStatus());
+
+        // Set subscription package details
+        SubscriptionPackage subscriptionPackage = subscriber.getSubscriptionPackage();
+        if (subscriptionPackage != null) {
+            dto.setPackageName(subscriptionPackage.getPackageName());
+          
+        }
+
+        return dto;
     }
+
 
     @Override
     public List<SubscriberDTO> getAllSubscribers() {
@@ -233,5 +255,68 @@ public class SubscriberServiceImpl implements SubscriberService {
         // Return only Saathi details, or null if Saathi is not assigned
         return saathi;
     }
+    
+    @Override
+    public SubscriberDTO assignSaathiToSubscriber(int subscriberId, int saathiId) {
 
+        // Fetch the Subscriber from the database
+        Subscriber subscriber = subscriberRepository.findById(subscriberId)
+                .orElseThrow(() -> new RuntimeException("Subscriber not found with ID: " + subscriberId));
+
+        // Fetch the Saathi from the database
+        AdminUser saathi = adminUserRepository.findById(saathiId)
+                .orElseThrow(() -> new RuntimeException("Saathi not found with ID: " + saathiId));
+
+        // Assign the Saathi to the Subscriber
+        subscriber.setSaathi(saathi);
+
+        // Save the updated subscriber to the database
+        Subscriber updatedSubscriber = subscriberRepository.save(subscriber);
+
+        // Convert the updated Subscriber entity to DTO
+        SubscriberDTO updatedSubscriberDTO = convertToSubscriberDTO(updatedSubscriber);
+        return updatedSubscriberDTO;
+    }
+
+    @Override
+    public SubscriberDTO convertToSubscriberDTO(Subscriber subscriber) {
+        SubscriberDTO subscriberDTO = new SubscriberDTO();
+
+        // Basic fields mapping
+        subscriberDTO.setSubscriberID(subscriber.getSubscriberId()); // Mapping the ID
+        subscriberDTO.setFirstName(subscriber.getFirstName()); // First name
+        subscriberDTO.setLastName(subscriber.getLastName()); // Last name
+        subscriberDTO.setEmail(subscriber.getEmail()); // Email
+        subscriberDTO.setContactNo(subscriber.getContactNo()); // Phone number
+        subscriberDTO.setCountryCode(subscriber.getCountryCode()); // Country code
+        subscriberDTO.setPassword(subscriber.getPassword()); // Password
+
+        // Handling package ID
+        subscriberDTO.setPackageID(subscriber.getSubscriptionPackage() != null ? subscriber.getSubscriptionPackage().getPackageID() : null);
+
+        // Handling dates (assuming they are stored as Date objects in the Subscriber entity)
+        subscriberDTO.setStartDate(subscriber.getStartDate() != null ? subscriber.getStartDate().toString() : null);
+        subscriberDTO.setEndDate(subscriber.getEndDate() != null ? subscriber.getEndDate().toString() : null);
+        subscriberDTO.setCreatedDate(subscriber.getCreatedDate());
+        subscriberDTO.setLastUpdatedDate(subscriber.getLastUpdatedDate());
+
+        // Billing status
+        subscriberDTO.setBillingStatus(subscriber.getBillingStatus());
+
+        // Saathi (AdminUser) Mapping
+        if (subscriber.getSaathi() != null) {
+            subscriberDTO.setSaathiID(subscriber.getSaathi().getAdminUserID()); // Saathi ID
+            subscriberDTO.setSaathi(subscriber.getSaathi()); // Saathi object
+        }
+
+        // Handling status
+        subscriberDTO.setStatus(subscriber.getStatus());
+
+        return subscriberDTO;
+    }
+
+    @Override
+    public List<Subscriber> getSubscribersWithoutSaathi() {
+        return subscriberRepository.findSubscribersWithoutSaathi();
+    }
 }

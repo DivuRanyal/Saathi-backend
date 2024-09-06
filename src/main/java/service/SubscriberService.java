@@ -15,4 +15,7 @@ public interface SubscriberService {
     Subscriber findByEmailAndPassword(String email, String password);
     List<SubscriberDTO> getSubscribersBySaathi(int saathiId);
     AdminUser getSubscriberDetails(int subscriberId);
+    SubscriberDTO convertToSubscriberDTO(Subscriber subscriber);
+    SubscriberDTO assignSaathiToSubscriber(int subscriberId, int saathiId);
+    List<Subscriber> getSubscribersWithoutSaathi();
 }

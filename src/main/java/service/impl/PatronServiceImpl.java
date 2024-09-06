@@ -42,14 +42,14 @@ public class PatronServiceImpl implements PatronService {
     @Override
     public PatronDTO savePatron(PatronDTO patronDTO) {
         // Check if email is already registered
-        Optional<Patron> existingPatron = patronRepository.findByEmail(patronDTO.getEmail());
+   /*     Optional<Patron> existingPatron = patronRepository.findByEmail(patronDTO.getEmail());
         if (existingPatron.isPresent()) {
             // Handle the case where the email is already registered
         	throw new EmailAlreadyRegisteredException("The email address is already registered.");
 
             // Alternatively, you could return a special DTO or handle it in another way.
         }
-        
+     */   
         Patron patron = convertToEntity(patronDTO);
         Patron savedPatron = patronRepository.save(patron);
         return convertToDTO(savedPatron);
@@ -76,7 +76,7 @@ public class PatronServiceImpl implements PatronService {
 
     @Override
     public List<PatronDTO> getPatronsBySubscriberId(int subscriberID) {
-        return patronRepository.findBySubscriberSubscriberID(subscriberID).stream()
+        return patronRepository.findBySubscriber_SubscriberID(subscriberID).stream()
                 .map(this::convertToDTO)
                 .collect(Collectors.toList());
     }
@@ -136,5 +136,28 @@ public class PatronServiceImpl implements PatronService {
         patron.setRelation(dto.getRelation());
 
         return patron;
+    }
+    
+    @Override
+    public PatronDTO getPatronBySubscriberId(int subscriberId) {
+        Patron patron = patronRepository.findFirstBySubscriber_SubscriberID(subscriberId)
+            .orElseThrow(() -> new RuntimeException("No Patron found for Subscriber ID: " + subscriberId));
+        return convertToPatronDTO(patron);
+    }
+
+    // Convert Patron entity to DTO
+    private PatronDTO convertToPatronDTO(Patron patron) {
+        PatronDTO patronDTO = new PatronDTO();
+        
+        patronDTO.setPatronID(patron.getPatronID());
+        patronDTO.setFirstName(patron.getFirstName());
+        patronDTO.setLastName(patron.getLastName());
+        patronDTO.setRelation(patron.getRelation());
+        patronDTO.setAddress1(patron.getAddress1());
+        patronDTO.setAddress2(patron.getAddress2());
+        patronDTO.setCity(patron.getCity());
+        patronDTO.setState(patron.getState());
+        patronDTO.setCountry(patron.getCountry());
+        return patronDTO;
     }
 }

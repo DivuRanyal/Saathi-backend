@@ -10,8 +10,13 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface PatronRepository extends JpaRepository<Patron, Integer> {
-    // Add custom query methods here if needed
-	
-	List<Patron> findBySubscriberSubscriberID(int subscriberID);
-	 Optional<Patron> findByEmail(String email);
+
+    // Find all patrons based on subscriber ID (returns a list of patrons)
+    List<Patron> findBySubscriber_SubscriberID(int subscriberID);
+
+    // Find a single patron based on subscriber ID (returns an optional single patron)
+    Optional<Patron> findFirstBySubscriber_SubscriberID(int subscriberID);
+
+    // Find a patron by email
+    Optional<Patron> findByEmail(String email);
 }

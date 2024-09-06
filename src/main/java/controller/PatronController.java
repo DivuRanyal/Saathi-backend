@@ -1,5 +1,6 @@
 package controller;
 
+import model.dto.PatronCreationResponse;
 import model.dto.PatronDTO;
 import service.PatronService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,6 +10,7 @@ import org.springframework.web.bind.annotation.*;
 
 import exception.EmailAlreadyRegisteredException;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -37,15 +39,28 @@ public class PatronController {
         return new ResponseEntity<>(patrons, HttpStatus.OK);
     }
     @PostMapping
-    public ResponseEntity<?> createPatron(@RequestBody PatronDTO patronDTO) {
-        try {
-            PatronDTO createdPatron = patronService.savePatron(patronDTO);
-            return new ResponseEntity<>(createdPatron, HttpStatus.CREATED);
-        } catch (EmailAlreadyRegisteredException e) {
-            // Handle the exception and return a custom message with a 409 Conflict status
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
+    public ResponseEntity<?> createPatrons(@RequestBody List<PatronDTO> patronDTOs) {
+        List<PatronDTO> createdPatrons = new ArrayList<>();
+        List<String> conflictMessages = new ArrayList<>();
+        
+        for (PatronDTO patronDTO : patronDTOs) {
+            try {
+                PatronDTO createdPatron = patronService.savePatron(patronDTO);
+                createdPatrons.add(createdPatron);
+            } catch (EmailAlreadyRegisteredException e) {
+                conflictMessages.add("Email already registered: " + patronDTO.getEmail());
+            }
         }
+        
+        if (!conflictMessages.isEmpty()) {
+            // Return a 207 Multi-Status response if some patrons were created and others had conflicts
+            return ResponseEntity.status(HttpStatus.MULTI_STATUS)
+                    .body(new PatronCreationResponse(createdPatrons, conflictMessages));
+        }
+        
+        return new ResponseEntity<>(createdPatrons, HttpStatus.CREATED);
     }
+
 
     @PutMapping("/{id}")
     public ResponseEntity<PatronDTO> updatePatron(@PathVariable("id") int patronId, @RequestBody PatronDTO patronDTO) {

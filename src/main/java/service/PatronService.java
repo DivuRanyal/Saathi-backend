@@ -20,4 +20,5 @@ public interface PatronService {
     void deletePatron(int patronId);
     
     List<PatronDTO> getPatronsBySubscriberId(int subscriberID);
+    PatronDTO getPatronBySubscriberId(int subscriberId);
 }

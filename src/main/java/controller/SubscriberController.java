@@ -1,6 +1,7 @@
 package controller;
 
 import model.AdminUser;
+import model.Subscriber;
 import model.SubscriberAlaCarteServices;
 import model.dto.PatronDTO;
 import model.dto.PatronServiceDTO;
@@ -146,7 +147,6 @@ public class SubscriberController {
             return "Failed to send email.";
         }
     }
-
    
     @GetMapping("/sendEmail")
     public String sendEmail(
@@ -156,5 +156,105 @@ public class SubscriberController {
 
         emailService.sendSimpleEmail(to, subject, body);
         return "Email sent successfully!";
+    }
+  /*  @PutMapping("/{subscriberID}/assign-saathi")
+    public ResponseEntity<Map<String, Object>> assignSaathiToSubscriber(
+            @PathVariable int subscriberID, @RequestParam int saathiID) throws IOException, TemplateException {
+
+        // Step 1: Assign Saathi to Subscriber and get the updated subscriber
+        SubscriberDTO updatedSubscriber = subscriberService.assignSaathiToSubscriber(subscriberID, saathiID);
+
+        // Step 2: Fetch the Patron details for the Subscriber
+        PatronDTO patronDetails = patronService.getPatronBySubscriberId(subscriberID);
+
+        // Step 3: Create a response model (Map) with additional details
+        Map<String, Object> model = new HashMap<>();
+
+        // Step 4: Populate the model with data from the updated subscriber
+        model.put("subscriberID", updatedSubscriber.getSubscriberID());
+        model.put("subscriberName", updatedSubscriber.getFirstName() + " " + updatedSubscriber.getLastName());
+        model.put("subscriberPhone", updatedSubscriber.getContactNo());
+        model.put("subscriberEmail", updatedSubscriber.getEmail());
+        model.put("subscriptionPackage", updatedSubscriber.getPackageID() != null ? "Gold" : "Standard");
+
+        // Saathi details
+        String saathiEmail = updatedSubscriber.getSaathi().getEmail(); 
+        if (updatedSubscriber.getSaathi() != null) {
+            model.put("saathiName", updatedSubscriber.getSaathi().getFirstName());
+            saathiEmail = updatedSubscriber.getSaathi().getEmail(); // Assuming Saathi has an email field
+        } else {
+            model.put("saathiName", "John Doe"); // Fallback or default value
+        }
+
+        // Step 5: Add Patron details dynamically based on the Subscriber
+        model.put("patronName", patronDetails.getFirstName() + " " + patronDetails.getLastName());
+        model.put("patronRelationship", patronDetails.getRelation());
+        model.put("patronAddress", patronDetails.getAddress1() + ", " + patronDetails.getAddress2() + ", " + 
+                                    patronDetails.getCity() + ", " + patronDetails.getState() + ", " + patronDetails.getCountry());
+
+        // Step 6: Send an email using the email service
+        try {
+            emailService.sendSaathiAssignedEmail(saathiEmail, model);
+        } catch (MessagingException e) {
+            e.printStackTrace();
+            model.put("emailStatus", "Failed to send email.");
+        }
+
+        // Step 7: Return the model and HttpStatus.OK
+        return new ResponseEntity<>(model, HttpStatus.OK);
+    }
+*/
+    
+    @PutMapping("/{subscriberID}/assign-saathi")
+    public ResponseEntity<Map<String, Object>> assignSaathiToSubscriber(
+            @PathVariable int subscriberID, @RequestParam int saathiID) throws IOException, TemplateException {
+
+        // Step 1: Assign Saathi to Subscriber and get the updated subscriber
+        SubscriberDTO updatedSubscriber = subscriberService.assignSaathiToSubscriber(subscriberID, saathiID);
+
+        // Step 2: Fetch the Patron details for the Subscriber
+ //       PatronDTO patronDetails = patronService.getPatronBySubscriberId(subscriberID);
+
+        // Step 3: Create a response model (Map) with additional details
+        Map<String, Object> model = new HashMap<>();
+
+        // Step 4: Populate the model with data from the updated subscriber
+        model.put("subscriberID", updatedSubscriber.getSubscriberID());
+        model.put("subscriberName", updatedSubscriber.getFirstName() + " " + updatedSubscriber.getLastName());
+        model.put("subscriberPhone", updatedSubscriber.getContactNo());
+        model.put("subscriberEmail", updatedSubscriber.getEmail());
+        model.put("subscriptionPackage", updatedSubscriber.getPackageID() != null ? "Gold" : "Standard");
+
+        // Saathi details
+        String saathiEmail = updatedSubscriber.getSaathi().getEmail(); 
+        if (updatedSubscriber.getSaathi() != null) {
+            model.put("saathiName", updatedSubscriber.getSaathi().getFirstName());
+            saathiEmail = updatedSubscriber.getSaathi().getEmail(); // Assuming Saathi has an email field
+        } else {
+            model.put("saathiName", "John Doe"); // Fallback or default value
+        }
+
+        // Step 5: Add Patron details dynamically based on the Subscriber
+  //      model.put("patronName", patronDetails.getFirstName() + " " + patronDetails.getLastName());
+  //      model.put("patronRelationship", patronDetails.getRelation());
+ //       model.put("patronAddress", patronDetails.getAddress1() + ", " + patronDetails.getAddress2() + ", " + 
+//                                    patronDetails.getCity() + ", " + patronDetails.getState() + ", " + patronDetails.getCountry());
+
+        // Step 6: Send an email using the email service
+        try {
+            emailService.sendSaathiAssignedEmail(saathiEmail, model);
+        } catch (MessagingException e) {
+            e.printStackTrace();
+            model.put("emailStatus", "Failed to send email.");
+        }
+
+        // Step 7: Return the model and HttpStatus.OK
+        return new ResponseEntity<>(model, HttpStatus.OK);
+    }
+    
+    @GetMapping("/without-saathi")
+    public ResponseEntity<List<Subscriber>> getSubscribersWithoutSaathi() {
+        List<Subscriber> subscribers = subscriberService.getSubscribersWithoutSaathi();
+        return ResponseEntity.ok(subscribers);
     }
 }

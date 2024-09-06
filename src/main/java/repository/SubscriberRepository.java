@@ -22,6 +22,8 @@ public interface SubscriberRepository extends JpaRepository<Subscriber, Integer>
 	List<Subscriber> findByStatus(Integer status);
 	 Optional<Subscriber> findByEmail(String email);
 	 List<Subscriber> findBySaathi(AdminUser saathi);
+	 @Query("SELECT s FROM Subscriber s WHERE s.saathi IS NULL")
+	    List<Subscriber> findSubscribersWithoutSaathi();
     
 	
 }

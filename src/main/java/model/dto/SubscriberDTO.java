@@ -25,6 +25,14 @@ public class SubscriberDTO {
     private Date lastUpdatedDate;
     private int status;
     private AdminUser saathi; 
+ // Add fields for Subscription Package details
+    private String packageName;
+	public String getPackageName() {
+		return packageName;
+	}
+	public void setPackageName(String packageName) {
+		this.packageName = packageName;
+	}
 	// Date format to be used for date fields
     private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
 
