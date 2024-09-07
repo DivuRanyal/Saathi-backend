@@ -48,7 +48,7 @@ public class SubscriptionPackageController {
         }
     }
         
-    @GetMapping
+    @GetMapping("/all")
     public ResponseEntity<List<SubscriptionPackageDTO>> getAllSubscriptionPackages() {
         // Call the service to get all subscription packages and their services
         List<SubscriptionPackageDTO> packageDTOs = subscriptionPackageService.getAllSubscriptionPackagesWithServices();

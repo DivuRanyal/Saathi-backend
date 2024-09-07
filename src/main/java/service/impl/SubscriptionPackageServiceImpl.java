@@ -176,10 +176,22 @@ public class SubscriptionPackageServiceImpl implements SubscriptionPackageServic
 
         // Convert each SubscriptionPackage entity to DTO with associated services
         return packages.stream()
-                .map(this::convertToDTO)  // Use the existing method to convert each package to DTO
+                .map(pkg -> {
+                    // Fetch associated services for each package
+                    SubscriptionPackageDTO packageDTO = convertToDTO(pkg);
+
+                    List<PackageServices> packageServicesList = packageServiceRepository.findBySubscriptionPackage(pkg);
+                    
+                    List<PackageServiceDTO> serviceDTOs = packageServicesList.stream()
+                            .map(this::convertServiceToDTO)
+                            .collect(Collectors.toList());
+                    
+                    packageDTO.setPackageServices(serviceDTOs);  // Add services to DTO
+                    
+                    return packageDTO;
+                })
                 .collect(Collectors.toList());
     }
-    
     @Override
     public List<PackageServiceDTO> getPackageServicesByPackageId(Integer packageId) {
         // Find the subscription package by ID
