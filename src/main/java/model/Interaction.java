@@ -39,7 +39,7 @@ public class Interaction {
 
     @ManyToOne
     @JoinColumn(name = "PackageServicesID", referencedColumnName = "PackageServicesID")
-    private PackageService packageService;
+    private PackageServices packageService;
 
     @ManyToOne
     @JoinColumn(name = "SubscriberAlaCarteServicesID", referencedColumnName = "SubscriberAlaCarteServicesID")
@@ -110,11 +110,11 @@ public class Interaction {
         this.completionStatus = completionStatus;
     }
 
-    public PackageService getPackageService() {
+    public PackageServices getPackageService() {
         return packageService;
     }
 
-    public void setPackageService(PackageService packageService) {
+    public void setPackageService(PackageServices packageService) {
         this.packageService = packageService;
     }
 

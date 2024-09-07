@@ -1,11 +1,14 @@
 package controller;
 
 import model.AdminUser;
+
 import model.Subscriber;
 import model.SubscriberAlaCarteServices;
+import model.dto.CreditCardDTO;
 import model.dto.PatronDTO;
 import model.dto.PatronServiceDTO;
 import model.dto.SubscriberDTO;
+
 import service.EmailService;
 import service.PatronService;
 import service.SubscriberAlaCarteServicesService;
@@ -27,6 +30,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/subscribers")
@@ -45,10 +49,29 @@ public class SubscriberController {
     private EmailService emailService;
 
     @PostMapping
-    public ResponseEntity<?> createSubscriber(@RequestBody SubscriberDTO subscriberDTO) {
+    public ResponseEntity<?> createSubscriber(@RequestBody SubscriberDTO subscriberDTO) throws MessagingException, IOException, TemplateException {
         try {
+            // Create the subscriber
             SubscriberDTO createdSubscriber = subscriberService.createSubscriber(subscriberDTO);
+            
+            // Send email notification to admin after successful creation
+            String adminEmail = "divya1111sharma@gmail.com"; // Replace with actual admin email
+            String subject = "New Subscriber Added";
+            Map<String, Object> model = new HashMap<>();
+            
+            // Create a Map for the subscriber data
+            Map<String, Object> subscriberData = new HashMap<>();
+            subscriberData.put("name", createdSubscriber.getFirstName() + " " + createdSubscriber.getLastName());
+
+            // Add the subscriber map to the main model
+            model.put("subscriber", subscriberData); // Pass the subscriber object
+
+            // Assuming you have an email service that sends Freemarker templated emails
+            emailService.sendEmail(adminEmail, subject, "subscriber-added-email.ftlh", model);
+            
+            // Return the created subscriber details
             return new ResponseEntity<>(createdSubscriber, HttpStatus.CREATED);
+            
         } catch (EmailAlreadyRegisteredException e) {
             // Return a 409 Conflict response if the email is already registered
             return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
@@ -257,4 +280,7 @@ public class SubscriberController {
         List<Subscriber> subscribers = subscriberService.getSubscribersWithoutSaathi();
         return ResponseEntity.ok(subscribers);
     }
+    
+
+
 }

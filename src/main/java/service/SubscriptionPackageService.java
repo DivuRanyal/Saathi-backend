@@ -1,21 +1,10 @@
 package service;
 
 import model.SubscriptionPackage;
-
-import java.util.List;
-import java.util.Optional;
+import model.dto.SubscriptionPackageDTO;
 
 public interface SubscriptionPackageService {
 
-    List<SubscriptionPackage> findAll();
-
-    Optional<SubscriptionPackage> findById(int packageID);
-
-    SubscriptionPackage save(SubscriptionPackage subscriptionPackage);
-
-    SubscriptionPackage update(int packageID, SubscriptionPackage subscriptionPackage);
-
-    void deleteById(int packageID);
-    
-    SubscriptionPackage getSubscriptionPackageById(int packageID);
+	SubscriptionPackage saveSubscriptionPackageWithServices(SubscriptionPackageDTO packageDTO);
+	SubscriptionPackage updateSubscriptionPackageWithServices(Integer packageId, SubscriptionPackageDTO packageDTO);
 }

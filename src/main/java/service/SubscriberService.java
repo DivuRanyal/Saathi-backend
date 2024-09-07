@@ -18,4 +18,7 @@ public interface SubscriberService {
     SubscriberDTO convertToSubscriberDTO(Subscriber subscriber);
     SubscriberDTO assignSaathiToSubscriber(int subscriberId, int saathiId);
     List<Subscriber> getSubscribersWithoutSaathi();
+    // Convert DTO to Entity
+   Subscriber convertToEntity(SubscriberDTO subscriberDTO, boolean isPasswordRequired);
+  
 }

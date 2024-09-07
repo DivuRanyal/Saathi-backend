@@ -56,6 +56,28 @@ public class EmailService {
         return stringWriter.toString();  // Return the resulting string
     }
 
+    public void sendEmail(String to, String subject, String templateName, Map<String, Object> model) throws MessagingException, IOException, TemplateException {
+        // Create a MimeMessage
+        MimeMessage message = mailSender.createMimeMessage();
+        
+        // Use MimeMessageHelper to construct the email message
+        MimeMessageHelper helper = new MimeMessageHelper(message, MimeMessageHelper.MULTIPART_MODE_MIXED_RELATED, "UTF-8");
+        
+        // Set the email's recipient, subject, and from address
+        helper.setTo(to);
+        helper.setSubject(subject);
+        helper.setFrom("info@etheriumtech.com");  // Replace with your from address
+        
+        // Get the Freemarker template and process it with the model
+        Template t = freemarkerConfig.getTemplate(templateName);
+        String text = FreeMarkerTemplateUtils.processTemplateIntoString(t, model);
+        
+        // Set the processed template as the email content
+        helper.setText(text, true); // true indicates that this is an HTML email
+
+        // Send the email
+        mailSender.send(message);
+    }
     
     public void sendSimpleEmail(String to, String subject, String text) {
         SimpleMailMessage message = new SimpleMailMessage();

@@ -44,11 +44,12 @@ public class SubscriberServiceImpl implements SubscriberService {
         }
 
         // If the email is not registered, proceed to create a new subscriber
-        Subscriber subscriber = convertToEntity(subscriberDTO);
+        Subscriber subscriber = convertToEntity(subscriberDTO,true);
         Subscriber savedSubscriber = subscriberRepository.save(subscriber);
         return convertToDTO(savedSubscriber);
     }
-
+    
+  
     @Override
     public SubscriberDTO updateSubscriber(int subscriberId, SubscriberDTO subscriberDTO) {
         Subscriber existingSubscriber = subscriberRepository.findById(subscriberId)
@@ -201,37 +202,50 @@ public class SubscriberServiceImpl implements SubscriberService {
         
         return subscriberDTO;
     }
-
-    private Subscriber convertToEntity(SubscriberDTO subscriberDTO) throws RuntimeException {
+    @Override
+    public Subscriber convertToEntity(SubscriberDTO subscriberDTO, boolean isPasswordRequired) throws RuntimeException {
         Subscriber subscriber = new Subscriber();
         subscriber.setFirstName(subscriberDTO.getFirstName());
         subscriber.setLastName(subscriberDTO.getLastName());
         subscriber.setEmail(subscriberDTO.getEmail());
         subscriber.setContactNo(subscriberDTO.getContactNo());
         subscriber.setCountryCode(subscriberDTO.getCountryCode());
-        subscriber.setPassword(passwordEncoder.encode(subscriberDTO.getPassword()));
-        
+
+        // If the password is required, check that it's not null or empty and encode it
+        if (isPasswordRequired) {
+            if (subscriberDTO.getPassword() == null || subscriberDTO.getPassword().isEmpty()) {
+                throw new IllegalArgumentException("Password cannot be null or empty");
+            }
+            subscriber.setPassword(passwordEncoder.encode(subscriberDTO.getPassword()));
+        } else {
+            // If password is not required, skip encoding
+            subscriber.setPassword(subscriberDTO.getPassword());
+        }
+
         subscriber.setLastLoginTime(subscriberDTO.getLastLoginTime());
         subscriber.setStartDate(subscriberDTO.getStartDate());
         subscriber.setEndDate(subscriberDTO.getEndDate());
         subscriber.setBillingStatus(subscriberDTO.getBillingStatus());
-        // Fetch the SubscriptionPackage entity by packageId and set it
+
+        // Set the subscription package if available
         if (subscriberDTO.getPackageID() != null) {
             SubscriptionPackage subscriptionPackage = subscriptionPackageRepository.findById(subscriberDTO.getPackageID())
                 .orElseThrow(() -> new RuntimeException("Subscription Package not found"));
             subscriber.setSubscriptionPackage(subscriptionPackage);
         }
 
-        // Fetch the AdminUser entity by saathiId and set it
+        // Set the Saathi (AdminUser) if available
         if (subscriberDTO.getSaathiID() != null) {
             AdminUser saathi = adminUserRepository.findById(subscriberDTO.getSaathiID())
                 .orElseThrow(() -> new RuntimeException("Admin User (Saathi) not found"));
             subscriber.setSaathi(saathi);
         }
+
         subscriber.setStatus(subscriberDTO.getStatus());
-        // Additional fields can be set here
         return subscriber;
     }
+
+    
     @Override
     public List<SubscriberDTO> getSubscribersBySaathi(int saathiId) {
         AdminUser saathi = adminUserRepository.findById(saathiId)
@@ -319,4 +333,7 @@ public class SubscriberServiceImpl implements SubscriberService {
     public List<Subscriber> getSubscribersWithoutSaathi() {
         return subscriberRepository.findSubscribersWithoutSaathi();
     }
+    
+   
+    
 }

@@ -8,6 +8,7 @@ import jakarta.validation.constraints.NotNull;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
 
 @Entity
 @Table(name = "Subscribers")
@@ -74,6 +75,7 @@ public class Subscriber {
     @Column(name = "Status")
     private int status;
 
+   
  // Date format to be used for date fields
     private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
 
