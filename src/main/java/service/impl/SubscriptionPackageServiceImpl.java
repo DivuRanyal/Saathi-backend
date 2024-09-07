@@ -169,6 +169,37 @@ public class SubscriptionPackageServiceImpl implements SubscriptionPackageServic
 
         return packageDTO;
     }
+    
+    @Override
+    public List<SubscriptionPackageDTO> getAllSubscriptionPackagesWithServices() {
+        List<SubscriptionPackage> packages = subscriptionPackageRepository.findAll();  // Fetch all packages
+
+        // Convert each SubscriptionPackage entity to DTO with associated services
+        return packages.stream()
+                .map(this::convertToDTO)  // Use the existing method to convert each package to DTO
+                .collect(Collectors.toList());
+    }
+    
+    @Override
+    public List<PackageServiceDTO> getPackageServicesByPackageId(Integer packageId) {
+        // Find the subscription package by ID
+        Optional<SubscriptionPackage> subscriptionPackageOptional = subscriptionPackageRepository.findById(packageId);
+        if (!subscriptionPackageOptional.isPresent()) {
+            throw new RuntimeException("Subscription Package not found for ID: " + packageId);
+        }
+
+        SubscriptionPackage subscriptionPackage = subscriptionPackageOptional.get();
+
+        // Get package services associated with the package
+        List<PackageServices> packageServicesList = packageServiceRepository.findBySubscriptionPackage(subscriptionPackage);
+
+        // Convert to DTO
+        List<PackageServiceDTO> serviceDTOs = packageServicesList.stream()
+            .map(this::convertTo_DTO)
+            .collect(Collectors.toList());
+
+        return serviceDTOs;
+    }
     private SubscriptionPackageDTO convertToDTO(SubscriptionPackage subscriptionPackage) {
         SubscriptionPackageDTO dto = new SubscriptionPackageDTO();
         dto.setPackageID(subscriptionPackage.getPackageID());
@@ -193,6 +224,20 @@ public class SubscriptionPackageServiceImpl implements SubscriptionPackageServic
         return dto;
     }
     
+    private PackageServiceDTO convertTo_DTO(PackageServices packageServices) {
+        PackageServiceDTO dto = new PackageServiceDTO();
+        dto.setServiceID(packageServices.getServiceID());
+        dto.setFrequency(packageServices.getFrequency());
+        dto.setFrequencyUnit(packageServices.getFrequencyUnit());
+        dto.setPriceUSD(packageServices.getPriceUSD());
+        dto.setPriceINR(packageServices.getPriceINR());
+        dto.setStatus(packageServices.getStatus());
+        dto.setCreatedDate(packageServices.getCreatedDate());
+        dto.setLastUpdatedDate(packageServices.getLastUpdatedDate());
+        dto.setCreatedBy(packageServices.getCreatedBy());
+        dto.setUpdatedBy(packageServices.getUpdatedBy());
+        return dto;
+    }
     private PackageServiceDTO convertServiceToDTO(PackageServices service) {
         PackageServiceDTO serviceDTO = new PackageServiceDTO();
         serviceDTO.setServiceID(service.getServiceID());

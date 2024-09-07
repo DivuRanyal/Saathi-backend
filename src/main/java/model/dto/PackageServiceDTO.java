@@ -14,8 +14,22 @@ public class PackageServiceDTO {
     private Integer status;
     private Date createdDate; // Add this field
     private Date lastUpdatedDate; // Add this field
+    private Integer createdBy;  // Add createdBy in DTO
+    private Integer updatedBy;
+ public Integer getCreatedBy() {
+		return createdBy;
+	}
+	public void setCreatedBy(Integer createdBy) {
+		this.createdBy = createdBy;
+	}
+	public Integer getUpdatedBy() {
+		return updatedBy;
+	}
+	public void setUpdatedBy(Integer updatedBy) {
+		this.updatedBy = updatedBy;
+	}
 
- // Date format to be used for date fields
+	// Date format to be used for date fields
     private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
 
 	public Integer getServiceID() {
