@@ -47,8 +47,7 @@ public class SubscriptionPackageController {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
     }
-    
-    
+        
     @GetMapping
     public ResponseEntity<List<SubscriptionPackageDTO>> getAllSubscriptionPackages() {
         // Call the service to get all subscription packages and their services

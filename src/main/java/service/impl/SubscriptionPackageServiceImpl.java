@@ -210,17 +210,26 @@ public class SubscriptionPackageServiceImpl implements SubscriptionPackageServic
         dto.setStatus(subscriptionPackage.getStatus());
         dto.setCreatedBy(subscriptionPackage.getCreatedBy());
         dto.setUpdatedBy(subscriptionPackage.getUpdatedBy());
-        // Convert String to Date before setting in DTO
+     // Convert String to Date before setting in DTO
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
+        
         try {
-            SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
-            Date createdDate = formatter.parse(subscriptionPackage.getCreatedDate());
-            Date lastUpdatedDate = formatter.parse(subscriptionPackage.getLastUpdatedDate());
+            // Check if createdDate is not null before conversion
+            if (subscriptionPackage.getCreatedDate() != null && !subscriptionPackage.getCreatedDate().isEmpty()) {
+                Date createdDate = formatter.parse(subscriptionPackage.getCreatedDate());
+                dto.setCreatedDate(createdDate);
+            }
 
-            dto.setCreatedDate(createdDate);
-            dto.setLastUpdatedDate(lastUpdatedDate);
+            // Check if lastUpdatedDate is not null before conversion
+            if (subscriptionPackage.getLastUpdatedDate() != null && !subscriptionPackage.getLastUpdatedDate().isEmpty()) {
+                Date lastUpdatedDate = formatter.parse(subscriptionPackage.getLastUpdatedDate());
+                dto.setLastUpdatedDate(lastUpdatedDate);
+            }
         } catch (ParseException e) {
-            e.printStackTrace();  // Handle exception as needed
+            e.printStackTrace();  // Handle the exception as per your application logic
+            // You can log this error or handle it more gracefully if needed.
         }
+
         return dto;
     }
     

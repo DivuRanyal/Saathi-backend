@@ -40,16 +40,16 @@ public class SubscriptionPackage {
     private int status;
 
     @Column(name = "CreatedBy")
-    private int createdBy;
+    private Integer createdBy;
 
     @Column(name = "UpdatedBy")
-    private int updatedBy;
+    private Integer updatedBy;
 
-    public int getCreatedBy() {
+    public Integer getCreatedBy() {
         return createdBy;
     }
 
-    public void setCreatedBy(int createdBy) {
+    public void setCreatedBy(Integer createdBy) {
         this.createdBy = createdBy;
     }
 
