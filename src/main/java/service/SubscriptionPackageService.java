@@ -7,4 +7,5 @@ public interface SubscriptionPackageService {
 
 	SubscriptionPackage saveSubscriptionPackageWithServices(SubscriptionPackageDTO packageDTO);
 	SubscriptionPackage updateSubscriptionPackageWithServices(Integer packageId, SubscriptionPackageDTO packageDTO);
+	SubscriptionPackageDTO getSubscriptionPackageWithServices(Integer packageId);
 }

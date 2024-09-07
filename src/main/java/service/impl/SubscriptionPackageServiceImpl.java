@@ -12,6 +12,9 @@ import repository.SubscriptionPackageRepository;
 import service.SubscriptionPackageService;
 import repository.AdminUsersRepository;
 import repository.PackageServiceRepository;
+
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -139,5 +142,66 @@ public class SubscriptionPackageServiceImpl implements SubscriptionPackageServic
         return updatedPackage;
     }
 
+    // Method to get the SubscriptionPackage and its services
+    @Override
+    public SubscriptionPackageDTO getSubscriptionPackageWithServices(Integer packageId) {
+        Optional<SubscriptionPackage> subscriptionPackageOptional = subscriptionPackageRepository.findById(packageId);
+
+        if (!subscriptionPackageOptional.isPresent()) {
+            return null;
+        }
+
+        SubscriptionPackage subscriptionPackage = subscriptionPackageOptional.get();
+
+        // Convert the SubscriptionPackage to DTO
+        SubscriptionPackageDTO packageDTO = convertToDTO(subscriptionPackage);
+
+        // Fetch associated PackageServices
+        List<PackageServices> packageServicesList = packageServiceRepository.findBySubscriptionPackage(subscriptionPackage);
+
+        // Convert PackageServices to DTO
+        List<PackageServiceDTO> serviceDTOs = packageServicesList.stream()
+                .map(this::convertServiceToDTO)
+                .collect(Collectors.toList());
+
+        // Add services to the SubscriptionPackageDTO
+        packageDTO.setPackageServices(serviceDTOs);
+
+        return packageDTO;
+    }
+    private SubscriptionPackageDTO convertToDTO(SubscriptionPackage subscriptionPackage) {
+        SubscriptionPackageDTO dto = new SubscriptionPackageDTO();
+        dto.setPackageID(subscriptionPackage.getPackageID());
+        dto.setPackageName(subscriptionPackage.getPackageName());
+        dto.setPackageDescription(subscriptionPackage.getPackageDescription());
+        dto.setPriceUSD(subscriptionPackage.getPriceUSD());
+        dto.setPriceINR(subscriptionPackage.getPriceINR());
+        dto.setStatus(subscriptionPackage.getStatus());
+        dto.setCreatedBy(subscriptionPackage.getCreatedBy());
+        dto.setUpdatedBy(subscriptionPackage.getUpdatedBy());
+        // Convert String to Date before setting in DTO
+        try {
+            SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
+            Date createdDate = formatter.parse(subscriptionPackage.getCreatedDate());
+            Date lastUpdatedDate = formatter.parse(subscriptionPackage.getLastUpdatedDate());
+
+            dto.setCreatedDate(createdDate);
+            dto.setLastUpdatedDate(lastUpdatedDate);
+        } catch (ParseException e) {
+            e.printStackTrace();  // Handle exception as needed
+        }
+        return dto;
+    }
     
+    private PackageServiceDTO convertServiceToDTO(PackageServices service) {
+        PackageServiceDTO serviceDTO = new PackageServiceDTO();
+        serviceDTO.setServiceID(service.getServiceID());
+        serviceDTO.setFrequency(service.getFrequency());
+        serviceDTO.setFrequencyUnit(service.getFrequencyUnit());
+        serviceDTO.setPriceUSD(service.getPriceUSD());
+        serviceDTO.setPriceINR(service.getPriceINR());
+        serviceDTO.setStatus(service.getStatus());
+        serviceDTO.setLastUpdatedDate(service.getLastUpdatedDate());
+        return serviceDTO;
+    }
 }

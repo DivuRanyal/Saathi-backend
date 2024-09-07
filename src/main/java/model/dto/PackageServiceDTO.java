@@ -1,6 +1,8 @@
 package model.dto;
 
 import java.math.BigDecimal;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 public class PackageServiceDTO {
 
@@ -10,6 +12,12 @@ public class PackageServiceDTO {
     private BigDecimal priceUSD;
     private BigDecimal priceINR;
     private Integer status;
+    private Date createdDate; // Add this field
+    private Date lastUpdatedDate; // Add this field
+
+ // Date format to be used for date fields
+    private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
+
 	public Integer getServiceID() {
 		return serviceID;
 	}
@@ -46,7 +54,21 @@ public class PackageServiceDTO {
 	public void setStatus(Integer status) {
 		this.status = status;
 	}
+	public String getCreatedDate() {
+        return createdDate != null ? DATE_FORMAT.format(createdDate) : null;
+    }
 
+    public void setCreatedDate(Date createdDate) {
+        this.createdDate = createdDate;
+    }
+    public String getLastUpdatedDate() {
+    	return lastUpdatedDate != null ? DATE_FORMAT.format(lastUpdatedDate) : null;
+       
+    }
+
+    public void setLastUpdatedDate(Date lastUpdatedDate) {
+        this.lastUpdatedDate = lastUpdatedDate;
+    }
     
     // Getters and Setters
     

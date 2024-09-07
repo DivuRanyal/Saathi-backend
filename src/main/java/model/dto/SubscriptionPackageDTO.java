@@ -1,6 +1,7 @@
 package model.dto;
 
 import java.math.BigDecimal;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 
@@ -17,24 +18,31 @@ public class SubscriptionPackageDTO {
     private Date createdDate; // Add this field
     private Date lastUpdatedDate; // Add this field
 
+ // Date format to be used for date fields
+    private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
+
     public Integer getPackageID() {
 		return packageID;
 	}
 	public void setPackageID(Integer packageID) {
 		this.packageID = packageID;
 	}
-	public Date getCreatedDate() {
-		return createdDate;
-	}
-	public void setCreatedDate(Date createdDate) {
-		this.createdDate = createdDate;
-	}
-	public Date getLastUpdatedDate() {
-		return lastUpdatedDate;
-	}
-	public void setLastUpdatedDate(Date lastUpdatedDate) {
-		this.lastUpdatedDate = lastUpdatedDate;
-	}
+	 public String getCreatedDate() {
+	        return createdDate != null ? DATE_FORMAT.format(createdDate) : null;
+	    }
+
+	    public void setCreatedDate(Date createdDate) {
+	        this.createdDate = createdDate;
+	    }
+	    public String getLastUpdatedDate() {
+	    	return lastUpdatedDate != null ? DATE_FORMAT.format(lastUpdatedDate) : null;
+	       
+	    }
+
+	    public void setLastUpdatedDate(Date lastUpdatedDate) {
+	        this.lastUpdatedDate = lastUpdatedDate;
+	    }
+
 	public Integer getCreatedBy() {
 		return createdBy;
 	}

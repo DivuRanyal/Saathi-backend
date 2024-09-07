@@ -1,6 +1,7 @@
 package controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import model.SubscriptionPackage;
@@ -30,5 +31,17 @@ public class SubscriptionPackageController {
         SubscriptionPackage updatedPackage = subscriptionPackageService.updateSubscriptionPackageWithServices(packageId, packageDTO);
 
         return ResponseEntity.ok(updatedPackage);
+    }
+    
+    @GetMapping("/{packageId}")
+    public ResponseEntity<SubscriptionPackageDTO> getSubscriptionPackageById(@PathVariable Integer packageId) {
+        // Call the service to get the subscription package and its services
+        SubscriptionPackageDTO packageDTO = subscriptionPackageService.getSubscriptionPackageWithServices(packageId);
+
+        if (packageDTO != null) {
+            return new ResponseEntity<>(packageDTO, HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
     }
 }
