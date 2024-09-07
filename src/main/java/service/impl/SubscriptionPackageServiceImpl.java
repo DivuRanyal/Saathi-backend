@@ -268,6 +268,8 @@ public class SubscriptionPackageServiceImpl implements SubscriptionPackageServic
         serviceDTO.setPriceINR(service.getPriceINR());
         serviceDTO.setStatus(service.getStatus());
         serviceDTO.setLastUpdatedDate(service.getLastUpdatedDate());
+        serviceDTO.setCreatedBy(service.getCreatedBy());
+        serviceDTO.setUpdatedBy(service.getUpdatedBy());
         return serviceDTO;
     }
 }
