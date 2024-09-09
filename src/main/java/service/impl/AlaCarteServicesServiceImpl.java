@@ -49,12 +49,14 @@ public class AlaCarteServicesServiceImpl implements AlaCarteServicesService {
             AlaCarteService service = serviceOpt.get();
             service.setServiceName(alaCarteServiceDTO.getServiceName());
             service.setServiceDescription(alaCarteServiceDTO.getServiceDescription());
-            service.setFrequencyInHours(alaCarteServiceDTO.getFrequencyInHours());
+            service.setFrequency(alaCarteServiceDTO.getFrequency());
+            service.setFrequencyUnit(alaCarteServiceDTO.getFrequencyUnit());
             service.setPriceINR(alaCarteServiceDTO.getPriceINR());
             service.setPriceUSD(alaCarteServiceDTO.getPriceUSD());
             service.setBusinessHoursStart(alaCarteServiceDTO.getBusinessHoursStart());
             service.setBusinessHoursEnd(alaCarteServiceDTO.getBusinessHoursEnd());
             service.setStatus(alaCarteServiceDTO.getStatus());
+            service.setDurationInHours(alaCarteServiceDTO.getDurationInHours());
             AlaCarteService updatedService = alaCarteServiceRepository.save(service);
             return convertToDTO(updatedService);
         }
@@ -72,12 +74,14 @@ public class AlaCarteServicesServiceImpl implements AlaCarteServicesService {
         dto.setServiceID(service.getServiceID());
         dto.setServiceName(service.getServiceName());
         dto.setServiceDescription(service.getServiceDescription());
-        dto.setFrequencyInHours(service.getFrequencyInHours());
+        dto.setFrequency(service.getFrequency());
+        dto.setFrequencyUnit(service.getFrequencyUnit());
         dto.setPriceINR(service.getPriceINR());
         dto.setPriceUSD(service.getPriceUSD());
         dto.setBusinessHoursStart(service.getBusinessHoursStart());
         dto.setBusinessHoursEnd(service.getBusinessHoursEnd());
         dto.setStatus(service.getStatus());
+        dto.setDurationInHours(service.getDurationInHours());
         // Check if createdBy is null before accessing getAdminUserID
         if (service.getCreatedBy() != null) {
             dto.setCreatedBy(service.getCreatedBy().getAdminUserID());
@@ -100,12 +104,14 @@ public class AlaCarteServicesServiceImpl implements AlaCarteServicesService {
         service.setServiceID(dto.getServiceID());
         service.setServiceName(dto.getServiceName());
         service.setServiceDescription(dto.getServiceDescription());
-        service.setFrequencyInHours(dto.getFrequencyInHours());
+        service.setFrequency(dto.getFrequency());
+        service.setFrequencyUnit(dto.getFrequencyUnit());
         service.setPriceINR(dto.getPriceINR());
         service.setPriceUSD(dto.getPriceUSD());
         service.setBusinessHoursStart(dto.getBusinessHoursStart());
         service.setBusinessHoursEnd(dto.getBusinessHoursEnd());
         service.setStatus(dto.getStatus());
+        service.setDurationInHours(dto.getDurationInHours());
         // Fetch and set createdBy using the ID from the DTO
         if (dto.getCreatedBy() != null) {
             AdminUser createdBy = adminUsersRepository.findById(dto.getCreatedBy())

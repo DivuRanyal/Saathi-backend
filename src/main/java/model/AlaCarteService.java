@@ -21,8 +21,11 @@ public class AlaCarteService {
     @Column(name = "ServiceDescription", columnDefinition = "TEXT")
     private String serviceDescription;
 
-    @Column(name = "FrequencyInHours")
-    private Integer frequencyInHours;
+    @Column(name = "Frequency")
+    private Integer frequency;
+
+    @Column(name = "FrequencyUnit")
+    private String frequencyUnit; // New field to store the unit of frequency (e.g., Monthly, Weekly)
 
     @Column(name = "PriceUSD")
     private BigDecimal priceUSD;
@@ -35,6 +38,9 @@ public class AlaCarteService {
 
     @Column(name = "BusinessHoursEnd")
     private Time businessHoursEnd;
+
+    @Column(name = "DurationInHours")
+    private Integer durationInHours; // New field to store the duration of the service in hours
 
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "CreatedDate")
@@ -83,16 +89,24 @@ public class AlaCarteService {
         this.serviceDescription = serviceDescription;
     }
 
-    public Integer getFrequencyInHours() {
-        return frequencyInHours;
-    }
+       
+    public Integer getFrequency() {
+		return frequency;
+	}
 
-    public void setFrequencyInHours(Integer frequencyInHours) {
-        this.frequencyInHours = frequencyInHours;
-    }
+	public void setFrequency(Integer frequency) {
+		this.frequency = frequency;
+	}
 
-   
-    public BigDecimal getPriceUSD() {
+	public String getFrequencyUnit() {
+		return frequencyUnit;
+	}
+
+	public void setFrequencyUnit(String frequencyUnit) {
+		this.frequencyUnit = frequencyUnit;
+	}
+
+	public BigDecimal getPriceUSD() {
 		return priceUSD;
 	}
 
@@ -164,7 +178,16 @@ public class AlaCarteService {
         this.updatedBy = updatedBy;
     }
 
-    @PrePersist
+    
+    public Integer getDurationInHours() {
+		return durationInHours;
+	}
+
+	public void setDurationInHours(Integer durationInHours) {
+		this.durationInHours = durationInHours;
+	}
+
+	@PrePersist
     protected void onCreate() {
         createdDate = new Date();
     }

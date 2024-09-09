@@ -8,7 +8,8 @@ public class AlaCarteServiceDTO {
     private Integer serviceID;
     private String serviceName;
     private String serviceDescription;
-    private Integer frequencyInHours;
+    private Integer frequency;
+    private String frequencyUnit;
     private BigDecimal priceINR;
     private BigDecimal priceUSD;
     private Time businessHoursStart;
@@ -16,7 +17,7 @@ public class AlaCarteServiceDTO {
     private Integer status;
     private Integer createdBy;
     private Integer updatedBy;
-
+    private Integer durationInHours;
     // Constructors
     public AlaCarteServiceDTO() {}
 
@@ -44,15 +45,6 @@ public class AlaCarteServiceDTO {
     public void setServiceDescription(String serviceDescription) {
         this.serviceDescription = serviceDescription;
     }
-
-    public Integer getFrequencyInHours() {
-        return frequencyInHours;
-    }
-
-    public void setFrequencyInHours(Integer frequencyInHours) {
-        this.frequencyInHours = frequencyInHours;
-    }
-
    
     public BigDecimal getPriceINR() {
 		return priceINR;
@@ -117,4 +109,31 @@ public class AlaCarteServiceDTO {
             this.updatedBy = -1;  // Handle null case
         }
     }
+
+	public Integer getDurationInHours() {
+		return durationInHours;
+	}
+
+	public void setDurationInHours(Integer durationInHours) {
+		this.durationInHours = durationInHours;
+	}
+
+	public Integer getFrequency() {
+		return frequency;
+	}
+
+	public void setFrequency(Integer frequency) {
+		this.frequency = frequency;
+	}
+
+	public String getFrequencyUnit() {
+		return frequencyUnit;
+	}
+
+	public void setFrequencyUnit(String frequencyUnit) {
+		this.frequencyUnit = frequencyUnit;
+	}
+    
+	
+    
 }
