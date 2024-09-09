@@ -16,7 +16,7 @@ public class SubscriberDTO {
     private String countryCode;
     private String password;
     private Date lastLoginTime;
-    private Integer packageID; // Assume this is the ID only, you can also have the entire object if needed
+    private Integer packageServiceID; // Assume this is the ID only, you can also have the entire object if needed
     private Date startDate;
     private Date endDate;
     private int billingStatus;
@@ -27,6 +27,14 @@ public class SubscriberDTO {
     private AdminUser saathi; 
  // Add fields for Subscription Package details
     private String packageName;
+    private String comments;
+    private CreditCardDTO creditCard;
+	public CreditCardDTO getCreditCard() {
+		return creditCard;
+	}
+	public void setCreditCard(CreditCardDTO creditCard) {
+		this.creditCard = creditCard;
+	}
 	public String getPackageName() {
 		return packageName;
 	}
@@ -78,15 +86,15 @@ public class SubscriberDTO {
 	public void setLastLoginTime(Date lastLoginTime) {
 		this.lastLoginTime = lastLoginTime;
 	}
-	public Integer getPackageID() {
-		return packageID;
-	}
-	public void setPackageID(Integer packageId) {
-		this.packageID = packageId;
-	}
 	
 	
-	 public String getStartDate() {
+	 public Integer getPackageServiceID() {
+		return packageServiceID;
+	}
+	public void setPackageServiceID(Integer packageServiceID) {
+		this.packageServiceID = packageServiceID;
+	}
+	public String getStartDate() {
 	        return startDate != null ? DATE_FORMAT.format(startDate) : null;
 	    }
 
@@ -163,6 +171,14 @@ public class SubscriberDTO {
     public void setSaathi(AdminUser saathi) {
         this.saathi = saathi;
     }
+    
+    
+	public String getComments() {
+		return comments;
+	}
+	public void setComments(String comments) {
+		this.comments = comments;
+	}
 	// Constructor
     public SubscriberDTO(int subscriberID, String firstName, String lastName, String email, String contactNo, AdminUser saathi) {
         this.subscriberID = subscriberID;

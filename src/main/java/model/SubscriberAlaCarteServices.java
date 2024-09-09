@@ -41,6 +41,11 @@ public class SubscriberAlaCarteServices {
     @Column(name = "IsAccepted")
     private Boolean isAccepted;
 
+ // Correctly map the ManyToOne relationship
+    @ManyToOne
+    @JoinColumn(name = "subscriber_id")
+    private Subscriber subscriber;  // Ensure this field name is 'subscriber', not 'subscriberID'
+
 
 	public int getSubscriberAlaCarteServicesID() {
 		return SubscriberAlaCarteServicesID;
@@ -128,6 +133,23 @@ public class SubscriberAlaCarteServices {
     @JoinColumn(name = "ServiceID", referencedColumnName = "ServiceID", insertable = false, updatable = false)
     private AlaCarteService service;
     // Getters and Setters
+
+
+	public Subscriber getSubscriber() {
+		return subscriber;
+	}
+
+	public void setSubscriber(Subscriber subscriber) {
+		this.subscriber = subscriber;
+	}
+
+	public AlaCarteService getService() {
+		return service;
+	}
+
+	public void setService(AlaCarteService service) {
+		this.service = service;
+	}
     
 
 }

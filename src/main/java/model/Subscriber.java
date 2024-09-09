@@ -46,8 +46,8 @@ public class Subscriber {
     private Date lastLoginTime;
 
     @ManyToOne
-    @JoinColumn(name = "PackageID", referencedColumnName = "PackageID", foreignKey = @ForeignKey(name = "PackageID"))
-    private SubscriptionPackage subscriptionPackage;
+    @JoinColumn(name = "PackageServiceID", referencedColumnName = "PackageServicesID", foreignKey = @ForeignKey(name = "PackageServiceID"))
+    private PackageServices packageServices;
 
     @Column(name = "StartDate")
     @Temporal(TemporalType.DATE)
@@ -75,7 +75,11 @@ public class Subscriber {
     @Column(name = "Status")
     private int status;
 
-   
+    @Column(name = "Comments", columnDefinition = "TEXT")
+    private String comments;
+
+    @OneToOne(mappedBy = "subscriber", cascade = CascadeType.ALL)
+    private CreditCard creditCard;
  // Date format to be used for date fields
     private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
 
@@ -143,15 +147,16 @@ public class Subscriber {
 		this.lastLoginTime = lastLoginTime;
 	}
 
-	public SubscriptionPackage getSubscriptionPackage() {
-		return subscriptionPackage;
+	
+	 public PackageServices getPackageServices() {
+		return packageServices;
 	}
 
-	public void setSubscriptionPackage(SubscriptionPackage subscriptionPackage) {
-		this.subscriptionPackage = subscriptionPackage;
+	public void setPackageServices(PackageServices packageServices) {
+		this.packageServices = packageServices;
 	}
 
-	 public String getStartDate() {
+	public String getStartDate() {
 	        return startDate != null ? DATE_FORMAT.format(startDate) : null;
 	    }
 
@@ -217,6 +222,23 @@ public class Subscriber {
 		this.status = status;
 	}
 	
+	
+		public String getComments() {
+		return comments;
+	}
+
+	public void setComments(String comments) {
+		this.comments = comments;
+	}
+
+	public CreditCard getCreditCard() {
+		return creditCard;
+	}
+
+	public void setCreditCard(CreditCard creditCard) {
+		this.creditCard = creditCard;
+	}
+
 		@PrePersist
     protected void onCreate() {
         createdDate = new Date();  // Set the current timestamp for createdDate
@@ -228,5 +250,5 @@ public class Subscriber {
     }
 
     // Getters and Setters
-    
+   
 }

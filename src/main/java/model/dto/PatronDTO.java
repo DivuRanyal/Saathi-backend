@@ -22,8 +22,17 @@ public class PatronDTO {
     private String relation;
     private Date createdDate;
     private Date lastUpdatedDate;
+    private String comments;
 
- // Date format to be used for date fields
+ public String getComments() {
+		return comments;
+	}
+
+	public void setComments(String comments) {
+		this.comments = comments;
+	}
+
+	// Date format to be used for date fields
     private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
 
     // Getters and Setters

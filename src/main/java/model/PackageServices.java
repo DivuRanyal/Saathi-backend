@@ -19,9 +19,11 @@ public class PackageServices {
     @JoinColumn(name = "PackageID")
     private SubscriptionPackage subscriptionPackage;
 
-    @Column(name = "ServiceID")
-    private Integer serviceID;
-
+ // Add a service reference if applicable
+    @ManyToOne
+    @JoinColumn(name = "ServiceID")
+    private AlaCarteService service;
+    
     @Column(name = "Frequency")
     private Integer frequency;
 
@@ -49,7 +51,19 @@ public class PackageServices {
     @Column(name = "UpdatedBy")
     private Integer updatedBy;
 
-    public Integer getCreatedBy() {
+    @ManyToOne
+    private Subscriber subscriber;
+    
+    
+    public Subscriber getSubscriber() {
+		return subscriber;
+	}
+
+	public void setSubscriber(Subscriber subscriber) {
+		this.subscriber = subscriber;
+	}
+
+	public Integer getCreatedBy() {
         return createdBy;
     }
 
@@ -80,12 +94,14 @@ public class PackageServices {
 		this.subscriptionPackage = subscriptionPackage;
 	}
 
-	public Integer getServiceID() {
-		return serviceID;
+	
+
+	public AlaCarteService getService() {
+		return service;
 	}
 
-	public void setServiceID(Integer serviceID) {
-		this.serviceID = serviceID;
+	public void setService(AlaCarteService service) {
+		this.service = service;
 	}
 
 	public Integer getFrequency() {

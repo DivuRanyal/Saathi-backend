@@ -9,7 +9,8 @@ public class AlaCarteServiceDTO {
     private String serviceName;
     private String serviceDescription;
     private Integer frequencyInHours;
-    private BigDecimal price;
+    private BigDecimal priceINR;
+    private BigDecimal priceUSD;
     private Time businessHoursStart;
     private Time businessHoursEnd;
     private Integer status;
@@ -52,13 +53,22 @@ public class AlaCarteServiceDTO {
         this.frequencyInHours = frequencyInHours;
     }
 
-    public BigDecimal getPrice() {
-        return price;
-    }
+   
+    public BigDecimal getPriceINR() {
+		return priceINR;
+	}
 
-    public void setPrice(BigDecimal price) {
-        this.price = price;
-    }
+	public void setPriceINR(BigDecimal priceINR) {
+		this.priceINR = priceINR;
+	}
+
+	public BigDecimal getPriceUSD() {
+		return priceUSD;
+	}
+
+	public void setPriceUSD(BigDecimal priceUSD) {
+		this.priceUSD = priceUSD;
+	}
 
     public Time getBusinessHoursStart() {
         return businessHoursStart;

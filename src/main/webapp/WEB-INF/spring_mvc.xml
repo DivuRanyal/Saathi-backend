@@ -4,6 +4,7 @@
        xmlns:context="http://www.springframework.org/schema/context"
        xmlns:mvc="http://www.springframework.org/schema/mvc"
        xmlns:jpa="http://www.springframework.org/schema/data/jpa"
+        xmlns:cache="http://www.springframework.org/schema/cache"
        xmlns:tx="http://www.springframework.org/schema/tx"
        xsi:schemaLocation="http://www.springframework.org/schema/beans 
            http://www.springframework.org/schema/beans/spring-beans.xsd
@@ -69,6 +70,8 @@
         <property name="defaultEncoding" value="UTF-8" />
     </bean>
       
+      
+      
    <bean id="mailSender" class="org.springframework.mail.javamail.JavaMailSenderImpl">
     <property name="host" value="smtpout.secureserver.net"/>
     <property name="port" value="465"/>
@@ -88,5 +91,5 @@
     </property>
 </bean>
 
-    
+
 </beans>

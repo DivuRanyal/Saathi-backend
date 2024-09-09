@@ -50,7 +50,8 @@ public class AlaCarteServicesServiceImpl implements AlaCarteServicesService {
             service.setServiceName(alaCarteServiceDTO.getServiceName());
             service.setServiceDescription(alaCarteServiceDTO.getServiceDescription());
             service.setFrequencyInHours(alaCarteServiceDTO.getFrequencyInHours());
-            service.setPrice(alaCarteServiceDTO.getPrice());
+            service.setPriceINR(alaCarteServiceDTO.getPriceINR());
+            service.setPriceUSD(alaCarteServiceDTO.getPriceUSD());
             service.setBusinessHoursStart(alaCarteServiceDTO.getBusinessHoursStart());
             service.setBusinessHoursEnd(alaCarteServiceDTO.getBusinessHoursEnd());
             service.setStatus(alaCarteServiceDTO.getStatus());
@@ -72,7 +73,8 @@ public class AlaCarteServicesServiceImpl implements AlaCarteServicesService {
         dto.setServiceName(service.getServiceName());
         dto.setServiceDescription(service.getServiceDescription());
         dto.setFrequencyInHours(service.getFrequencyInHours());
-        dto.setPrice(service.getPrice());
+        dto.setPriceINR(service.getPriceINR());
+        dto.setPriceUSD(service.getPriceUSD());
         dto.setBusinessHoursStart(service.getBusinessHoursStart());
         dto.setBusinessHoursEnd(service.getBusinessHoursEnd());
         dto.setStatus(service.getStatus());
@@ -99,7 +101,8 @@ public class AlaCarteServicesServiceImpl implements AlaCarteServicesService {
         service.setServiceName(dto.getServiceName());
         service.setServiceDescription(dto.getServiceDescription());
         service.setFrequencyInHours(dto.getFrequencyInHours());
-        service.setPrice(dto.getPrice());
+        service.setPriceINR(dto.getPriceINR());
+        service.setPriceUSD(dto.getPriceUSD());
         service.setBusinessHoursStart(dto.getBusinessHoursStart());
         service.setBusinessHoursEnd(dto.getBusinessHoursEnd());
         service.setStatus(dto.getStatus());

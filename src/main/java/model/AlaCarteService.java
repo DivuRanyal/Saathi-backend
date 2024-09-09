@@ -24,8 +24,11 @@ public class AlaCarteService {
     @Column(name = "FrequencyInHours")
     private Integer frequencyInHours;
 
-    @Column(name = "Price")
-    private BigDecimal price;
+    @Column(name = "PriceUSD")
+    private BigDecimal priceUSD;
+
+    @Column(name = "PriceINR")
+    private BigDecimal priceINR;
 
     @Column(name = "BusinessHoursStart")
     private Time businessHoursStart;
@@ -88,15 +91,24 @@ public class AlaCarteService {
         this.frequencyInHours = frequencyInHours;
     }
 
-    public BigDecimal getPrice() {
-        return price;
-    }
+   
+    public BigDecimal getPriceUSD() {
+		return priceUSD;
+	}
 
-    public void setPrice(BigDecimal price) {
-        this.price = price;
-    }
+	public void setPriceUSD(BigDecimal priceUSD) {
+		this.priceUSD = priceUSD;
+	}
 
-    public Time getBusinessHoursStart() {
+	public BigDecimal getPriceINR() {
+		return priceINR;
+	}
+
+	public void setPriceINR(BigDecimal priceINR) {
+		this.priceINR = priceINR;
+	}
+
+	public Time getBusinessHoursStart() {
         return businessHoursStart;
     }
 

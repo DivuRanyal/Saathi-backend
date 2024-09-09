@@ -1,7 +1,8 @@
 package controller;
 
 import model.AdminUser;
-
+import model.AlaCarteService;
+import model.ServiceReport;
 import model.Subscriber;
 import model.SubscriberAlaCarteServices;
 import model.dto.CreditCardDTO;
@@ -11,6 +12,8 @@ import model.dto.SubscriberDTO;
 
 import service.EmailService;
 import service.PatronService;
+import service.ServiceCompletionService;
+import service.ServiceCompletionServiceNew;
 import service.SubscriberAlaCarteServicesService;
 import service.SubscriberService;
 
@@ -39,6 +42,9 @@ public class SubscriberController {
     @Autowired
     private SubscriberService subscriberService;
     
+ //   @Autowired
+ //   private ServiceCompletionService completionService;
+    
     @Autowired
     private SubscriberAlaCarteServicesService service;
 
@@ -47,6 +53,12 @@ public class SubscriberController {
     
     @Autowired
     private EmailService emailService;
+
+    @Autowired
+    private ServiceCompletionServiceNew serviceCompletionService;
+
+    @Autowired
+    private ServiceCompletionService serviceCompletionService1;
 
     @PostMapping
     public ResponseEntity<?> createSubscriber(@RequestBody SubscriberDTO subscriberDTO) throws MessagingException, IOException, TemplateException {
@@ -246,7 +258,7 @@ public class SubscriberController {
         model.put("subscriberName", updatedSubscriber.getFirstName() + " " + updatedSubscriber.getLastName());
         model.put("subscriberPhone", updatedSubscriber.getContactNo());
         model.put("subscriberEmail", updatedSubscriber.getEmail());
-        model.put("subscriptionPackage", updatedSubscriber.getPackageID() != null ? "Gold" : "Standard");
+        model.put("subscriptionPackage", updatedSubscriber.getPackageName() != null ? "Gold" : "Standard");
 
         // Saathi details
         String saathiEmail = updatedSubscriber.getSaathi().getEmail(); 
@@ -281,6 +293,74 @@ public class SubscriberController {
         return ResponseEntity.ok(subscribers);
     }
     
+ // Define an endpoint to get the services for a subscriber
+    @GetMapping("/{subscriberId}/services")
+    public ResponseEntity<?> getSubscriberServices(@PathVariable Long subscriberId) {
+        try {
+            // Fetch the services for the subscriber
+            Map<String, List<ServiceReport>> services = serviceCompletionService.getSubscriberServices(subscriberId);
+
+            // Check if the list of services is null or empty
+            if (services == null || services.isEmpty() || !services.containsKey("allServices")) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No services found for subscriber with ID: " + subscriberId);
+            }
+
+            List<ServiceReport> serviceReports = services.get("allServices");
+            
+            if (serviceReports == null || serviceReports.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No services found for subscriber with ID: " + subscriberId);
+            }
+
+            // Return the list of service reports
+            return ResponseEntity.ok(serviceReports);
+            
+        } catch (Exception e) {
+            // Log the error and return a response with status 500
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occurred while retrieving services for subscriber ID: " + subscriberId);
+        }
+    }
 
 
+    // Endpoint for confirming a package purchase
+ /*   @PostMapping("/{subscriberId}/confirmPackagePurchase/{packageId}")
+    public ResponseEntity<String> confirmPackagePurchase(@PathVariable Long subscriberId, @PathVariable int packageId) {
+        serviceCompletionService.trackSubscriberPackage(subscriberId, packageId);
+        return ResponseEntity.ok("Package purchase confirmed and services are being tracked.");
+    }
+*/
+    // Endpoint for updating service completion for a subscriber
+    @PutMapping("/{subscriberId}/services/{serviceId}/complete")
+    public ResponseEntity<String> updateServiceCompletion(@PathVariable Long subscriberId, @PathVariable int serviceId) {
+        Map<String, List<ServiceReport>> updatedServices = serviceCompletionService.updateServiceCompletion(subscriberId, serviceId);
+       
+        if (updatedServices != null) {
+            return ResponseEntity.ok("Service completion updated successfully.");
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Service not found for the subscriber.");
+        }
+    }
+    
+    @PostMapping("/Services")
+    public ResponseEntity<Map<String, List<ServiceReport>>> trackSubscriberServices(
+            @RequestParam Long subscriberId,
+            @RequestParam(required = false, defaultValue = "0") int packageId,
+            @RequestParam(required = false, defaultValue = "0") int subscriberAlaCarteServiceId
+    		) {
+
+        // Call the service method to track services
+        Map<String, List<ServiceReport>> trackedServices = serviceCompletionService.trackSubscriberServices(subscriberId, packageId, subscriberAlaCarteServiceId);
+
+        // Check if any services were tracked
+        if (trackedServices == null || trackedServices.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                   .body(null);
+       }
+
+        // Return the tracked services in the response
+        return ResponseEntity.ok(trackedServices);
+    	
+   //     return null;
+    }
+      
 }

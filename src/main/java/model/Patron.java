@@ -63,6 +63,9 @@ public class Patron {
     @Temporal(TemporalType.TIMESTAMP)
     private Date lastUpdatedDate;
 
+    @Column(name = "Comments", columnDefinition = "TEXT")
+    private String comments;
+
     // Getters and Setters
  // Date format to be used for date fields
     private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
@@ -194,7 +197,16 @@ public class Patron {
         return lastUpdatedDate;
     }
 
-    @PrePersist
+    
+    public String getComments() {
+		return comments;
+	}
+
+	public void setComments(String comments) {
+		this.comments = comments;
+	}
+
+	@PrePersist
     protected void onCreate() {
         createdDate = new Date();  // Set the current timestamp for createdDate
     }

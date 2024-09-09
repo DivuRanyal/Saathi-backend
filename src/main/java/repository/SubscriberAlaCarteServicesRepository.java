@@ -1,5 +1,7 @@
 package repository;
 
+import model.AlaCarteService;
+import model.Subscriber;
 import model.SubscriberAlaCarteServices;
 
 import java.util.List;
@@ -25,6 +27,10 @@ public interface SubscriberAlaCarteServicesRepository extends JpaRepository<Subs
 	           "JOIN AlaCarteService sv ON s.serviceID = sv.serviceID " +
 	           "WHERE s.subscriberID = :subscriberID")
 	    List<Object[]> findAlaCarteServicesWithCompletionStatusAndServiceDetails(@Param("subscriberID")  Integer subscriberID);
-
+	   
+	 
+	 // Query using the 'subscriber' field
+	    List<SubscriberAlaCarteServices> findBySubscriber(Subscriber subscriber);
+	    
 }
 

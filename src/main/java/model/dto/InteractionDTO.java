@@ -1,52 +1,24 @@
-package model;
+package model.dto;
 
-import javax.persistence.*;
 import java.time.LocalDateTime;
 
-@Entity
-@Table(name = "Interactions")
-public class Interaction {
+public class InteractionDTO {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "InteractionID")
     private Integer interactionID;
-
-    @Column(name = "SubscriberID")
     private Integer subscriberID;
-
-    @Column(name = "SaathiID")
     private Integer saathiID;
-
-    @Column(name = "InteractionType", length = 255)
     private String interactionType;
-
-    @Column(name = "Documents", length = 255)
     private String documents;
-
-    @Column(name = "CreatedDate")
     private LocalDateTime createdDate;
-
-    @Column(name = "LastUpdatedDate")
     private LocalDateTime lastUpdatedDate;
-
-    @Column(name = "CompletionStatus")
     private Integer completionStatus;
-
-    @Column(name = "PackageServicesID")
     private Integer packageServicesID;
-
-    @Column(name = "Subscriber", length = 45)
-    private String subscriber;
-
-    @Column(name = "Description", columnDefinition = "TEXT")
     private String description;
+    
+    // Add this new field
+    private Integer subscriberAlaCarteServicesID;
 
-    @ManyToOne
-    @JoinColumn(name = "SubscriberAlaCarteServicesID", referencedColumnName = "SubscriberAlaCarteServicesID")
-    private SubscriberAlaCarteServices subscriberAlaCarteServices;
-
-    // Getters and setters
+    // Getters and Setters for all fields including subscriberAlaCarteServicesID
 
     public Integer getInteractionID() {
         return interactionID;
@@ -104,7 +76,7 @@ public class Interaction {
         this.lastUpdatedDate = lastUpdatedDate;
     }
 
-   
+    
     public Integer getCompletionStatus() {
 		return completionStatus;
 	}
@@ -121,14 +93,6 @@ public class Interaction {
         this.packageServicesID = packageServicesID;
     }
 
-    public String getSubscriber() {
-        return subscriber;
-    }
-
-    public void setSubscriber(String subscriber) {
-        this.subscriber = subscriber;
-    }
-
     public String getDescription() {
         return description;
     }
@@ -137,13 +101,11 @@ public class Interaction {
         this.description = description;
     }
 
-	public SubscriberAlaCarteServices getSubscriberAlaCarteServices() {
-		return subscriberAlaCarteServices;
-	}
+    public Integer getSubscriberAlaCarteServicesID() {
+        return subscriberAlaCarteServicesID;
+    }
 
-	public void setSubscriberAlaCarteServices(SubscriberAlaCarteServices subscriberAlaCarteServices) {
-		this.subscriberAlaCarteServices = subscriberAlaCarteServices;
-	}
-
-   
+    public void setSubscriberAlaCarteServicesID(Integer subscriberAlaCarteServicesID) {
+        this.subscriberAlaCarteServicesID = subscriberAlaCarteServicesID;
+    }
 }

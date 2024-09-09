@@ -92,7 +92,7 @@ public class PatronServiceImpl implements PatronService {
         dto.setContactNo(patron.getContactNo());
         dto.setCountryCode(patron.getCountryCode());
         dto.setDob(patron.getDob());
-        
+        dto.setComments(patron.getComments());
         // Safely handle the case where the Subscriber might be null
         if (patron.getSubscriber() != null) {
             dto.setSubscriberID(patron.getSubscriber().getSubscriberId());
@@ -134,7 +134,7 @@ public class PatronServiceImpl implements PatronService {
         patron.setState(dto.getState());
         patron.setCountry(dto.getCountry());
         patron.setRelation(dto.getRelation());
-
+        patron.setComments(dto.getComments());
         return patron;
     }
     

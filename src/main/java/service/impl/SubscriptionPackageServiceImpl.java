@@ -5,12 +5,14 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import model.SubscriptionPackage;
 import model.AdminUser;
+import model.AlaCarteService;
 import model.PackageServices;
 import model.dto.SubscriptionPackageDTO;
 import model.dto.PackageServiceDTO;
 import repository.SubscriptionPackageRepository;
 import service.SubscriptionPackageService;
 import repository.AdminUsersRepository;
+import repository.AlaCarteServiceRepository;
 import repository.PackageServiceRepository;
 
 import java.text.ParseException;
@@ -31,6 +33,10 @@ public class SubscriptionPackageServiceImpl implements SubscriptionPackageServic
 
     @Autowired
     private AdminUsersRepository adminUserRepository; // To fetch AdminUser by ID
+
+    @Autowired
+    private AlaCarteServiceRepository alaCarteServiceRepository;
+    private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
 
     @Override
     @Transactional
@@ -54,18 +60,24 @@ public class SubscriptionPackageServiceImpl implements SubscriptionPackageServic
         // Save the Subscription Package first
         SubscriptionPackage savedPackage = subscriptionPackageRepository.save(subscriptionPackage);
 
-        // Now save the associated PackageServices
+     // Now save the associated PackageServices
         for (PackageServiceDTO serviceDTO : packageDTO.getPackageServices()) {
+            // Fetch the AlaCarteService entity by the serviceID from the DTO
+            AlaCarteService alaCarteService = alaCarteServiceRepository.findById(serviceDTO.getServiceID())
+                    .orElseThrow(() -> new RuntimeException("Service not found for ID: " + serviceDTO.getServiceID()));
+
+            // Create a new PackageServices entity
             PackageServices packageServices = new PackageServices();
-            packageServices.setSubscriptionPackage(savedPackage);  // Set the saved package
-            packageServices.setServiceID(serviceDTO.getServiceID());
-            packageServices.setFrequency(serviceDTO.getFrequency());
-            packageServices.setFrequencyUnit(serviceDTO.getFrequencyUnit());
-            packageServices.setPriceUSD(serviceDTO.getPriceUSD());
-            packageServices.setPriceINR(serviceDTO.getPriceINR());
-            packageServices.setStatus(serviceDTO.getStatus());
-            packageServices.setCreatedDate(new Date());
-            packageServices.setCreatedBy(createdByUser.get().getAdminUserID()); // Set createdBy user
+            packageServices.setSubscriptionPackage(savedPackage);  // Set the saved SubscriptionPackage entity
+            packageServices.setService(alaCarteService);  // Set the fetched AlaCarteService entity
+            packageServices.setFrequency(serviceDTO.getFrequency());  // Set the frequency from DTO
+            packageServices.setFrequencyUnit(serviceDTO.getFrequencyUnit());  // Set the frequency unit from DTO
+            packageServices.setPriceUSD(serviceDTO.getPriceUSD());  // Set the USD price from DTO
+            packageServices.setPriceINR(serviceDTO.getPriceINR());  // Set the INR price from DTO
+            packageServices.setStatus(serviceDTO.getStatus());  // Set the status from DTO
+            packageServices.setCreatedDate(new Date());  // Set the current date for createdDate
+            packageServices.setCreatedBy(createdByUser.get().getAdminUserID());  // Set the createdBy user ID
+
             // Save each PackageService
             packageServiceRepository.save(packageServices);
         }
@@ -113,34 +125,41 @@ public class SubscriptionPackageServiceImpl implements SubscriptionPackageServic
 
         // Remove services that are no longer present in the updated DTO
         for (PackageServices existingService : existingServices) {
-            if (!updatedServiceIds.contains(existingService.getServiceID())) {
+            if (!updatedServiceIds.contains(existingService.getService().getServiceID())) {
                 packageServiceRepository.delete(existingService);
             }
         }
 
         // Add or update the new services from the DTO
         for (PackageServiceDTO serviceDTO : packageDTO.getPackageServices()) {
+            // Fetch the AlaCarteService entity by the serviceID from the DTO
+            AlaCarteService alaCarteService = alaCarteServiceRepository.findById(serviceDTO.getServiceID())
+                    .orElseThrow(() -> new RuntimeException("Service not found for ID: " + serviceDTO.getServiceID()));
+
+            // Check if the service already exists in the package
             PackageServices packageServices = existingServices.stream()
-                    .filter(s -> s.getServiceID().equals(serviceDTO.getServiceID()))
-                    .findFirst().orElse(new PackageServices()); // Find existing service or create a new one
+                    .filter(s -> s.getService().getServiceID().equals(serviceDTO.getServiceID()))
+                    .findFirst()
+                    .orElse(new PackageServices()); // Create new if not found
 
-            // Update fields of PackageService
-            packageServices.setSubscriptionPackage(updatedPackage);
-            packageServices.setServiceID(serviceDTO.getServiceID());
-            packageServices.setFrequency(serviceDTO.getFrequency());
-            packageServices.setFrequencyUnit(serviceDTO.getFrequencyUnit());
-            packageServices.setPriceUSD(serviceDTO.getPriceUSD());
-            packageServices.setPriceINR(serviceDTO.getPriceINR());
-            packageServices.setStatus(serviceDTO.getStatus());
-            packageServices.setLastUpdatedDate(new Date());
-            packageServices.setUpdatedBy(updatedByUser.getAdminUserID());
+            // Set or update the fields for PackageServices
+            packageServices.setSubscriptionPackage(updatedPackage);  // Use updatedPackage here
+            packageServices.setService(alaCarteService);  // Set the fetched AlaCarteService entity
+            packageServices.setFrequency(serviceDTO.getFrequency());  // Set the frequency from DTO
+            packageServices.setFrequencyUnit(serviceDTO.getFrequencyUnit());  // Set the frequency unit from DTO
+            packageServices.setPriceUSD(serviceDTO.getPriceUSD());  // Set the USD price from DTO
+            packageServices.setPriceINR(serviceDTO.getPriceINR());  // Set the INR price from DTO
+            packageServices.setStatus(serviceDTO.getStatus());  // Set the status from DTO
+            packageServices.setLastUpdatedDate(new Date());  // Set the current date for lastUpdatedDate
+            packageServices.setUpdatedBy(updatedByUser.getAdminUserID());  // Set the updatedBy user ID
 
-            // Save or update each PackageService
+            // Save or update the PackageServices
             packageServiceRepository.save(packageServices);
         }
 
         return updatedPackage;
     }
+
 
     // Method to get the SubscriptionPackage and its services
     @Override
@@ -169,7 +188,7 @@ public class SubscriptionPackageServiceImpl implements SubscriptionPackageServic
 
         return packageDTO;
     }
-    
+
     @Override
     public List<SubscriptionPackageDTO> getAllSubscriptionPackagesWithServices() {
         List<SubscriptionPackage> packages = subscriptionPackageRepository.findAll();  // Fetch all packages
@@ -192,6 +211,7 @@ public class SubscriptionPackageServiceImpl implements SubscriptionPackageServic
                 })
                 .collect(Collectors.toList());
     }
+
     @Override
     public List<PackageServiceDTO> getPackageServicesByPackageId(Integer packageId) {
         // Find the subscription package by ID
@@ -207,11 +227,12 @@ public class SubscriptionPackageServiceImpl implements SubscriptionPackageServic
 
         // Convert to DTO
         List<PackageServiceDTO> serviceDTOs = packageServicesList.stream()
-            .map(this::convertTo_DTO)
+            .map(this::convertServiceToDTO)
             .collect(Collectors.toList());
 
         return serviceDTOs;
     }
+
     private SubscriptionPackageDTO convertToDTO(SubscriptionPackage subscriptionPackage) {
         SubscriptionPackageDTO dto = new SubscriptionPackageDTO();
         dto.setPackageID(subscriptionPackage.getPackageID());
@@ -222,46 +243,13 @@ public class SubscriptionPackageServiceImpl implements SubscriptionPackageServic
         dto.setStatus(subscriptionPackage.getStatus());
         dto.setCreatedBy(subscriptionPackage.getCreatedBy());
         dto.setUpdatedBy(subscriptionPackage.getUpdatedBy());
-     // Convert String to Date before setting in DTO
-        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
-        
-        try {
-            // Check if createdDate is not null before conversion
-            if (subscriptionPackage.getCreatedDate() != null && !subscriptionPackage.getCreatedDate().isEmpty()) {
-                Date createdDate = formatter.parse(subscriptionPackage.getCreatedDate());
-                dto.setCreatedDate(createdDate);
-            }
-
-            // Check if lastUpdatedDate is not null before conversion
-            if (subscriptionPackage.getLastUpdatedDate() != null && !subscriptionPackage.getLastUpdatedDate().isEmpty()) {
-                Date lastUpdatedDate = formatter.parse(subscriptionPackage.getLastUpdatedDate());
-                dto.setLastUpdatedDate(lastUpdatedDate);
-            }
-        } catch (ParseException e) {
-            e.printStackTrace();  // Handle the exception as per your application logic
-            // You can log this error or handle it more gracefully if needed.
-        }
-
+       
         return dto;
     }
-    
-    private PackageServiceDTO convertTo_DTO(PackageServices packageServices) {
-        PackageServiceDTO dto = new PackageServiceDTO();
-        dto.setServiceID(packageServices.getServiceID());
-        dto.setFrequency(packageServices.getFrequency());
-        dto.setFrequencyUnit(packageServices.getFrequencyUnit());
-        dto.setPriceUSD(packageServices.getPriceUSD());
-        dto.setPriceINR(packageServices.getPriceINR());
-        dto.setStatus(packageServices.getStatus());
-        dto.setCreatedDate(packageServices.getCreatedDate());
-        dto.setLastUpdatedDate(packageServices.getLastUpdatedDate());
-        dto.setCreatedBy(packageServices.getCreatedBy());
-        dto.setUpdatedBy(packageServices.getUpdatedBy());
-        return dto;
-    }
+
     private PackageServiceDTO convertServiceToDTO(PackageServices service) {
         PackageServiceDTO serviceDTO = new PackageServiceDTO();
-        serviceDTO.setServiceID(service.getServiceID());
+        serviceDTO.setServiceID(service.getService().getServiceID());
         serviceDTO.setFrequency(service.getFrequency());
         serviceDTO.setFrequencyUnit(service.getFrequencyUnit());
         serviceDTO.setPriceUSD(service.getPriceUSD());
