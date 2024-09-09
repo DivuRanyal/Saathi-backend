@@ -195,6 +195,8 @@ public class SubscriberServiceImpl implements SubscriberService {
             // Fetch and set the packageName from SubscriptionPackage
             if (subscriber.getPackageServices().getSubscriptionPackage() != null) {
             	subscriberDTO.setPackageName(subscriber.getPackageServices().getSubscriptionPackage().getPackageName());
+            	subscriberDTO.setPriceINR(subscriber.getPackageServices().getSubscriptionPackage().getPriceINR());
+            	subscriberDTO.setPriceUSD(subscriber.getPackageServices().getSubscriptionPackage().getPriceUSD());
             }
         }
         
@@ -261,6 +263,8 @@ public class SubscriberServiceImpl implements SubscriberService {
             if (packageServices.getSubscriptionPackage() != null) {
             	System.out.println(packageServices.getSubscriptionPackage().getPackageName());
                 subscriberDTO.setPackageName(packageServices.getSubscriptionPackage().getPackageName());
+                subscriberDTO.setPriceINR(packageServices.getSubscriptionPackage().getPriceINR());
+                subscriberDTO.setPriceUSD(packageServices.getSubscriptionPackage().getPriceUSD());
             }
         }
 

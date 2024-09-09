@@ -1,5 +1,6 @@
 package model.dto;
 
+import java.math.BigDecimal;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -27,6 +28,8 @@ public class SubscriberDTO {
     private AdminUser saathi; 
  // Add fields for Subscription Package details
     private String packageName;
+    private BigDecimal priceINR;
+    private BigDecimal priceUSD;
     private String comments;
     private CreditCardDTO creditCard;
 	public CreditCardDTO getCreditCard() {
@@ -178,6 +181,20 @@ public class SubscriberDTO {
 	}
 	public void setComments(String comments) {
 		this.comments = comments;
+	}
+	
+	
+	public BigDecimal getPriceINR() {
+		return priceINR;
+	}
+	public void setPriceINR(BigDecimal priceINR) {
+		this.priceINR = priceINR;
+	}
+	public BigDecimal getPriceUSD() {
+		return priceUSD;
+	}
+	public void setPriceUSD(BigDecimal priceUSD) {
+		this.priceUSD = priceUSD;
 	}
 	// Constructor
     public SubscriberDTO(int subscriberID, String firstName, String lastName, String email, String contactNo, AdminUser saathi) {

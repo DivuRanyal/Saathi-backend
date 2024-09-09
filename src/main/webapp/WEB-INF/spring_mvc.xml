@@ -70,8 +70,6 @@
         <property name="defaultEncoding" value="UTF-8" />
     </bean>
       
-      
-      
    <bean id="mailSender" class="org.springframework.mail.javamail.JavaMailSenderImpl">
     <property name="host" value="smtpout.secureserver.net"/>
     <property name="port" value="465"/>
