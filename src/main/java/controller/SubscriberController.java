@@ -276,7 +276,7 @@ public class SubscriberController {
         }
         // Step 1: Assign Saathi to Subscriber and get the updated subscriber
         SubscriberDTO updatedSubscriber = subscriberService.assignSaathiToSubscriber(subscriberID, saathiID);
-
+//        System.out.println(updatedSubscriber.getSaathi().getAdminUserID());
         // Step 2: Fetch the Patron details for the Subscriber
  //       PatronDTO patronDetails = patronService.getPatronBySubscriberId(subscriberID);
 
@@ -292,6 +292,7 @@ public class SubscriberController {
 
         // Saathi details
         String saathiEmail = updatedSubscriber.getSaathi().getEmail(); 
+        System.out.println(saathiEmail);
         if (updatedSubscriber.getSaathi() != null) {
             model.put("saathiName", updatedSubscriber.getSaathi().getFirstName());
             saathiEmail = updatedSubscriber.getSaathi().getEmail(); // Assuming Saathi has an email field

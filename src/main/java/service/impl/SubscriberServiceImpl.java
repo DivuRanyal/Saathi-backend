@@ -218,7 +218,10 @@ public class SubscriberServiceImpl implements SubscriberService {
         // Handle Saathi (AdminUser)
         if (subscriber.getSaathi() != null) {
             subscriberDTO.setSaathiID(subscriber.getSaathi().getAdminUserID());
+            subscriberDTO.setSaathi(subscriber.getSaathi());
         }
+
+        System.out.println("subscriberDTO"+subscriberDTO.getSaathi().getAdminUserID());
         return subscriberDTO;
     }
 
@@ -313,6 +316,7 @@ public class SubscriberServiceImpl implements SubscriberService {
                 .orElseThrow(() -> new RuntimeException("Saathi not found with ID: " + saathiId));
         subscriber.setSaathi(saathi);
         Subscriber updatedSubscriber = subscriberRepository.save(subscriber);
+        System.out.println(updatedSubscriber.getSaathi().getAdminUserID());
         return convertToDTO(updatedSubscriber);
     }
 
