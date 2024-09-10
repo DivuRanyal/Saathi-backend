@@ -1,6 +1,9 @@
 package model;
 
 import javax.persistence.*;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import java.math.BigDecimal;
 import java.sql.Time;
 import java.util.Date;
@@ -55,8 +58,10 @@ public class AlaCarteService {
 
     @Column(name = "isAlaCarte")
     private Integer isAlaCarte;
+    
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "CreatedBy", referencedColumnName = "AdminUserID")
+    @JsonIgnore
     private AdminUser createdBy;
 
     @ManyToOne(fetch = FetchType.LAZY)

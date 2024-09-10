@@ -79,7 +79,7 @@ public class SubscriberController {
             SubscriberDTO createdSubscriber = subscriberService.createSubscriber(subscriberDTO);
             
             // Send email notification to admin after successful creation
-            String adminEmail = "divya1111sharma@gmail.com"; // Replace with actual admin email
+            String adminEmail = "suchigupta@etheriumtech.com"; // Replace with actual admin email
             String subject = "New Subscriber Added";
             Map<String, Object> model = new HashMap<>();
             
@@ -378,13 +378,15 @@ public class SubscriberController {
     @PostMapping("/{subscriberId}/services/{serviceId}/complete")
     public ResponseEntity<String> updateServiceCompletion(
             @PathVariable Long subscriberId,
-            @PathVariable int serviceId,
+            @PathVariable Integer serviceId,
             @RequestParam(value = "file", required = false) MultipartFile file,
             @RequestParam("description") String description) {
 
         // Step 1: Fetch the packageServiceID associated with the subscriber
         Integer packageServiceID = subscriberService.getPackageServiceIDBySubscriber(subscriberId);
+        System.out.println("packageServiceID: " + packageServiceID);
         Integer subscriberAlaCarteServicesID = service.getSubscriberAlaCarteServicesID(subscriberId, serviceId);
+        System.out.println("subscriberAlaCarteServicesID: " + subscriberAlaCarteServicesID);
         if (packageServiceID == null) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Package not found for the subscriber.");
         }
