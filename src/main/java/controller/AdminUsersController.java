@@ -60,7 +60,7 @@ public class AdminUsersController {
             @RequestParam("firstName") String firstName,
             @RequestParam("lastName") String lastName,
             @RequestParam("email") String email,
-            @RequestParam(value = "dob") 
+            @RequestParam(value = "dob",required=false) 
             @DateTimeFormat(pattern = "yyyy-MM-dd") Date dob,
 
             @RequestParam("contactNo") String contactNo,
