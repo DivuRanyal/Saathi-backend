@@ -31,6 +31,7 @@ public class Subscriber {
     @Column(name = "Email")
     private String email;
 
+    @NotNull(message = "Contact number is required")
     @Column(name = "ContactNo")
     private String contactNo;
 
