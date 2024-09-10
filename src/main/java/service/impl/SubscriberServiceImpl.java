@@ -221,8 +221,7 @@ public class SubscriberServiceImpl implements SubscriberService {
             subscriberDTO.setSaathi(subscriber.getSaathi());
         }
 
-        System.out.println("subscriberDTO"+subscriberDTO.getSaathi().getAdminUserID());
-        return subscriberDTO;
+         return subscriberDTO;
     }
 
     @Override
