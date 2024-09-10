@@ -11,6 +11,7 @@ import model.dto.PatronDTO;
 import model.dto.PatronServiceDTO;
 import model.dto.SubscriberDTO;
 import repository.SubscriberAlaCarteServicesRepository;
+import service.AdminUsersService;
 import service.EmailService;
 import service.InteractionService;
 import service.PatronService;
@@ -47,6 +48,8 @@ public class SubscriberController {
     @Autowired
     private SubscriberService subscriberService;
     
+    @Autowired
+    private AdminUsersService adminUsersService;
  //   @Autowired
  //   private ServiceCompletionService completionService;
     
@@ -256,6 +259,21 @@ public class SubscriberController {
     public ResponseEntity<Map<String, Object>> assignSaathiToSubscriber(
             @PathVariable int subscriberID, @RequestParam int saathiID) throws IOException, TemplateException {
 
+    	 // Step 1: Check if the Subscriber exists
+        boolean subscriberExists = subscriberService.subscriberExists(subscriberID); // You should implement this method
+        if (!subscriberExists) {
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("error", "Subscriber not found with ID: " + subscriberID);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
+        }
+
+        // Step 2: Check if the Saathi (companion) exists
+        boolean saathiExists = adminUsersService.saathiExists(saathiID); // You should implement this method
+        if (!saathiExists) {
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("error", "Saathi not found with ID: " + saathiID);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
+        }
         // Step 1: Assign Saathi to Subscriber and get the updated subscriber
         SubscriberDTO updatedSubscriber = subscriberService.assignSaathiToSubscriber(subscriberID, saathiID);
 

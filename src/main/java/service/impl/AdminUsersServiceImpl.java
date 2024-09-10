@@ -93,4 +93,9 @@ public class AdminUsersServiceImpl implements AdminUsersService {
     public boolean isEmailAlreadyRegistered(String email) {
         return adminUsersRepository.findByEmail(email).isPresent();
     }
+    
+    @Override
+    public boolean saathiExists(int saathiID) {
+        return adminUsersRepository.existsById(saathiID);
+    }
 }

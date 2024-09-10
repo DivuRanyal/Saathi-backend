@@ -23,4 +23,5 @@ public interface AdminUsersService {
     public List<AdminUser> getAllSaathiUsers();
     
     boolean isEmailAlreadyRegistered(String email);
+    boolean saathiExists(int saathiID) ;
 }

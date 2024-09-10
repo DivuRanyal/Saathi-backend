@@ -349,4 +349,8 @@ public class SubscriberServiceImpl implements SubscriberService {
 	    return null;
 	}
 
+	@Override
+	public boolean subscriberExists(int subscriberID) {
+        return subscriberRepository.existsById(subscriberID);
+    }
 }
