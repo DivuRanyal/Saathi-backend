@@ -53,7 +53,7 @@ public class AlaCarteService {
     @Column(name = "Status")
     private Integer status;
 
-    @Column(name = "Status")
+    @Column(name = "isAlaCarte")
     private Integer isAlaCarte;
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "CreatedBy", referencedColumnName = "AdminUserID")
