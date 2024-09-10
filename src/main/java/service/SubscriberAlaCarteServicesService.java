@@ -9,5 +9,7 @@ public interface SubscriberAlaCarteServicesService {
     SubscriberAlaCarteServices getServiceById(int id);
     SubscriberAlaCarteServices createOrUpdateService(SubscriberAlaCarteServices service);
     void deleteService(int id);
+    // Ensure this method matches the implementation
+    Integer getSubscriberAlaCarteServicesID(Long subscriberId, Integer serviceId);
    
 }

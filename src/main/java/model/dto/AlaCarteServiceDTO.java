@@ -18,6 +18,7 @@ public class AlaCarteServiceDTO {
     private Integer createdBy;
     private Integer updatedBy;
     private Integer durationInHours;
+    private Integer isAlaCarte;
     // Constructors
     public AlaCarteServiceDTO() {}
 
@@ -132,6 +133,14 @@ public class AlaCarteServiceDTO {
 
 	public void setFrequencyUnit(String frequencyUnit) {
 		this.frequencyUnit = frequencyUnit;
+	}
+
+	public Integer getIsAlaCarte() {
+		return isAlaCarte;
+	}
+
+	public void setIsAlaCarte(Integer isAlaCarte) {
+		this.isAlaCarte = isAlaCarte;
 	}
     
 	

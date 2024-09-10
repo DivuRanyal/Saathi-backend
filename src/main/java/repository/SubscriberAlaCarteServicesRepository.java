@@ -5,6 +5,7 @@ import model.Subscriber;
 import model.SubscriberAlaCarteServices;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -31,6 +32,6 @@ public interface SubscriberAlaCarteServicesRepository extends JpaRepository<Subs
 	 
 	 // Query using the 'subscriber' field
 	    List<SubscriberAlaCarteServices> findBySubscriber(Subscriber subscriber);
-	    
-}
+	    Optional<SubscriberAlaCarteServices> findBySubscriberIDAndServiceID(Long subscriberId,  Integer serviceId);
+	    }
 

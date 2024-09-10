@@ -6,11 +6,13 @@ import model.ServiceReport;
 import model.Subscriber;
 import model.SubscriberAlaCarteServices;
 import model.dto.CreditCardDTO;
+import model.dto.InteractionDTO;
 import model.dto.PatronDTO;
 import model.dto.PatronServiceDTO;
 import model.dto.SubscriberDTO;
-
+import repository.SubscriberAlaCarteServicesRepository;
 import service.EmailService;
+import service.InteractionService;
 import service.PatronService;
 import service.ServiceCompletionService;
 import service.ServiceCompletionServiceNew;
@@ -21,6 +23,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import exception.EmailAlreadyRegisteredException;
 import freemarker.core.ParseException;
@@ -29,7 +32,9 @@ import freemarker.template.TemplateException;
 import freemarker.template.TemplateNotFoundException;
 import javax.mail.MessagingException;
 
+import java.io.File;
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -60,6 +65,13 @@ public class SubscriberController {
     @Autowired
     private ServiceCompletionService serviceCompletionService1;
 
+    @Autowired
+    private InteractionService interactionService;
+    
+    @Autowired
+    private SubscriberAlaCarteServicesRepository subscriberAlaCarteServicesRepository;
+
+    
     @PostMapping
     public ResponseEntity<?> createSubscriber(@RequestBody SubscriberDTO subscriberDTO) throws MessagingException, IOException, TemplateException {
         try {
@@ -330,7 +342,7 @@ public class SubscriberController {
     }
 */
     // Endpoint for updating service completion for a subscriber
-    @PutMapping("/{subscriberId}/services/{serviceId}/complete")
+/*    @PutMapping("/{subscriberId}/services/{serviceId}/complete")
     public ResponseEntity<String> updateServiceCompletion(@PathVariable Long subscriberId, @PathVariable int serviceId) {
         Map<String, List<ServiceReport>> updatedServices = serviceCompletionService.updateServiceCompletion(subscriberId, serviceId);
        
@@ -340,7 +352,7 @@ public class SubscriberController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Service not found for the subscriber.");
         }
     }
-    
+ */  
     @PostMapping("/Services")
     public ResponseEntity<Map<String, List<ServiceReport>>> trackSubscriberServices(
             @RequestParam Long subscriberId,
@@ -363,4 +375,80 @@ public class SubscriberController {
    //     return null;
     }
       
+    @PostMapping("/{subscriberId}/services/{serviceId}/complete")
+    public ResponseEntity<String> updateServiceCompletion(
+            @PathVariable Long subscriberId,
+            @PathVariable int serviceId,
+            @RequestParam(value = "file", required = false) MultipartFile file,
+            @RequestParam("description") String description) {
+
+        // Step 1: Fetch the packageServiceID associated with the subscriber
+        Integer packageServiceID = subscriberService.getPackageServiceIDBySubscriber(subscriberId);
+        Integer subscriberAlaCarteServicesID = service.getSubscriberAlaCarteServicesID(subscriberId, serviceId);
+        if (packageServiceID == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Package not found for the subscriber.");
+        }
+
+        // Step 2: Update service completion logic
+        Map<String, List<ServiceReport>> updatedServices = serviceCompletionService.updateServiceCompletion(subscriberId, serviceId);
+
+        if (updatedServices != null) {
+            try {
+                // Step 3: Upload file and get file path
+                String uploadDirectory = "C:\\Users\\ether\\Divya\\"; // Specify the directory where you want to store the file
+                String filePath = uploadDirectory + file.getOriginalFilename(); // Get the original file name
+
+                // Save the file to the server
+                File dest = new File(filePath);
+                file.transferTo(dest);
+
+                // Step 4: Create and add interaction when the service is completed
+                InteractionDTO interactionDTO = new InteractionDTO();
+                interactionDTO.setSubscriberID(subscriberId.intValue());
+                interactionDTO.setCreatedDate(LocalDateTime.now());
+                interactionDTO.setLastUpdatedDate(LocalDateTime.now());
+                interactionDTO.setDescription(description); // Get the description from the request payload
+                interactionDTO.setDocuments(filePath);  // Store the file path in the documents attribute
+
+                // Step 5: Check service completion status and differentiate between package and ala-carte services
+                List<ServiceReport> services = updatedServices.get("packageServices");
+                if (services != null) {
+                    for (ServiceReport service : services) {
+                        if (service.getServiceID() == serviceId) {
+                            // Set the interaction type based on whether it's an ala-carte service or a package service
+                            if (service.isAlaCarte()) {
+                                interactionDTO.setPackageServicesID(packageServiceID);
+                            } else {
+                                // Use the packageServiceID retrieved based on the subscriber
+                                interactionDTO.setSubscriberAlaCarteServicesID(subscriberAlaCarteServicesID);
+                            }
+
+                            // Set the completion status only if the service is fully completed
+                            if ("Completed".equals(service.getCompletionStatus())) {
+                                interactionDTO.setCompletionStatus(1); // 1 means completed
+                            } else {
+                                interactionDTO.setCompletionStatus(0); // 0 means not completed
+                            }
+                        }
+                    }
+                }
+
+                // Step 6: Save the interaction to the database
+                interactionService.createInteraction(interactionDTO);
+
+                // Return a success message
+                return ResponseEntity.ok("Service completion updated successfully and interaction with file added.");
+
+            } catch (IOException e) {
+                e.printStackTrace();
+                // If file upload fails, return an internal server error response
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("File upload failed");
+            }
+        } else {
+            // If the service is not found for the subscriber, return a 404 response
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Service not found for the subscriber.");
+        }
+    }
+
+
 }

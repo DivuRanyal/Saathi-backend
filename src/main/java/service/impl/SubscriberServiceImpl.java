@@ -175,7 +175,8 @@ public class SubscriberServiceImpl implements SubscriberService {
 
         return null; // Return null if credentials are invalid or subscriber does not exist
     }
-
+    
+    
     // Utility methods to convert between entity and DTO
     private SubscriberDTO convertToDTO(Subscriber subscriber) {
         SubscriberDTO subscriberDTO = new SubscriberDTO();
@@ -191,15 +192,14 @@ public class SubscriberServiceImpl implements SubscriberService {
         // Set PackageService ID
         if (subscriber.getPackageServices() != null) {
         	subscriberDTO.setPackageServiceID(subscriber.getPackageServices().getPackageServicesID());
-
+        	
             // Fetch and set the packageName from SubscriptionPackage
             if (subscriber.getPackageServices().getSubscriptionPackage() != null) {
             	subscriberDTO.setPackageName(subscriber.getPackageServices().getSubscriptionPackage().getPackageName());
             	subscriberDTO.setPriceINR(subscriber.getPackageServices().getSubscriptionPackage().getPriceINR());
             	subscriberDTO.setPriceUSD(subscriber.getPackageServices().getSubscriptionPackage().getPriceUSD());
             }
-        }
-        
+        } 
         // Credit Card Mapping
         if (subscriber.getCreditCard() != null) {
             CreditCardDTO creditCardDTO = new CreditCardDTO();
@@ -209,33 +209,28 @@ public class SubscriberServiceImpl implements SubscriberService {
             creditCardDTO.setCvv(subscriber.getCreditCard().getCvv());
             subscriberDTO.setCreditCard(creditCardDTO);
         }
-        
         subscriberDTO.setStartDate(subscriber.getStartDate());
         subscriberDTO.setEndDate(subscriber.getEndDate());
         subscriberDTO.setBillingStatus(subscriber.getBillingStatus());
         subscriberDTO.setCreatedDate(subscriber.getCreatedDate());
         subscriberDTO.setLastUpdatedDate(subscriber.getLastUpdatedDate());
         subscriberDTO.setStatus(subscriber.getStatus());
-
         // Handle Saathi (AdminUser)
         if (subscriber.getSaathi() != null) {
             subscriberDTO.setSaathiID(subscriber.getSaathi().getAdminUserID());
         }
-
         return subscriberDTO;
     }
 
     @Override
     public Subscriber convertToEntity(SubscriberDTO subscriberDTO, boolean isPasswordRequired) {
         Subscriber subscriber = new Subscriber();
-        
         // Set the basic details from the DTO
         subscriber.setFirstName(subscriberDTO.getFirstName());
         subscriber.setLastName(subscriberDTO.getLastName());
         subscriber.setEmail(subscriberDTO.getEmail());
         subscriber.setContactNo(subscriberDTO.getContactNo());
         subscriber.setCountryCode(subscriberDTO.getCountryCode());
-
         // Handle password setting
         if (isPasswordRequired) {
             if (subscriberDTO.getPassword() == null || subscriberDTO.getPassword().isEmpty()) {
@@ -245,7 +240,6 @@ public class SubscriberServiceImpl implements SubscriberService {
         } else {
             subscriber.setPassword(subscriberDTO.getPassword());
         }
-
         subscriber.setLastLoginTime(subscriberDTO.getLastLoginTime());
         subscriber.setStartDate(subscriberDTO.getStartDate());
         subscriber.setEndDate(subscriberDTO.getEndDate());
@@ -254,11 +248,9 @@ public class SubscriberServiceImpl implements SubscriberService {
         // Handle PackageServices relationship
         if (subscriberDTO.getPackageServiceID() != null) {
             PackageServices packageServices = packageServiceRepository.findById(subscriberDTO.getPackageServiceID())
-                    .orElseThrow(() -> new RuntimeException("PackageServices not found with ID: " + subscriberDTO.getPackageServiceID()));
-            
+                    .orElseThrow(() -> new RuntimeException("PackageServices not found with ID: " + subscriberDTO.getPackageServiceID())); 
             // Set the package services for the subscriber
             subscriber.setPackageServices(packageServices);
-            
             // Fetch the associated SubscriptionPackage and set the packageName in the DTO
             if (packageServices.getSubscriptionPackage() != null) {
             	System.out.println(packageServices.getSubscriptionPackage().getPackageName());
@@ -267,29 +259,24 @@ public class SubscriberServiceImpl implements SubscriberService {
                 subscriberDTO.setPriceUSD(packageServices.getSubscriptionPackage().getPriceUSD());
             }
         }
-
+        
         // Handle Saathi (AdminUser) relationship
         if (subscriberDTO.getSaathiID() != null) {
             AdminUser saathi = adminUserRepository.findById(subscriberDTO.getSaathiID())
                     .orElseThrow(() -> new RuntimeException("Admin User (Saathi) not found with ID: " + subscriberDTO.getSaathiID()));
             subscriber.setSaathi(saathi);
         }
-
         // Set the status from the DTO
         subscriber.setStatus(subscriberDTO.getStatus());
-
      // Mapping the CreditCard
         if (subscriberDTO.getCreditCard() != null) {
             CreditCardDTO creditCardDTO = subscriberDTO.getCreditCard();
-
             // Create a new CreditCard entity or update the existing one
             CreditCard creditCard = subscriber.getCreditCard() != null ? subscriber.getCreditCard() : new CreditCard();
-
             creditCard.setNameOnCard(creditCardDTO.getNameOnCard());
             creditCard.setCreditCardNumber(creditCardDTO.getCreditCardNumber());
             creditCard.setExpiryDate(creditCardDTO.getExpiryDate());
             creditCard.setCvv(creditCardDTO.getCvv());
-
             // Set the relationship with the subscriber
             creditCard.setSubscriber(subscriber);
 
@@ -298,8 +285,6 @@ public class SubscriberServiceImpl implements SubscriberService {
 
             subscriber.setCreditCard(creditCard);  // Set the credit card to the subscriber entity
         }
-
-        
         return subscriber;
     }
 
@@ -307,7 +292,6 @@ public class SubscriberServiceImpl implements SubscriberService {
     public List<SubscriberDTO> getSubscribersBySaathi(int saathiId) {
         AdminUser saathi = adminUserRepository.findById(saathiId)
                 .orElseThrow(() -> new RuntimeException("Saathi not found with ID: " + saathiId));
-
         List<Subscriber> subscribers = subscriberRepository.findBySaathi(saathi);
         return subscribers.stream()
                 .map(this::convertToDTO)
@@ -318,7 +302,6 @@ public class SubscriberServiceImpl implements SubscriberService {
     public AdminUser getSubscriberDetails(int subscriberId) {
         Subscriber subscriber = subscriberRepository.findById(subscriberId)
                 .orElseThrow(() -> new RuntimeException("Subscriber not found"));
-
         return subscriber.getSaathi(); // Return Saathi details or null if not assigned
     }
 
@@ -326,13 +309,10 @@ public class SubscriberServiceImpl implements SubscriberService {
     public SubscriberDTO assignSaathiToSubscriber(int subscriberId, int saathiId) {
         Subscriber subscriber = subscriberRepository.findById(subscriberId)
                 .orElseThrow(() -> new RuntimeException("Subscriber not found with ID: " + subscriberId));
-
         AdminUser saathi = adminUserRepository.findById(saathiId)
                 .orElseThrow(() -> new RuntimeException("Saathi not found with ID: " + saathiId));
-
         subscriber.setSaathi(saathi);
         Subscriber updatedSubscriber = subscriberRepository.save(subscriber);
-
         return convertToDTO(updatedSubscriber);
     }
 
@@ -346,4 +326,27 @@ public class SubscriberServiceImpl implements SubscriberService {
 		// TODO Auto-generated method stub
 		return convertToDTO(subscriber);
 	}
+	
+	public Integer getPackageServiceIDBySubscriber(Long subscriberId) {
+	    // Convert Long to Integer safely, assuming the value is within Integer range
+	    if (subscriberId > Integer.MAX_VALUE || subscriberId < Integer.MIN_VALUE) {
+	        throw new IllegalArgumentException("Subscriber ID is out of range for Integer.");
+	    }
+
+	    // Cast subscriberId from Long to Integer
+	    Integer subscriberIdAsInt = subscriberId.intValue();
+
+	    // Fetch the subscriber using the Integer subscriberId
+	    Subscriber subscriber = subscriberRepository.findById(subscriberIdAsInt)
+	        .orElse(null);
+
+	    // Check if the subscriber and their package services exist
+	    if (subscriber != null && subscriber.getPackageServices() != null) {
+	        return subscriber.getPackageServices().getPackageServicesID();
+	    }
+
+	    // Return null if no package service is found
+	    return null;
+	}
+
 }

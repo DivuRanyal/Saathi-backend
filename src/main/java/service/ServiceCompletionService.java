@@ -53,7 +53,7 @@ public class ServiceCompletionService {
                 service.getFrequencyUnit(),
                 1,  // Mark 1 completion initially
                 "Completed",  // Mark the completion status
-                LocalDateTime.now()  // Set the completion date
+                LocalDateTime.now(),true ,service.getPackageServicesID() // Set the completion date
             );
 
             // Add the report to the in-memory storage
@@ -179,7 +179,7 @@ public class ServiceCompletionService {
                         packageService.getFrequencyUnit(),
                         0,
                         "Not Completed",
-                        null
+                        null,false,packageService.getPackageServicesID()
                     );
                     serviceReports.add(report);
                 }
@@ -199,7 +199,7 @@ public class ServiceCompletionService {
                 "Single", // Can change based on how you track frequency for ala-carte
                 0,
                 "Not Completed",
-                null
+                null,true,0
             );
 
             serviceReports.add(alaCarteServiceReport);

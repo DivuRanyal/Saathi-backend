@@ -184,7 +184,7 @@ public class ServiceCompletionServiceNew {
                         packageService.getFrequencyUnit(),
                         0,
                         "Not Completed",
-                        null
+                        null,false,packageService.getPackageServicesID()
                     );
                     serviceReports.add(report);
                 }
@@ -204,7 +204,7 @@ public class ServiceCompletionServiceNew {
                 "Single",
                 0,
                 "Not Completed",
-                null
+                null,true,0
             );
             serviceReports.add(alaCarteServiceReport);
         }

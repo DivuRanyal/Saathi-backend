@@ -25,6 +25,9 @@ public class SubscriberAlaCarteServicesServiceImpl implements SubscriberAlaCarte
     @Autowired
     private InteractionRepository interactionRepository;
 
+    @Autowired
+    private SubscriberAlaCarteServicesRepository subscriberAlaCarteServicesRepository;
+
     @Override
     public List<SubscriberAlaCarteServices> getAllServices() {
         return servicerepository.findAll();
@@ -59,4 +62,15 @@ public class SubscriberAlaCarteServicesServiceImpl implements SubscriberAlaCarte
         return interactionRepository.findAlaCarteServicesWithCompletionStatusAndServiceDetails(subscriberID);
     }
    */
+    
+    @Override
+    public Integer getSubscriberAlaCarteServicesID(Long subscriberId, Integer serviceId) {
+        // Fetch the SubscriberAlaCarteService entity using subscriberId and serviceId
+        Optional<SubscriberAlaCarteServices> subscriberAlaCarteService = subscriberAlaCarteServicesRepository.findBySubscriberIDAndServiceID(subscriberId, serviceId);
+
+        // Return the SubscriberAlaCarteServicesID if present, otherwise return null
+        return subscriberAlaCarteService.map(SubscriberAlaCarteServices::getSubscriberAlaCarteServicesID).orElse(null);
+    }
+    
+    
 }

@@ -11,18 +11,20 @@ public class ServiceReport implements Serializable {
     private int serviceID;
     private String serviceName;
     private String packageName;
+    private int packageServiceID;
     private int frequency; // How many times the service should be completed
     private String frequencyUnit; // e.g., "monthly", "weekly", etc.
     private int completions; // How many times the service has been completed
     private String completionStatus; // Could be "In Progress", "Completed", etc.
-    
+    private boolean isAlaCarte;
     // Define the JSON format to return only the date part of the LocalDateTime
     @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDateTime completionDate;
 
-    // Constructor
+ // Constructor
     public ServiceReport(int serviceID, String serviceName, String packageName, int frequency, 
-                         String frequencyUnit, int completions, String completionStatus, LocalDateTime completionDate) {
+                         String frequencyUnit, int completions, String completionStatus, LocalDateTime completionDate, 
+                         boolean isAlaCarte, int packageServiceID) {
         this.serviceID = serviceID;
         this.serviceName = serviceName;
         this.packageName = packageName;
@@ -31,7 +33,10 @@ public class ServiceReport implements Serializable {
         this.completions = completions;
         this.completionStatus = completionStatus;
         this.completionDate = completionDate;
+        this.isAlaCarte = isAlaCarte;
+        this.packageServiceID = packageServiceID;
     }
+
 
     public int getServiceID() {
         return serviceID;
@@ -102,7 +107,24 @@ public class ServiceReport implements Serializable {
         this.completionDate = completionDate;
     }
 
-    @Override
+    
+    public boolean isAlaCarte() {
+		return isAlaCarte;
+	}
+
+	public void setAlaCarte(boolean isAlaCarte) {
+		this.isAlaCarte = isAlaCarte;
+	}
+
+	public int getPackageServiceID() {
+		return packageServiceID;
+	}
+
+	public void setPackageServiceID(int packageServiceID) {
+		this.packageServiceID = packageServiceID;
+	}
+
+	@Override
     public String toString() {
         return "ServiceReport{" +
                 "serviceID=" + serviceID +
@@ -113,6 +135,7 @@ public class ServiceReport implements Serializable {
                 ", completions=" + completions +
                 ", completionStatus='" + completionStatus + '\'' +
                 ", completionDate=" + getCompletionDate() +
+                ", isAlaCarte=" + isAlaCarte +
                 '}';
     }
 }

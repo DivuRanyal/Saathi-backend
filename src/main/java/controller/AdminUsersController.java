@@ -33,7 +33,6 @@ public class AdminUsersController {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
-
     @Autowired
     public AdminUsersController(AdminUsersService adminUsersService, SubscriberService subscriberService) {
         this.adminUsersService = adminUsersService;

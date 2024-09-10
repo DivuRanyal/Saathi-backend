@@ -53,6 +53,8 @@ public class AlaCarteService {
     @Column(name = "Status")
     private Integer status;
 
+    @Column(name = "Status")
+    private Integer isAlaCarte;
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "CreatedBy", referencedColumnName = "AdminUserID")
     private AdminUser createdBy;
@@ -61,6 +63,7 @@ public class AlaCarteService {
     @JoinColumn(name = "UpdatedBy", referencedColumnName = "AdminUserID")
     private AdminUser updatedBy;
 
+    
     // Constructors
     public AlaCarteService() {}
 
@@ -185,6 +188,15 @@ public class AlaCarteService {
 
 	public void setDurationInHours(Integer durationInHours) {
 		this.durationInHours = durationInHours;
+	}
+
+	
+	public Integer getIsAlaCarte() {
+		return isAlaCarte;
+	}
+
+	public void setIsAlaCarte(Integer isAlaCarte) {
+		this.isAlaCarte = isAlaCarte;
 	}
 
 	@PrePersist
