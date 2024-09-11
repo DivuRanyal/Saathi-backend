@@ -1,6 +1,7 @@
 package controller;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -53,12 +54,20 @@ public class SubscriptionPackageController {
         // Call the service to get all subscription packages and their services
         List<SubscriptionPackageDTO> packageDTOs = subscriptionPackageService.getAllSubscriptionPackagesWithServices();
 
-        if (!packageDTOs.isEmpty()) {
-            return new ResponseEntity<>(packageDTOs, HttpStatus.OK);  // Return OK if packages are found
+        System.out.println(packageDTOs);
+        // Filter out packages with empty or null packageServices
+        List<SubscriptionPackageDTO> filteredPackages = packageDTOs.stream()
+            .filter(packageDTO -> packageDTO.getPackageServices() != null && !packageDTO.getPackageServices().isEmpty())
+            .collect(Collectors.toList());
+
+        System.out.println(filteredPackages);
+        if (!filteredPackages.isEmpty()) {
+            return new ResponseEntity<>(filteredPackages, HttpStatus.OK);  // Return OK if packages are found
         } else {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);  // Return NO_CONTENT if no packages are found
         }
     }
+
 
     @GetMapping("/{packageId}/services")
     public ResponseEntity<List<PackageServiceDTO>> getPackageServices(@PathVariable Integer packageId) {

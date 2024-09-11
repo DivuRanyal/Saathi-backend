@@ -13,6 +13,8 @@ import freemarker.template.MalformedTemplateNameException;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
 import freemarker.template.TemplateNotFoundException;
+import model.AdminUser;
+
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
 
@@ -85,6 +87,36 @@ public class EmailService {
         message.setTo(to);
         message.setSubject(subject);
         message.setText(text);
+        mailSender.send(message);
+    }
+    
+    public void sendAdminEmail(String password,AdminUser adminUser) throws MessagingException, IOException, TemplateException {
+        // Create a MimeMessage
+        MimeMessage message = mailSender.createMimeMessage();
+        MimeMessageHelper helper = new MimeMessageHelper(message, true);
+
+        // Set the From, To, and Subject headers
+        helper.setFrom("info@etheriumtech.com"); // Set a valid "From" email address
+        helper.setTo(adminUser.getEmail());
+        helper.setSubject("Your Admin Account Credentials");
+
+        // Create a model to pass data to the FreeMarker template
+        Map<String, Object> model = new HashMap<>();
+        model.put("adminFirstName", adminUser.getFirstName());
+        model.put("adminLastName", adminUser.getLastName() != null ? adminUser.getLastName() : ""); // Handle null last name
+        model.put("adminEmail", adminUser.getEmail());
+        model.put("adminPassword", password); // Optionally a reset link
+        model.put("adminLoginLink", "https://saathi.etheriumtech.com/admin/login");
+
+        // Process the FreeMarker template and generate email content
+        String emailContent = FreeMarkerTemplateUtils.processTemplateIntoString(
+            freemarkerConfig.getTemplate("admin_template.ftlh"), model
+        );
+
+        // Set the email content (HTML)
+        helper.setText(emailContent, true);
+
+        // Send the email
         mailSender.send(message);
     }
 }

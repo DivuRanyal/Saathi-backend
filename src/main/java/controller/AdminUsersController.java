@@ -3,6 +3,7 @@ package controller;
 import model.AdminUser;
 import model.dto.SubscriberDTO;
 import service.AdminUsersService;
+import service.EmailService;
 import service.SubscriberService;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import exception.EmailAlreadyRegisteredException;
+import freemarker.template.TemplateException;
 
 import java.io.File;
 import java.io.IOException;
@@ -21,6 +23,8 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+
+import javax.mail.MessagingException;
 
 @RestController
 @RequestMapping("/admin-users")
@@ -32,6 +36,10 @@ public class AdminUsersController {
     
     @Autowired
     private PasswordEncoder passwordEncoder;
+    
+    @Autowired
+    private EmailService emailService;
+
 
     @Autowired
     public AdminUsersController(AdminUsersService adminUsersService, SubscriberService subscriberService) {
@@ -72,7 +80,7 @@ public class AdminUsersController {
             @RequestParam("createdBy") Integer createdBy,
            
     		
-            @RequestParam(value = "picture", required = false) MultipartFile picture) {
+            @RequestParam(value = "picture", required = false) MultipartFile picture) throws MessagingException, IOException, TemplateException {
     	
     	// Date format to convert Date to String
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
@@ -94,7 +102,7 @@ public class AdminUsersController {
         adminUser.setPassword(passwordEncoder.encode(password));
         adminUser.setStatus(status);
         adminUser.setCreatedBy(createdBy);
-      System.out.println(dob);
+        System.out.println(dob);
        
 	      // Handle picture upload if present
         if (picture != null && !picture.isEmpty()) {
@@ -107,7 +115,17 @@ public class AdminUsersController {
                 return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
             }
         }
+        
         AdminUser createdAdminUser = adminUsersService.createAdminUser(adminUser);
+        
+        // Send email based on userType
+        if ("Admin".equalsIgnoreCase(userType)) {
+            // Send email with Admin template
+            emailService.sendAdminEmail( password,createdAdminUser);
+        } else if ("Saathi".equalsIgnoreCase(userType)) {
+            // Send email with Saathi template
+  //          emailService.sendAdminEmail(password,createdAdminUser);
+        }
         return ResponseEntity.ok(createdAdminUser);
     } catch (EmailAlreadyRegisteredException e) {
         // Handle the exception and return a custom message with a 409 Conflict status
