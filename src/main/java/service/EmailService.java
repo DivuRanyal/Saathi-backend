@@ -16,10 +16,12 @@ import freemarker.template.TemplateNotFoundException;
 import model.AdminUser;
 
 import javax.mail.MessagingException;
+import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 
 import java.io.IOException;
 import java.io.StringWriter;
+import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -96,10 +98,11 @@ public class EmailService {
         MimeMessageHelper helper = new MimeMessageHelper(message, true);
 
         // Set the From, To, and Subject headers
-        helper.setFrom("info@etheriumtech.com"); // Set a valid "From" email address
+        helper.setFrom("info@etheriumtech.com", "Saathi-INFO"); // Proper email with display name
+         // Set a valid "From" email address
         helper.setTo(adminUser.getEmail());
         helper.setSubject("Your Admin Account Credentials");
-
+       
         // Create a model to pass data to the FreeMarker template
         Map<String, Object> model = new HashMap<>();
         model.put("adminFirstName", adminUser.getFirstName());
@@ -119,4 +122,41 @@ public class EmailService {
         // Send the email
         mailSender.send(message);
     }
+    
+    public void sendSaathiEmail(String password, AdminUser saathiUser) throws MessagingException, IOException, TemplateException {
+        // Create a MimeMessage
+        MimeMessage message = mailSender.createMimeMessage();
+        MimeMessageHelper helper = new MimeMessageHelper(message, true);
+
+        // Set the From, To, and Subject headers
+     // Set the From header with a custom display name and email address
+        try {
+           helper.setFrom(new InternetAddress("info@etheriumtech.com", "Saathi-INFO"));
+        	// Ensure display name is applied
+        } catch (UnsupportedEncodingException e) {
+            throw new MessagingException("Failed to set display name", e);
+        }
+         helper.setTo(saathiUser.getEmail());
+        helper.setSubject("Your Saathi Account Credentials");
+      
+        // Create a model to pass data to the FreeMarker template
+        Map<String, Object> model = new HashMap<>();
+        model.put("saathiFirstName", saathiUser.getFirstName());
+        model.put("saathiLastName", saathiUser.getLastName() != null ? saathiUser.getLastName() : ""); // Handle null last name
+        model.put("saathiEmail", saathiUser.getEmail());
+        model.put("saathiPassword", password); // Optionally a reset link
+        model.put("saathiLoginLink", "https://saathi.etheriumtech.com/saathi/login");
+
+        // Process the FreeMarker template and generate email content
+        String emailContent = FreeMarkerTemplateUtils.processTemplateIntoString(
+            freemarkerConfig.getTemplate("saathi_template.ftlh"), model
+        );
+
+        // Set the email content (HTML)
+        helper.setText(emailContent, true);
+
+        // Send the email
+        mailSender.send(message);
+    }
+
 }
