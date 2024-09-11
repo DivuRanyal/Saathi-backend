@@ -119,13 +119,14 @@ public class AdminUsersController {
         AdminUser createdAdminUser = adminUsersService.createAdminUser(adminUser);
         
         // Send email based on userType
-        if ("Admin".equalsIgnoreCase(userType)) {
+  /*      if ("Admin".equalsIgnoreCase(userType)) {
             // Send email with Admin template
             emailService.sendAdminEmail( password,createdAdminUser);
         } else if ("Saathi".equalsIgnoreCase(userType)) {
             // Send email with Saathi template
-  //          emailService.sendAdminEmail(password,createdAdminUser);
+            emailService.sendAdminEmail(password,createdAdminUser);
         }
+        */
         return ResponseEntity.ok(createdAdminUser);
     } catch (EmailAlreadyRegisteredException e) {
         // Handle the exception and return a custom message with a 409 Conflict status
