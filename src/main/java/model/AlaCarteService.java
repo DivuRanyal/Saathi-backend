@@ -55,10 +55,7 @@ public class AlaCarteService {
 
     @Column(name = "Status")
     private Integer status;
-
-    @Column(name = "isAlaCarte")
-    private Integer isAlaCarte;
-    
+ 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "CreatedBy", referencedColumnName = "AdminUserID")
     @JsonIgnore
@@ -193,15 +190,6 @@ public class AlaCarteService {
 
 	public void setDurationInHours(Integer durationInHours) {
 		this.durationInHours = durationInHours;
-	}
-
-	
-	public Integer getIsAlaCarte() {
-		return isAlaCarte;
-	}
-
-	public void setIsAlaCarte(Integer isAlaCarte) {
-		this.isAlaCarte = isAlaCarte;
 	}
 
 	@PrePersist

@@ -27,7 +27,7 @@ public class PackageServices {
     @Column(name = "Frequency")
     private Integer frequency;
 
-    @Column(name = "FrequencyUnit")
+    @Transient
     private String frequencyUnit;
 
     @Column(name = "PriceUSD")
@@ -93,8 +93,6 @@ public class PackageServices {
 	public void setSubscriptionPackage(SubscriptionPackage subscriptionPackage) {
 		this.subscriptionPackage = subscriptionPackage;
 	}
-
-	
 
 	public AlaCarteService getService() {
 		return service;

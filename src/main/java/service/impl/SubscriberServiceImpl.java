@@ -175,8 +175,7 @@ public class SubscriberServiceImpl implements SubscriberService {
 
         return null; // Return null if credentials are invalid or subscriber does not exist
     }
-    
-    
+   
     // Utility methods to convert between entity and DTO
     private SubscriberDTO convertToDTO(Subscriber subscriber) {
         SubscriberDTO subscriberDTO = new SubscriberDTO();
