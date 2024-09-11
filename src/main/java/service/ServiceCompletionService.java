@@ -134,7 +134,6 @@ public class ServiceCompletionService {
                     // Increment completions
                     int newCompletions = service.getCompletions() + 1;
                     service.setCompletions(newCompletions);
-
                     // Check if the service is fully completed
                     if (newCompletions >= service.getFrequency()) {
                         service.setCompletionStatus("Completed");

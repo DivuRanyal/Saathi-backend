@@ -6,6 +6,7 @@ import java.util.Date;
 
 public class PackageServiceDTO {
 
+	private Integer packageServiceID;
     private Integer serviceID;
     private Integer frequency;
     private String frequencyUnit;
@@ -84,6 +85,14 @@ public class PackageServiceDTO {
         this.lastUpdatedDate = lastUpdatedDate;
     }
     
+    public Integer getPackageServiceID() {	
+    	        return packageServiceID;
+    	        
+    }
+    
+	public void setPackageServiceID(Integer packageServiceID) {
+		this.packageServiceID = packageServiceID;
+	}
     // Getters and Setters
     
 }

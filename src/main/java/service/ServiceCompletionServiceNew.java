@@ -219,7 +219,7 @@ public class ServiceCompletionServiceNew {
     }
     
     @CachePut(value = "subscriberServicesCache", key = "#subscriberId")
-    public Map<String, List<ServiceReport>> updateServiceCompletion(Long subscriberId, int serviceId) {
+    public Map<String, List<ServiceReport>> updateServiceCompletion(Long subscriberId, Long serviceId) {
         // Retrieve the services for the subscriber from the in-memory map
     	 List<ServiceReport> services = subscriberServiceMap.get(subscriberId);
         System.out.println("Retrieved services from in-memory map: " + services);
@@ -228,7 +228,6 @@ public class ServiceCompletionServiceNew {
             System.out.println("No services found for subscriber ID: " + subscriberId);
             return null;
         }
-
         boolean serviceUpdated = false;
 
         // Iterate over the services (both package and ala-carte)

@@ -372,6 +372,7 @@ public class SubscriberController {
         }
     }
  */  
+    
     @PostMapping("/Services")
     public ResponseEntity<Map<String, List<ServiceReport>>> trackSubscriberServices(
             @RequestParam Long subscriberId,
@@ -397,7 +398,7 @@ public class SubscriberController {
     @PostMapping("/{subscriberId}/services/{serviceId}/complete")
     public ResponseEntity<String> updateServiceCompletion(
             @PathVariable Long subscriberId,
-            @PathVariable Integer serviceId,
+            @PathVariable Long serviceId,
             @RequestParam(value = "file", required = false) MultipartFile file,
             @RequestParam("description") String description) {
 
@@ -470,6 +471,4 @@ public class SubscriberController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Service not found for the subscriber.");
         }
     }
-
-
 }

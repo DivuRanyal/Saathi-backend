@@ -243,7 +243,7 @@ public class SubscriptionPackageServiceImpl implements SubscriptionPackageServic
         dto.setStatus(subscriptionPackage.getStatus());
         dto.setCreatedBy(subscriptionPackage.getCreatedBy());
         dto.setUpdatedBy(subscriptionPackage.getUpdatedBy());
-       
+     
         return dto;
     }
 
@@ -258,6 +258,8 @@ public class SubscriptionPackageServiceImpl implements SubscriptionPackageServic
         serviceDTO.setLastUpdatedDate(service.getLastUpdatedDate());
         serviceDTO.setCreatedBy(service.getCreatedBy());
         serviceDTO.setUpdatedBy(service.getUpdatedBy());
+        serviceDTO.setPackageServiceID(service.getPackageServicesID());
+        
         return serviceDTO;
     }
 }
