@@ -5,8 +5,11 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 import model.AdminUser;
 
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class SubscriberDTO {
 
     private int subscriberID;
@@ -32,6 +35,9 @@ public class SubscriberDTO {
     private BigDecimal priceUSD;
     private String comments;
     private CreditCardDTO creditCard;
+ // Add patron details field
+    private PatronDTO patron;
+
 	public CreditCardDTO getCreditCard() {
 		return creditCard;
 	}
@@ -195,6 +201,14 @@ public class SubscriberDTO {
 	}
 	public void setPriceUSD(BigDecimal priceUSD) {
 		this.priceUSD = priceUSD;
+	}
+	
+	
+	public PatronDTO getPatron() {
+		return patron;
+	}
+	public void setPatron(PatronDTO patron) {
+		this.patron = patron;
 	}
 	// Constructor
     public SubscriberDTO(int subscriberID, String firstName, String lastName, String email, String contactNo, AdminUser saathi) {

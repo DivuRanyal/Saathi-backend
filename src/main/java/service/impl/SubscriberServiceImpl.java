@@ -1,14 +1,17 @@
 package service.impl;
 
 import model.dto.CreditCardDTO;
+import model.dto.PatronDTO;
 import model.dto.SubscriberDTO;
 import model.AdminUser;
 import model.CreditCard;
 import model.Subscriber;
 import model.PackageServices;
+import model.Patron;
 import repository.AdminUsersRepository;
 import repository.CreditCardRepository;
 import repository.PackageServiceRepository;
+import repository.PatronRepository;
 import repository.SubscriberRepository;
 import service.SubscriberService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,6 +38,8 @@ public class SubscriberServiceImpl implements SubscriberService {
     @Autowired
     private SubscriberRepository subscriberRepository;
 
+    @Autowired
+    private PatronRepository patronRepository;
     @Autowired
     private PasswordEncoder passwordEncoder;
 
@@ -291,12 +296,43 @@ public class SubscriberServiceImpl implements SubscriberService {
 
     @Override
     public List<SubscriberDTO> getSubscribersBySaathi(int saathiId) {
+        // Fetch the Saathi (AdminUser)
         AdminUser saathi = adminUserRepository.findById(saathiId)
                 .orElseThrow(() -> new RuntimeException("Saathi not found with ID: " + saathiId));
+
+        // Fetch the subscribers for the given Saathi
         List<Subscriber> subscribers = subscriberRepository.findBySaathi(saathi);
-        return subscribers.stream()
-                .map(this::convertToDTO)
-                .collect(Collectors.toList());
+
+        // Map each subscriber to SubscriberDTO, including PatronDTO
+        return subscribers.stream().map(subscriber -> {
+            SubscriberDTO subscriberDTO = mapToSubscriberDTO(subscriber);
+
+            // Fetch patron details for the subscriber using the correct repository method
+            Optional<Patron> optionalPatron = patronRepository.findFirstBySubscriber_SubscriberID(subscriber.getSubscriberId());
+            if (optionalPatron.isPresent()) {
+                PatronDTO patronDTO = mapToPatronDTO(optionalPatron.get());
+                subscriberDTO.setPatron(patronDTO);
+            }
+            
+            return subscriberDTO;
+        }).collect(Collectors.toList()); // This collects the DTOs into a list
+    }
+
+    private PatronDTO mapToPatronDTO(Patron patron) {
+        PatronDTO dto = new PatronDTO();
+        dto.setPatronID(patron.getPatronID());
+        dto.setFirstName(patron.getFirstName());
+        dto.setLastName(patron.getLastName());
+        dto.setEmail(patron.getEmail());
+        dto.setContactNo(patron.getContactNo());
+        dto.setAddress1(patron.getAddress1());
+        dto.setAddress2(patron.getAddress2());
+        dto.setCity(patron.getCity());
+        dto.setState(patron.getState());
+        dto.setCountry(patron.getCountry());
+        dto.setRelation(patron.getRelation());
+        dto.setCreatedDate(patron.getCreatedDate());
+        return dto;
     }
 
     @Override
@@ -329,6 +365,25 @@ public class SubscriberServiceImpl implements SubscriberService {
 		return convertToDTO(subscriber);
 	}
 	
+	public SubscriberDTO mapToSubscriberDTO(Subscriber subscriber) {
+	    SubscriberDTO dto = new SubscriberDTO();
+	    dto.setSubscriberID(subscriber.getSubscriberId());
+	    dto.setFirstName(subscriber.getFirstName());
+	    dto.setLastName(subscriber.getLastName());
+	    dto.setEmail(subscriber.getEmail());
+	    dto.setContactNo(subscriber.getContactNo());
+	    dto.setStatus(subscriber.getStatus());
+
+	    // You can selectively set fields for AdminUser (Saathi) instead of returning the whole object
+	    AdminUser saathi = subscriber.getSaathi(); // Assuming `saathi` is a field in Subscriber
+	    if (saathi != null) {
+	        dto.setLastName(saathi.getFirstName() + " " + saathi.getLastName());
+	        dto.setEmail(saathi.getEmail());
+	    }
+
+	    return dto;
+	}
+
 	public Integer getPackageServiceIDBySubscriber(Integer subscriberId) {
 	    // Convert Long to Integer safely, assuming the value is within Integer range
 /*	    if (subscriberId > Integer.MAX_VALUE || subscriberId < Integer.MIN_VALUE) {
@@ -355,4 +410,6 @@ public class SubscriberServiceImpl implements SubscriberService {
 	public boolean subscriberExists(Integer subscriberID) {
         return subscriberRepository.existsById(subscriberID);
     }
+	
+	
 }

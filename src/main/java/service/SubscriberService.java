@@ -49,4 +49,5 @@ public interface SubscriberService {
     
     Integer getPackageServiceIDBySubscriber(Integer subscriberId);
     boolean subscriberExists(Integer subscriberID);
+    
 }
