@@ -1,6 +1,7 @@
 package service;
 
 import model.PackageServices;
+import model.dto.PackageServiceDTO;
 
 import java.util.List;
 
@@ -20,4 +21,5 @@ public interface PackageServicesService {
 
     // Method to delete a PackageService by its ID
     void deletePackageService(Integer id);
+    
 }

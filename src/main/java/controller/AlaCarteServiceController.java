@@ -45,4 +45,10 @@ public class AlaCarteServiceController {
         alaCarteServicesService.deleteService(id);
         return ResponseEntity.noContent().build();
     }
+    
+    @GetMapping("/active")
+    public ResponseEntity<List<AlaCarteServiceDTO>> getActiveServices() {
+        List<AlaCarteServiceDTO> activeServices = alaCarteServicesService.getActiveServices();
+        return ResponseEntity.ok(activeServices);
+    }
 }

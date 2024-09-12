@@ -1,9 +1,7 @@
 package model;
 
 import java.io.Serializable;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 
@@ -138,4 +136,9 @@ public class ServiceReport implements Serializable {
                 ", isAlaCarte=" + isAlaCarte +
                 '}';
     }
+	
+	public ServiceReport() {
+		super();
+	}
+	
 }

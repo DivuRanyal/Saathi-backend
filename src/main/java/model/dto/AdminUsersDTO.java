@@ -3,6 +3,7 @@ package model.dto;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
 
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
@@ -14,7 +15,7 @@ public class AdminUsersDTO {
     private String firstName;
     private String lastName;
     private String email;
-    
+    private int adminUserID;
     private Date dob; // Or use java.util.Date if preferred
     private String contactNo;
     private String countryCode;
@@ -25,6 +26,8 @@ public class AdminUsersDTO {
     private Integer createdBy;
     private Integer updatedBy;
     private MultipartFile picture;
+    // Add a list to hold subscribers
+    private List<SubscriberDTO> subscribers;
     
  // Date format to be used for date fields
     private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
@@ -114,7 +117,20 @@ public class AdminUsersDTO {
 	public void setPicture(MultipartFile picture) {
 		this.picture = picture;
 	}
+	public int getAdminUserID() {
+		return adminUserID;
+	}
+	public void setAdminUserID(int adminUserID) {
+		this.adminUserID = adminUserID;
+	}
+	public List<SubscriberDTO> getSubscribers() {
+		return subscribers;
+	}
+	public void setSubscribers(List<SubscriberDTO> subscribers) {
+		this.subscribers = subscribers;
+	}
 
+	
     
     // Getters and Setters
     // Include all fields here

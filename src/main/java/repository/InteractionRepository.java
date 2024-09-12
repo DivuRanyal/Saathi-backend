@@ -22,5 +22,6 @@ public interface InteractionRepository extends JpaRepository<Interaction, Intege
 		       "JOIN AlaCarteService sv ON s.serviceID = sv.serviceID " +
 		       "WHERE s.subscriberID = :subscriberID")
 		List<SubscriberServiceDetailsDTO> findAlaCarteServicesWithCompletionStatusAndServiceDetails( Integer subscriberID);
-
+	// Define a method to fetch all interactions by the subscriber ID
+    List<Interaction> findBySubscriberID(Integer subscriberId);
 }

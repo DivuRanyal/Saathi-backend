@@ -329,17 +329,17 @@ public class SubscriberServiceImpl implements SubscriberService {
 		return convertToDTO(subscriber);
 	}
 	
-	public Integer getPackageServiceIDBySubscriber(Long subscriberId) {
+	public Integer getPackageServiceIDBySubscriber(Integer subscriberId) {
 	    // Convert Long to Integer safely, assuming the value is within Integer range
-	    if (subscriberId > Integer.MAX_VALUE || subscriberId < Integer.MIN_VALUE) {
+/*	    if (subscriberId > Integer.MAX_VALUE || subscriberId < Integer.MIN_VALUE) {
 	        throw new IllegalArgumentException("Subscriber ID is out of range for Integer.");
 	    }
 
 	    // Cast subscriberId from Long to Integer
 	    Integer subscriberIdAsInt = subscriberId.intValue();
-
+*/
 	    // Fetch the subscriber using the Integer subscriberId
-	    Subscriber subscriber = subscriberRepository.findById(subscriberIdAsInt)
+	    Subscriber subscriber = subscriberRepository.findById(subscriberId)
 	        .orElse(null);
 
 	    // Check if the subscriber and their package services exist
@@ -352,7 +352,7 @@ public class SubscriberServiceImpl implements SubscriberService {
 	}
 
 	@Override
-	public boolean subscriberExists(int subscriberID) {
+	public boolean subscriberExists(Integer subscriberID) {
         return subscriberRepository.existsById(subscriberID);
     }
 }

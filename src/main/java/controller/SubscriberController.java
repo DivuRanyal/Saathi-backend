@@ -326,7 +326,7 @@ public class SubscriberController {
     
  // Define an endpoint to get the services for a subscriber
     @GetMapping("/{subscriberId}/services")
-    public ResponseEntity<?> getSubscriberServices(@PathVariable Long subscriberId) {
+    public ResponseEntity<?> getSubscriberServices(@PathVariable Integer subscriberId) {
         try {
             // Fetch the services for the subscriber
             Map<String, List<ServiceReport>> services = serviceCompletionService.getSubscriberServices(subscriberId);
@@ -375,7 +375,7 @@ public class SubscriberController {
     
     @PostMapping("/Services")
     public ResponseEntity<Map<String, List<ServiceReport>>> trackSubscriberServices(
-            @RequestParam Long subscriberId,
+            @RequestParam Integer subscriberId,
             @RequestParam(required = false, defaultValue = "0") int packageId,
             @RequestParam(required = false, defaultValue = "0") int subscriberAlaCarteServiceId
     		) {
@@ -397,18 +397,21 @@ public class SubscriberController {
       
     @PostMapping("/{subscriberId}/services/{serviceId}/complete")
     public ResponseEntity<String> updateServiceCompletion(
-            @PathVariable Long subscriberId,
-            @PathVariable Long serviceId,
+            @PathVariable Integer subscriberId,
+            @PathVariable Integer serviceId,
             @RequestParam(value = "file", required = false) MultipartFile file,
             @RequestParam("description") String description) {
 
         // Step 1: Fetch the packageServiceID associated with the subscriber
         Integer packageServiceID = subscriberService.getPackageServiceIDBySubscriber(subscriberId);
         System.out.println("packageServiceID: " + packageServiceID);
+
+        // Fetch ala-carte service ID
         Integer subscriberAlaCarteServicesID = service.getSubscriberAlaCarteServicesID(subscriberId, serviceId);
         System.out.println("subscriberAlaCarteServicesID: " + subscriberAlaCarteServicesID);
-        if (packageServiceID == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Package not found for the subscriber.");
+
+        if (packageServiceID == null && subscriberAlaCarteServicesID == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No valid package or ala-carte service found for the subscriber.");
         }
 
         // Step 2: Update service completion logic
@@ -416,48 +419,42 @@ public class SubscriberController {
 
         if (updatedServices != null) {
             try {
-                // Step 3: Upload file and get file path
-                String uploadDirectory = "C:\\Users\\ether\\Divya\\"; // Specify the directory where you want to store the file
-                String filePath = uploadDirectory + file.getOriginalFilename(); // Get the original file name
-
-                // Save the file to the server
-                File dest = new File(filePath);
-                file.transferTo(dest);
-
+                String filePath = null;
+                // Step 3: Upload file if present and get file path
+                if (file != null && !file.isEmpty()) {
+                    String uploadDirectory = "C:\\Users\\ether\\Divya\\"; // Specify the directory where you want to store the file
+                    filePath = uploadDirectory + file.getOriginalFilename(); // Get the original file name
+                    // Save the file to the server
+                    File dest = new File(filePath);
+                    file.transferTo(dest);
+                }
                 // Step 4: Create and add interaction when the service is completed
                 InteractionDTO interactionDTO = new InteractionDTO();
-                interactionDTO.setSubscriberID(subscriberId.intValue());
+                interactionDTO.setSubscriberID(subscriberId);
                 interactionDTO.setCreatedDate(LocalDateTime.now());
                 interactionDTO.setLastUpdatedDate(LocalDateTime.now());
                 interactionDTO.setDescription(description); // Get the description from the request payload
                 interactionDTO.setDocuments(filePath);  // Store the file path in the documents attribute
-
                 // Step 5: Check service completion status and differentiate between package and ala-carte services
-                List<ServiceReport> services = updatedServices.get("packageServices");
+                List<ServiceReport> services = updatedServices.get("allServices");
                 if (services != null) {
                     for (ServiceReport service : services) {
                         if (service.getServiceID() == serviceId) {
                             // Set the interaction type based on whether it's an ala-carte service or a package service
                             if (service.isAlaCarte()) {
-                                interactionDTO.setPackageServicesID(packageServiceID);
+                                // Use the ala-carte service ID retrieved based on the subscriber
+                                interactionDTO.setSubscriberAlaCarteServicesID(subscriberAlaCarteServicesID);
                             } else {
                                 // Use the packageServiceID retrieved based on the subscriber
-                                interactionDTO.setSubscriberAlaCarteServicesID(subscriberAlaCarteServicesID);
+                                interactionDTO.setPackageServicesID(packageServiceID);
                             }
-
                             // Set the completion status only if the service is fully completed
-                            if ("Completed".equals(service.getCompletionStatus())) {
-                                interactionDTO.setCompletionStatus(1); // 1 means completed
-                            } else {
-                                interactionDTO.setCompletionStatus(0); // 0 means not completed
-                            }
+                            interactionDTO.setCompletionStatus("Completed".equals(service.getCompletionStatus()) ? 1 : 0);
                         }
                     }
                 }
-
                 // Step 6: Save the interaction to the database
                 interactionService.createInteraction(interactionDTO);
-
                 // Return a success message
                 return ResponseEntity.ok("Service completion updated successfully and interaction with file added.");
 
@@ -471,4 +468,5 @@ public class SubscriberController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Service not found for the subscriber.");
         }
     }
+    
 }

@@ -1,6 +1,7 @@
 package service;
 
 import model.AdminUser;
+import model.dto.AdminUsersDTO;
 
 import java.util.List;
 import java.util.Optional;
@@ -24,4 +25,7 @@ public interface AdminUsersService {
     
     boolean isEmailAlreadyRegistered(String email);
     boolean saathiExists(int saathiID) ;
+    
+    List<AdminUsersDTO> getAllAdminUsersWithSubscribersByUserType();
+    
 }

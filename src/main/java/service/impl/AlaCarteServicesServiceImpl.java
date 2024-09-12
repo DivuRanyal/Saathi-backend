@@ -127,4 +127,13 @@ public class AlaCarteServicesServiceImpl implements AlaCarteServicesService {
         }
         return service;
     }
+    
+    @Override
+    public List<AlaCarteServiceDTO> getActiveServices() {
+        List<AlaCarteService> activeServices = alaCarteServiceRepository.findActiveServices();
+        return activeServices.stream()
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
+    }
+
 }

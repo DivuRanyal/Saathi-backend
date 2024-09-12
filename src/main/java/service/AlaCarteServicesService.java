@@ -10,4 +10,5 @@ public interface AlaCarteServicesService {
     AlaCarteServiceDTO createService(AlaCarteServiceDTO alaCarteServiceDTO);
     AlaCarteServiceDTO updateService(Integer id, AlaCarteServiceDTO alaCarteServiceDTO);
     void deleteService(Integer id);
+    List<AlaCarteServiceDTO> getActiveServices();
 }

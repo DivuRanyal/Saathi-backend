@@ -69,6 +69,37 @@ public class SubscriptionPackageController {
     }
 
 
+    @GetMapping("/active")
+    public ResponseEntity<List<SubscriptionPackageDTO>> getActiveSubscriptionPackages() {
+        // Get all subscription packages and their services
+        List<SubscriptionPackageDTO> packageDTOs = subscriptionPackageService.getAllSubscriptionPackagesWithServices();
+
+        // Filter out packages with empty or null packageServices and filter packageServices where status=1
+        List<SubscriptionPackageDTO> filteredPackages = packageDTOs.stream()
+            .map(this::filterActiveServices)  // Use helper method to filter active services
+            .filter(packageDTO -> packageDTO.getPackageServices() != null && !packageDTO.getPackageServices().isEmpty()) // Ensure there are still services left
+            .collect(Collectors.toList());
+
+        if (!filteredPackages.isEmpty()) {
+            return new ResponseEntity<>(filteredPackages, HttpStatus.OK);  // Return OK if packages are found
+        } else {
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);  // Return NO_CONTENT if no packages are found
+        }
+    }
+
+    private SubscriptionPackageDTO filterActiveServices(SubscriptionPackageDTO packageDTO) {
+        // Filter package services where status = 1
+        List<PackageServiceDTO> activePackageServices = packageDTO.getPackageServices().stream()
+            .filter(serviceDTO -> serviceDTO.getStatus() != null && serviceDTO.getStatus() == 1) // Only services with status = 1
+            .collect(Collectors.toList());
+
+        // Set the filtered services back into the packageDTO
+        packageDTO.setPackageServices(activePackageServices);
+
+        return packageDTO;
+    }
+
+
     @GetMapping("/{packageId}/services")
     public ResponseEntity<List<PackageServiceDTO>> getPackageServices(@PathVariable Integer packageId) {
         List<PackageServiceDTO> services = subscriptionPackageService.getPackageServicesByPackageId(packageId);

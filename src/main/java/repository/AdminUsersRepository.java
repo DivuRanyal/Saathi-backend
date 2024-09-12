@@ -22,4 +22,7 @@ public interface AdminUsersRepository extends JpaRepository<AdminUser, Integer> 
     
     @Query("SELECT au FROM AdminUser au WHERE au.userType = :userType")
     List<AdminUser> findAllByUserType(@Param("userType") String userType);
+    
+    @Query("SELECT a FROM AdminUser a LEFT JOIN FETCH a.subscribers WHERE a.userType = 'Saathi'")
+    List<AdminUser> findAllAdminUsersWithSubscribersByUserType();
 }

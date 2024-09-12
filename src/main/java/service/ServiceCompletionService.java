@@ -23,7 +23,7 @@ import repository.SubscriberRepository;
 public class ServiceCompletionService {
 
     // In-memory map to store services for each subscriber
-    private final Map<Long, List<ServiceReport>> subscriberServiceMap = new HashMap<>();
+    private final Map<Integer, List<ServiceReport>> subscriberServiceMap = new HashMap<>();
 
     @Autowired
     private PackageServiceRepository packageServiceRepository;
@@ -38,7 +38,7 @@ public class ServiceCompletionService {
     private SubscriberRepository subscriberRepository;
 
     // Method to complete a service by marking it in the report
-    public void completeService(Long subscriberId, int serviceId) {
+    public void completeService(Integer subscriberId, Integer serviceId) {
         Optional<PackageServices> optionalService = packageServiceRepository.findById(serviceId);
 
         if (optionalService.isPresent()) {
@@ -64,7 +64,7 @@ public class ServiceCompletionService {
     }
 
     @Cacheable(value = "subscriberServicesCache", key = "#subscriberId")
-    public Map<String, List<ServiceReport>> getSubscriberServices(Long subscriberId) {
+    public Map<String, List<ServiceReport>> getSubscriberServices(Integer subscriberId) {
         System.out.println("Retrieving services for subscriber ID: " + subscriberId);
 
         // Retrieve the service reports from the in-memory map
@@ -119,7 +119,7 @@ public class ServiceCompletionService {
 */
     // Update the service completion for a subscriber
     @CachePut(value = "subscriberServicesCache", key = "#subscriberId")
-    public Map<String, List<ServiceReport>> updateServiceCompletion(Long subscriberId, int serviceId) {
+    public Map<String, List<ServiceReport>> updateServiceCompletion(Integer subscriberId, Integer serviceId) {
         List<ServiceReport> services = subscriberServiceMap.get(subscriberId);
         System.out.println("Retrieved services from in-memory map: " + services);
         if (services != null) {
@@ -157,7 +157,7 @@ public class ServiceCompletionService {
 
 
     @CachePut(value = "subscriberServicesCache", key = "#subscriberId")
-    public Map<String, List<ServiceReport>> trackSubscriberServices(Long subscriberId, int packageId, int alaCarteServiceId) {
+    public Map<String, List<ServiceReport>> trackSubscriberServices(Integer subscriberId, int packageId, int alaCarteServiceId) {
         System.out.println("Tracking services for subscriber ID: " + subscriberId);
 
         List<ServiceReport> serviceReports = new ArrayList<>();

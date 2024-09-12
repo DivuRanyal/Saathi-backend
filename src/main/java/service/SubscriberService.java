@@ -47,6 +47,6 @@ public interface SubscriberService {
     // Convert a DTO to a subscriber entity
     Subscriber convertToEntity(SubscriberDTO subscriberDTO, boolean isPasswordRequired);
     
-    Integer getPackageServiceIDBySubscriber(Long subscriberId);
-    boolean subscriberExists(int subscriberID);
+    Integer getPackageServiceIDBySubscriber(Integer subscriberId);
+    boolean subscriberExists(Integer subscriberID);
 }

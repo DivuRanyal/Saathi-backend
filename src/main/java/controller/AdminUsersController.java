@@ -1,6 +1,7 @@
 package controller;
 
 import model.AdminUser;
+import model.dto.AdminUsersDTO;
 import model.dto.SubscriberDTO;
 import service.AdminUsersService;
 import service.EmailService;
@@ -243,5 +244,11 @@ public class AdminUsersController {
     @GetMapping("/saathi")
     public List<AdminUser> getSaathiUsers() {
         return adminUsersService.getAllSaathiUsers();
+    }
+    
+    @GetMapping("/saathi/subscribers")
+    public ResponseEntity<List<AdminUsersDTO>> getAllSaathiAdminUsersWithSubscribers() {
+        List<AdminUsersDTO> adminUsers = adminUsersService.getAllAdminUsersWithSubscribersByUserType();
+        return ResponseEntity.ok(adminUsers);
     }
 }

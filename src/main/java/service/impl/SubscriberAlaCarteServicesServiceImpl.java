@@ -64,7 +64,7 @@ public class SubscriberAlaCarteServicesServiceImpl implements SubscriberAlaCarte
    */
     
     @Override
-    public Integer getSubscriberAlaCarteServicesID(Long subscriberId, Long serviceId) {
+    public Integer getSubscriberAlaCarteServicesID(Integer subscriberId, Integer serviceId) {
         // Fetch the SubscriberAlaCarteService entity using subscriberId and serviceId
         Optional<SubscriberAlaCarteServices> subscriberAlaCarteService = subscriberAlaCarteServicesRepository.findBySubscriberIDAndServiceID(subscriberId, serviceId);
 

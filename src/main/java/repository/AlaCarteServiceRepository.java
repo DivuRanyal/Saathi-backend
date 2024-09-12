@@ -14,8 +14,9 @@ public interface AlaCarteServiceRepository extends JpaRepository<AlaCarteService
 
     // Find all services with a specific status
     List<AlaCarteService> findByStatus(Integer status);
-   
-    
+    @Query("SELECT s FROM AlaCarteService s WHERE s.status = 1")
+    List<AlaCarteService> findActiveServices();
+
  // Add this method to fetch ala-carte services by subscriberId
    
 }

@@ -10,20 +10,20 @@ import model.ServiceReport;
 public class InMemoryServiceTracker {
 
     // Map to track services for each subscriber
-    private Map<Long, List<ServiceReport>> subscriberServiceMap = new HashMap<>();
+    private Map<Integer, List<ServiceReport>> subscriberServiceMap = new HashMap<>();
 
     // Start tracking services for a subscriber when they purchase a package
-    public void startTracking(Long subscriberId, List<ServiceReport> serviceReports) {
+    public void startTracking(Integer subscriberId, List<ServiceReport> serviceReports) {
         subscriberServiceMap.put(subscriberId, serviceReports);
     }
 
     // Get services currently being tracked for a subscriber
-    public List<ServiceReport> getTrackedServices(Long subscriberId) {
+    public List<ServiceReport> getTrackedServices(Integer subscriberId) {
         return subscriberServiceMap.get(subscriberId);
     }
     
  // Method to update tracking for a subscriber's services
-    public void updateTracking(Long subscriberId, List<ServiceReport> updatedServices) {
+    public void updateTracking(Integer subscriberId, List<ServiceReport> updatedServices) {
         if (subscriberServiceMap.containsKey(subscriberId)) {
             subscriberServiceMap.put(subscriberId, updatedServices); // Replace with updated services
             System.out.println("In-memory service tracking updated for subscriber ID: " + subscriberId);
