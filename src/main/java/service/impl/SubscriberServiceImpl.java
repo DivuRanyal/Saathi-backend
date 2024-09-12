@@ -306,7 +306,7 @@ public class SubscriberServiceImpl implements SubscriberService {
         // Map each subscriber to SubscriberDTO, including PatronDTO
         return subscribers.stream().map(subscriber -> {
             SubscriberDTO subscriberDTO = mapToSubscriberDTO(subscriber);
-
+            
             // Fetch patron details for the subscriber using the correct repository method
             Optional<Patron> optionalPatron = patronRepository.findFirstBySubscriber_SubscriberID(subscriber.getSubscriberId());
             if (optionalPatron.isPresent()) {
@@ -377,8 +377,9 @@ public class SubscriberServiceImpl implements SubscriberService {
 	    // You can selectively set fields for AdminUser (Saathi) instead of returning the whole object
 	    AdminUser saathi = subscriber.getSaathi(); // Assuming `saathi` is a field in Subscriber
 	    if (saathi != null) {
-	        dto.setLastName(saathi.getFirstName() + " " + saathi.getLastName());
-	        dto.setEmail(saathi.getEmail());
+	//        dto.setLastName(saathi.getFirstName() + " " + saathi.getLastName());
+	//        dto.setEmail(saathi.getEmail());
+	       dto.setSaathi(saathi);
 	    }
 
 	    return dto;
