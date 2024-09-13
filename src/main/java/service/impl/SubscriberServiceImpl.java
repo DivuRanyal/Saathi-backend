@@ -19,12 +19,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import exception.EmailAlreadyRegisteredException;
+import freemarker.template.TemplateException;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+
+import javax.mail.MessagingException;
 
 @Service
 public class SubscriberServiceImpl implements SubscriberService {
@@ -109,7 +113,7 @@ public class SubscriberServiceImpl implements SubscriberService {
             if (subscriberDTO.getStatus() == 1) { // Assuming '1' is the status for active
                 // Retrieve the assigned Saathi details directly from the subscriber entity
                 AdminUser assignedSaathi = existingSubscriber.getSaathi(); // Use getSaathi() to get Saathi details
-
+                System.out.println(assignedSaathi);
                 if (assignedSaathi != null) {
                     // Saathi details that need to be sent in the email
                     String saathiName = assignedSaathi.getFirstName() + " " + assignedSaathi.getLastName();
@@ -117,14 +121,25 @@ public class SubscriberServiceImpl implements SubscriberService {
                     String saathiEmail = assignedSaathi.getEmail();
                     
                     // Send Saathi details via email
-     /*               emailService.sendSaathiDetailsEmail(
-                        existingSubscriber.getEmail(),
-                        existingSubscriber.getFirstName(),
-                        saathiName,
-                        saathiPhone,
-                        saathiEmail
-                    );
-                    */
+                    try {
+						emailService.sendSaathiDetailsEmail(
+						    existingSubscriber.getEmail(),
+						    existingSubscriber.getFirstName(),
+						    saathiName,
+						    saathiPhone,
+						    saathiEmail
+						);
+					} catch (MessagingException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} catch (IOException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} catch (TemplateException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+                    
                 } else {
                     // Log or handle the case where no Saathi is assigned
                     System.out.println("No Saathi assigned to this subscriber.");
