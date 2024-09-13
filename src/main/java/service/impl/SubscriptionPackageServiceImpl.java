@@ -200,7 +200,7 @@ public class SubscriptionPackageServiceImpl implements SubscriptionPackageServic
                     SubscriptionPackageDTO packageDTO = convertToDTO(pkg);
 
                     List<PackageServices> packageServicesList = packageServiceRepository.findBySubscriptionPackage(pkg);
-                    
+                    System.out.println("Package Services: " + packageServicesList);
                     List<PackageServiceDTO> serviceDTOs = packageServicesList.stream()
                             .map(this::convertServiceToDTO)
                             .collect(Collectors.toList());
@@ -250,6 +250,7 @@ public class SubscriptionPackageServiceImpl implements SubscriptionPackageServic
     private PackageServiceDTO convertServiceToDTO(PackageServices service) {
         PackageServiceDTO serviceDTO = new PackageServiceDTO();
         serviceDTO.setServiceID(service.getService().getServiceID());
+        serviceDTO.setServiceName(service.getService().getServiceName());
         serviceDTO.setFrequency(service.getFrequency());
         serviceDTO.setFrequencyUnit(service.getFrequencyUnit());
         serviceDTO.setPriceUSD(service.getPriceUSD());

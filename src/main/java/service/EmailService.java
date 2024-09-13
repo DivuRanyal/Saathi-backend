@@ -159,4 +159,41 @@ public class EmailService {
         mailSender.send(message);
     }
 
+    public void sendSaathiDetailsEmail(String toEmail, String subscriberName, String saathiName, 
+            String saathiPhone, String saathiEmail) throws MessagingException, IOException, TemplateException {
+// Create a MimeMessage
+MimeMessage message = mailSender.createMimeMessage();
+MimeMessageHelper helper = new MimeMessageHelper(message, MimeMessageHelper.MULTIPART_MODE_MIXED_RELATED, "UTF-8");
+
+// Set the From header with custom display name and email address
+try {
+helper.setFrom(new InternetAddress("info@etheriumtech.com", "Saathi-INFO"));
+} catch (UnsupportedEncodingException e) {
+throw new MessagingException("Failed to set display name", e);
+}
+
+// Set the To, Subject, and other headers
+helper.setTo(toEmail);
+helper.setSubject("Saathi Details Assigned to You");
+
+// Create a model to pass data to the FreeMarker template
+Map<String, Object> model = new HashMap<>();
+model.put("subscriberName", subscriberName);
+model.put("saathiName", saathiName);
+model.put("saathiPhone", saathiPhone);
+model.put("saathiEmail", saathiEmail);
+
+// Process the FreeMarker template and generate email content
+String emailContent = FreeMarkerTemplateUtils.processTemplateIntoString(
+freemarkerConfig.getTemplate("saathi-details-email.ftlh"), model
+);
+
+// Set the email content (HTML)
+helper.setText(emailContent, true);
+
+// Send the email
+mailSender.send(message);
+}
+    
+    
 }

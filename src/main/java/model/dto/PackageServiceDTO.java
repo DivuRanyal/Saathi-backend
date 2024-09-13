@@ -8,6 +8,7 @@ public class PackageServiceDTO {
 
 	private Integer packageServiceID;
     private Integer serviceID;
+    private String serviceName;
     private Integer frequency;
     private String frequencyUnit;
     private BigDecimal priceUSD;
@@ -94,5 +95,11 @@ public class PackageServiceDTO {
 		this.packageServiceID = packageServiceID;
 	}
     // Getters and Setters
+	public String getServiceName() {
+		return serviceName;
+	}
+	public void setServiceName(String serviceName) {
+		this.serviceName = serviceName;
+	}
     
 }

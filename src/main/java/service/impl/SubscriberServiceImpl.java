@@ -13,6 +13,7 @@ import repository.CreditCardRepository;
 import repository.PackageServiceRepository;
 import repository.PatronRepository;
 import repository.SubscriberRepository;
+import service.EmailService;
 import service.SubscriberService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -44,6 +45,10 @@ public class SubscriberServiceImpl implements SubscriberService {
     private PatronRepository patronRepository;
     @Autowired
     private PasswordEncoder passwordEncoder;
+    
+    @Autowired
+    private EmailService emailService;
+
 
     @Override
     public SubscriberDTO createSubscriber(SubscriberDTO subscriberDTO) {
@@ -100,7 +105,33 @@ public class SubscriberServiceImpl implements SubscriberService {
         }
         if (subscriberDTO.getStatus() != null) {
             existingSubscriber.setStatus(subscriberDTO.getStatus());
+
+            if (subscriberDTO.getStatus() == 1) { // Assuming '1' is the status for active
+                // Retrieve the assigned Saathi details directly from the subscriber entity
+                AdminUser assignedSaathi = existingSubscriber.getSaathi(); // Use getSaathi() to get Saathi details
+
+                if (assignedSaathi != null) {
+                    // Saathi details that need to be sent in the email
+                    String saathiName = assignedSaathi.getFirstName() + " " + assignedSaathi.getLastName();
+                    String saathiPhone = assignedSaathi.getContactNo();
+                    String saathiEmail = assignedSaathi.getEmail();
+                    
+                    // Send Saathi details via email
+     /*               emailService.sendSaathiDetailsEmail(
+                        existingSubscriber.getEmail(),
+                        existingSubscriber.getFirstName(),
+                        saathiName,
+                        saathiPhone,
+                        saathiEmail
+                    );
+                    */
+                } else {
+                    // Log or handle the case where no Saathi is assigned
+                    System.out.println("No Saathi assigned to this subscriber.");
+                }
+            }
         }
+
         if (subscriberDTO.getComments() != null) {
             existingSubscriber.setComments(subscriberDTO.getComments());
         }
