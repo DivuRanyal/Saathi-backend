@@ -57,6 +57,10 @@ public class AlaCarteServicesServiceImpl implements AlaCarteServicesService {
             service.setBusinessHoursEnd(alaCarteServiceDTO.getBusinessHoursEnd());
             service.setStatus(alaCarteServiceDTO.getStatus());
             service.setDurationInHours(alaCarteServiceDTO.getDurationInHours());
+            service.setSurgePrice(alaCarteServiceDTO.getSurgePrice());
+            service.setExtra(alaCarteServiceDTO.getExtra());
+            service.setIconName(alaCarteServiceDTO.getIconName());
+            
             AlaCarteService updatedService = alaCarteServiceRepository.save(service);
             return convertToDTO(updatedService);
         }
@@ -82,6 +86,9 @@ public class AlaCarteServicesServiceImpl implements AlaCarteServicesService {
         dto.setBusinessHoursEnd(service.getBusinessHoursEnd());
         dto.setStatus(service.getStatus());
         dto.setDurationInHours(service.getDurationInHours());
+        dto.setSurgePrice(service.getSurgePrice());
+        dto.setExtra(service.getExtra());
+        dto.setIconName(service.getIconName());
         // Check if createdBy is null before accessing getAdminUserID
         if (service.getCreatedBy() != null) {
             dto.setCreatedBy(service.getCreatedBy().getAdminUserID());
@@ -112,6 +119,9 @@ public class AlaCarteServicesServiceImpl implements AlaCarteServicesService {
         service.setBusinessHoursEnd(dto.getBusinessHoursEnd());
         service.setStatus(dto.getStatus());
         service.setDurationInHours(dto.getDurationInHours());
+        service.setExtra(dto.getExtra());
+        service.setIconName(dto.getIconName());
+        service.setSurgePrice(dto.getSurgePrice());
         // Fetch and set createdBy using the ID from the DTO
         if (dto.getCreatedBy() != null) {
             AdminUser createdBy = adminUsersRepository.findById(dto.getCreatedBy())

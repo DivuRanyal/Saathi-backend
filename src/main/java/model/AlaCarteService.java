@@ -65,7 +65,15 @@ public class AlaCarteService {
     @JoinColumn(name = "UpdatedBy", referencedColumnName = "AdminUserID")
     private AdminUser updatedBy;
 
-    
+    @Column(name = "SurgePrice") // New field for surge pricing
+    private BigDecimal surgePrice;
+
+    @Column(name = "IconName") // New field for storing the icon name
+    private String iconName;
+
+    @Column(name = "Extra") // New field for storing extra string data
+    private String extra;
+
     // Constructors
     public AlaCarteService() {}
 
@@ -201,4 +209,30 @@ public class AlaCarteService {
     protected void onUpdate() {
         lastUpdatedDate = new Date();
     }
+
+	public BigDecimal getSurgePrice() {
+		return surgePrice;
+	}
+
+	public void setSurgePrice(BigDecimal surgePrice) {
+		this.surgePrice = surgePrice;
+	}
+
+	public String getIconName() {
+		return iconName;
+	}
+
+	public void setIconName(String iconName) {
+		this.iconName = iconName;
+	}
+
+	public String getExtra() {
+		return extra;
+	}
+
+	public void setExtra(String extra) {
+		this.extra = extra;
+	}
+    
+    
 }

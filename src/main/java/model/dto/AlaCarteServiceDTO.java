@@ -18,7 +18,10 @@ public class AlaCarteServiceDTO {
     private Integer createdBy;
     private Integer updatedBy;
     private Integer durationInHours;
-    
+    private BigDecimal surgePrice;
+    private String iconName;
+    private String extra;
+
     // Constructors
     public AlaCarteServiceDTO() {}
 
@@ -134,5 +137,31 @@ public class AlaCarteServiceDTO {
 	public void setFrequencyUnit(String frequencyUnit) {
 		this.frequencyUnit = frequencyUnit;
 	}
+
+	public BigDecimal getSurgePrice() {
+		return surgePrice;
+	}
+
+	public void setSurgePrice(BigDecimal surgePrice) {
+		this.surgePrice = surgePrice;
+	}
+
+	public String getIconName() {
+		return iconName;
+	}
+
+	public void setIconName(String iconName) {
+		this.iconName = iconName;
+	}
+
+	public String getExtra() {
+		return extra;
+	}
+
+	public void setExtra(String extra) {
+		this.extra = extra;
+	}
+	
+	
     
 }
