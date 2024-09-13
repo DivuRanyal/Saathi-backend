@@ -9,12 +9,20 @@ import service.AdminUsersService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import exception.EmailAlreadyRegisteredException;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Collections;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -107,9 +115,24 @@ public class AdminUsersServiceImpl implements AdminUsersService {
         // Fetch AdminUsers of type "Saathi"
         List<AdminUser> adminUsers = adminUsersRepository.findAllAdminUsersWithSubscribersByUserType();
 
-        // Map the AdminUser entities to AdminUsersDTO
-        return adminUsers.stream().map(this::mapToDTO).collect(Collectors.toList());
+        System.out.println(adminUsers);
+
+        // Check if the list is not empty to avoid mapping null or empty results
+        if (adminUsers != null && !adminUsers.isEmpty()) {
+            // Use a Set to filter out duplicates based on adminUserID
+            Set<AdminUser> uniqueAdminUsers = new HashSet<>(adminUsers);
+
+            // Map the unique AdminUser entities to AdminUsersDTO using stream
+            return uniqueAdminUsers.stream()
+                                   .map(this::mapToDTO)
+                                   .collect(Collectors.toList());
+        } else {
+            // Return an empty list if no AdminUsers are found
+            return Collections.emptyList();
+        }
     }
+
+
     
     private AdminUsersDTO mapToDTO(AdminUser adminUser) {
         AdminUsersDTO dto = new AdminUsersDTO();
@@ -121,7 +144,10 @@ public class AdminUsersServiceImpl implements AdminUsersService {
         dto.setContactNo(adminUser.getContactNo());
         dto.setCountryCode(adminUser.getCountryCode());
         dto.setBriefBio(adminUser.getBriefBio());
- //       dto.setPicture(adminUser.getPicture());
+        String picturePath = adminUser.getPicture(); // Assuming this is the path from the database
+        dto.setPicturePath(picturePath); // Add a path field in DTO
+
+        
         dto.setUserType(adminUser.getUserType());
  //       dto.setCreatedDate(adminUser.getCreatedDate());
 //        dto.setLastUpdatedDate(adminUser.getLastUpdatedDate());

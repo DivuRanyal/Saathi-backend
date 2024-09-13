@@ -18,6 +18,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import exception.EmailAlreadyRegisteredException;
+
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -303,20 +305,25 @@ public class SubscriberServiceImpl implements SubscriberService {
         // Fetch the subscribers for the given Saathi
         List<Subscriber> subscribers = subscriberRepository.findBySaathi(saathi);
 
-        // Map each subscriber to SubscriberDTO, including PatronDTO
+        // Map each subscriber to SubscriberDTO, including a list of PatronDTOs
         return subscribers.stream().map(subscriber -> {
             SubscriberDTO subscriberDTO = mapToSubscriberDTO(subscriber);
             
-            // Fetch patron details for the subscriber using the correct repository method
-            Optional<Patron> optionalPatron = patronRepository.findFirstBySubscriber_SubscriberID(subscriber.getSubscriberId());
-            if (optionalPatron.isPresent()) {
-                PatronDTO patronDTO = mapToPatronDTO(optionalPatron.get());
-                subscriberDTO.setPatron(patronDTO);
-            }
-            
+            // Fetch all patron details for the subscriber
+            List<Patron> patrons = patronRepository.findBySubscriber_SubscriberID(subscriber.getSubscriberId());
+            System.out.println("hh");
+            // Map to PatronDTO list
+            List<PatronDTO> patronDTOs = patrons.stream()
+                .map(this::mapToPatronDTO)
+                .collect(Collectors.toList());
+
+            // Set the list of PatronDTOs in the SubscriberDTO
+            subscriberDTO.setPatrons(patronDTOs);
+
             return subscriberDTO;
-        }).collect(Collectors.toList()); // This collects the DTOs into a list
+        }).collect(Collectors.toList()); // Collect the DTOs into a list
     }
+
 
     private PatronDTO mapToPatronDTO(Patron patron) {
         PatronDTO dto = new PatronDTO();

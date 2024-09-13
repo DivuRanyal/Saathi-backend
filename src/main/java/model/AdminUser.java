@@ -3,6 +3,7 @@ package model;
 import javax.persistence.*;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -12,6 +13,7 @@ import java.util.List;
 
 @Entity
 @Table(name = "AdminUsers")
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class AdminUser {
 
     @Id

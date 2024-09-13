@@ -3,7 +3,9 @@ package model.dto;
 import java.math.BigDecimal;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
@@ -37,7 +39,16 @@ public class SubscriberDTO {
     private CreditCardDTO creditCard;
  // Add patron details field
     private PatronDTO patron;
+    private List<PatronDTO> patrons=new ArrayList<>();;
 
+    // Getters and setters for patrons
+    public List<PatronDTO> getPatrons() {
+        return patrons;
+    }
+
+    public void setPatrons(List<PatronDTO> patrons) {
+        this.patrons = patrons;
+    }
 	public CreditCardDTO getCreditCard() {
 		return creditCard;
 	}

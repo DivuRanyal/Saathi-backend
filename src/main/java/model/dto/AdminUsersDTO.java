@@ -26,6 +26,8 @@ public class AdminUsersDTO {
     private Integer createdBy;
     private Integer updatedBy;
     private MultipartFile picture;
+    private String picturePath; // Add this in your DTO
+
     // Add a list to hold subscribers
     private List<SubscriberDTO> subscribers;
     
@@ -128,6 +130,12 @@ public class AdminUsersDTO {
 	}
 	public void setSubscribers(List<SubscriberDTO> subscribers) {
 		this.subscribers = subscribers;
+	}
+	public String getPicturePath() {
+		return picturePath;
+	}
+	public void setPicturePath(String picturePath) {
+		this.picturePath = picturePath;
 	}
 
 	
