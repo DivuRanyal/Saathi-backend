@@ -74,10 +74,11 @@ public class SubscriptionPackageController {
         // Get all subscription packages and their services
         List<SubscriptionPackageDTO> packageDTOs = subscriptionPackageService.getAllSubscriptionPackagesWithServices();
 
-        // Filter out packages with empty or null packageServices and filter packageServices where status=1
+        // Filter packages and their services where both package status and packageService status are 1
         List<SubscriptionPackageDTO> filteredPackages = packageDTOs.stream()
+            .filter(packageDTO -> packageDTO.getStatus() == 1)  // Ensure package status is 1
             .map(this::filterActiveServices)  // Use helper method to filter active services
-            .filter(packageDTO -> packageDTO.getPackageServices() != null && !packageDTO.getPackageServices().isEmpty()) // Ensure there are still services left
+            .filter(packageDTO -> packageDTO.getPackageServices() != null && !packageDTO.getPackageServices().isEmpty()) // Ensure there are still services left after filtering
             .collect(Collectors.toList());
 
         if (!filteredPackages.isEmpty()) {
@@ -87,22 +88,24 @@ public class SubscriptionPackageController {
         }
     }
 
+    // Helper method to filter only active services (status == 1)
     private SubscriptionPackageDTO filterActiveServices(SubscriptionPackageDTO packageDTO) {
-        // Filter package services where status = 1
-        List<PackageServiceDTO> activePackageServices = packageDTO.getPackageServices().stream()
-            .filter(serviceDTO -> serviceDTO.getStatus() != null && serviceDTO.getStatus() == 1) // Only services with status = 1
+        // Filter services within the package where service status is 1
+        List<PackageServiceDTO> activeServices = packageDTO.getPackageServices().stream()
+            .filter(service -> service.getStatus() == 1)  // Ensure packageService status is 1
             .collect(Collectors.toList());
 
-        // Set the filtered services back into the packageDTO
-        packageDTO.setPackageServices(activePackageServices);
-
+        // Set filtered active services back into the packageDTO
+        packageDTO.setPackageServices(activeServices);
         return packageDTO;
     }
-
 
     @GetMapping("/{packageId}/services")
     public ResponseEntity<List<PackageServiceDTO>> getPackageServices(@PathVariable Integer packageId) {
         List<PackageServiceDTO> services = subscriptionPackageService.getPackageServicesByPackageId(packageId);
         return ResponseEntity.ok(services);
     }
+    
+    
+    
 }
