@@ -37,5 +37,13 @@ public class PackageServicesController {
         return new ResponseEntity<>(packageServices, HttpStatus.OK);
     }
     
-    
+ // Update Package Service by ID
+    @PutMapping("/{id}")
+    public ResponseEntity<PackageServices> updatePackageServices(@PathVariable Integer id, @RequestBody PackageServices updatedPackageService) {
+        PackageServices updatedService = packageServicesService.updatePackageService(id, updatedPackageService);
+        if (updatedService == null) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        return new ResponseEntity<>(updatedService, HttpStatus.OK);
+    }
 }
