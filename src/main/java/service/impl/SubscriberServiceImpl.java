@@ -370,7 +370,8 @@ public class SubscriberServiceImpl implements SubscriberService {
 
     @Override
     public List<Subscriber> getSubscribersWithoutSaathi() {
-        return subscriberRepository.findSubscribersWithoutSaathi();
+ //       return subscriberRepository.findSubscribersWithoutSaathiNative();
+    	return subscriberRepository.findBySaathiIsNull();
     }
 
     @Override

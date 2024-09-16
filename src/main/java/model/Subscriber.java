@@ -2,6 +2,8 @@ package model;
 
 import javax.persistence.*;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotNull;
 
@@ -48,6 +50,7 @@ public class Subscriber {
 
     @ManyToOne
     @JoinColumn(name = "PackageID", referencedColumnName = "PackageID", foreignKey = @ForeignKey(name = "PackageID"))
+    @JsonIgnore
     private SubscriptionPackage subscriptionPackage;
 
     @Column(name = "StartDate")
@@ -63,6 +66,7 @@ public class Subscriber {
 
     @ManyToOne
     @JoinColumn(name = "SaathiID", referencedColumnName = "AdminUserID", foreignKey = @ForeignKey(name = "SaathiID"))
+    @JsonIgnore
     private AdminUser saathi;
 
     @Column(name = "CreatedDate")
@@ -80,6 +84,7 @@ public class Subscriber {
     private String comments;
 
     @OneToOne(mappedBy = "subscriber", cascade = CascadeType.ALL)
+    @JsonIgnore
     private CreditCard creditCard;
  // Date format to be used for date fields
     private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
