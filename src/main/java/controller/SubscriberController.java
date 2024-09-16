@@ -375,13 +375,13 @@ public class SubscriberController {
     
     @PostMapping("/Services")
     public ResponseEntity<Map<String, List<ServiceReport>>> trackSubscriberServices(
-            @RequestParam Integer subscriberId,
-            @RequestParam(required = false, defaultValue = "0") int packageId,
-            @RequestParam(required = false, defaultValue = "0") int subscriberAlaCarteServiceId
+            @RequestParam Integer subscriberID,
+            @RequestParam(required = false, defaultValue = "0") int packageID,
+            @RequestParam(required = false, defaultValue = "0") int subscriberAlaCarteServiceID
     		) {
 
         // Call the service method to track services
-        Map<String, List<ServiceReport>> trackedServices = serviceCompletionService.trackSubscriberServices(subscriberId, packageId, subscriberAlaCarteServiceId);
+        Map<String, List<ServiceReport>> trackedServices = serviceCompletionService.trackSubscriberServices(subscriberID, packageID, subscriberAlaCarteServiceID);
 
         // Check if any services were tracked
         if (trackedServices == null || trackedServices.isEmpty()) {
@@ -395,19 +395,19 @@ public class SubscriberController {
    //     return null;
     }
       
-    @PostMapping("/{subscriberId}/services/{serviceId}/complete")
+    @PostMapping("/{subscriberID}/services/{serviceID}/complete")
     public ResponseEntity<String> updateServiceCompletion(
-            @PathVariable Integer subscriberId,
-            @PathVariable Integer serviceId,
+            @PathVariable Integer subscriberID,
+            @PathVariable Integer serviceID,
             @RequestParam(value = "file", required = false) MultipartFile file,
             @RequestParam("description") String description) {
 
         // Step 1: Fetch the packageServiceID associated with the subscriber
-        Integer packageID = subscriberService.getPackageIDBySubscriber(subscriberId);
+        Integer packageID = subscriberService.getPackageIDBySubscriber(subscriberID);
         System.out.println("packageID: " + packageID);
 
         // Fetch ala-carte service ID
-        Integer subscriberAlaCarteServicesID = service.getSubscriberAlaCarteServicesID(subscriberId, serviceId);
+        Integer subscriberAlaCarteServicesID = service.getSubscriberAlaCarteServicesID(subscriberID, serviceID);
         System.out.println("subscriberAlaCarteServicesID: " + subscriberAlaCarteServicesID);
 
         if (packageID == null && subscriberAlaCarteServicesID == null) {
@@ -415,7 +415,7 @@ public class SubscriberController {
         }
 
         // Step 2: Update service completion logic
-        Map<String, List<ServiceReport>> updatedServices = serviceCompletionService.updateServiceCompletion(subscriberId, serviceId);
+        Map<String, List<ServiceReport>> updatedServices = serviceCompletionService.updateServiceCompletion(subscriberID, serviceID);
 
         if (updatedServices != null) {
             try {
@@ -430,7 +430,7 @@ public class SubscriberController {
                 }
                 // Step 4: Create and add interaction when the service is completed
                 InteractionDTO interactionDTO = new InteractionDTO();
-                interactionDTO.setSubscriberID(subscriberId);
+                interactionDTO.setSubscriberID(subscriberID);
                 interactionDTO.setCreatedDate(LocalDateTime.now());
                 interactionDTO.setLastUpdatedDate(LocalDateTime.now());
                 interactionDTO.setDescription(description); // Get the description from the request payload
@@ -439,7 +439,7 @@ public class SubscriberController {
                 List<ServiceReport> services = updatedServices.get("allServices");
                 if (services != null) {
                     for (ServiceReport service : services) {
-                        if (service.getServiceID() == serviceId) {
+                        if (service.getServiceID() == serviceID) {
                             // Set the interaction type based on whether it's an ala-carte service or a package service
                             if (service.isAlaCarte()) {
                                 // Use the ala-carte service ID retrieved based on the subscriber
@@ -468,5 +468,5 @@ public class SubscriberController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Service not found for the subscriber.");
         }
     }
-    
+   
 }

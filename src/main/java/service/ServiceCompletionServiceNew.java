@@ -168,16 +168,16 @@ public class ServiceCompletionServiceNew {
 */
     // Track package and ala-carte services for a subscriber and store them in cache
     @CachePut(value = "subscriberServicesCache", key = "#subscriberId")
-    public Map<String, List<ServiceReport>> trackSubscriberServices(Integer subscriberId, int packageId, int alaCarteServiceId) {
-        System.out.println("Tracking services for subscriber ID: " + subscriberId);
+    public Map<String, List<ServiceReport>> trackSubscriberServices(Integer subscriberID, int packageID, int alaCarteServiceID) {
+        System.out.println("Tracking services for subscriber ID: " + subscriberID);
         
         List<ServiceReport> serviceReports = new ArrayList<>();
 
         // Handle package services
-        if (packageId != 0) {
-            List<PackageServices> packageServices = packageServiceRepository.findServicesByPackageId(packageId);
+        if (packageID != 0) {
+            List<PackageServices> packageServices = packageServiceRepository.findServicesByPackageId(packageID);
             if (packageServices == null || packageServices.isEmpty()) {
-                System.out.println("No package services found for packageId: " + packageId);
+                System.out.println("No package services found for packageId: " + packageID);
             } else {
                 for (PackageServices packageService : packageServices) {
                     ServiceReport report = new ServiceReport(
@@ -196,8 +196,8 @@ public class ServiceCompletionServiceNew {
         }
 
         // Handle ala-carte services
-        if (alaCarteServiceId != 0) {
-            SubscriberAlaCarteServices alaCarteService = alaCarteServicesRepository.findById(alaCarteServiceId)
+        if (alaCarteServiceID != 0) {
+            SubscriberAlaCarteServices alaCarteService = alaCarteServicesRepository.findById(alaCarteServiceID)
                     .orElseThrow(() -> new RuntimeException("Ala-carte service not found"));
 
             ServiceReport alaCarteServiceReport = new ServiceReport(
@@ -214,29 +214,29 @@ public class ServiceCompletionServiceNew {
         }
 
         // Store the service reports in cache and in-memory
-        subscriberServiceMap.put(subscriberId, serviceReports);
-        inMemoryServiceTracker.startTracking(subscriberId, serviceReports);
+        subscriberServiceMap.put(subscriberID, serviceReports);
+        inMemoryServiceTracker.startTracking(subscriberID, serviceReports);
 
         Map<String, List<ServiceReport>> services = new HashMap<>();
         services.put("allServices", serviceReports);
         return services;
     }
     
-    @CachePut(value = "subscriberServicesCache", key = "#subscriberId")
-    public Map<String, List<ServiceReport>> updateServiceCompletion(Integer subscriberId, Integer serviceId) {
+    @CachePut(value = "subscriberServicesCache", key = "#subscriberID")
+    public Map<String, List<ServiceReport>> updateServiceCompletion(Integer subscriberID, Integer serviceID) {
         // Retrieve the services for the subscriber from the in-memory map
-    	 List<ServiceReport> services = subscriberServiceMap.get(subscriberId);
+    	 List<ServiceReport> services = subscriberServiceMap.get(subscriberID);
         System.out.println("Retrieved services from in-memory map: " + services);
         // If services are not found, return null or throw an appropriate exception
         if (services == null || services.isEmpty()) {
-            System.out.println("No services found for subscriber ID: " + subscriberId);
+            System.out.println("No services found for subscriber ID: " + subscriberID);
             return null;
         }
         boolean serviceUpdated = false;
 
         // Iterate over the services (both package and ala-carte)
         for (ServiceReport service : services) {
-            if (service.getServiceID() == serviceId) {
+            if (service.getServiceID() == serviceID) {
                 // Check if the service has already reached the frequency limit
                 if (service.getCompletions() >= service.getFrequency()) {
                     System.out.println("Service: " + service.getServiceName() + " is already completed.");
@@ -275,30 +275,30 @@ public class ServiceCompletionServiceNew {
         return null;
     }
 
-    @Cacheable(value = "subscriberServicesCache", key = "#subscriberId")
-    public Map<String, List<ServiceReport>> getSubscriberServices(Integer subscriberId) {
-        System.out.println("Retrieving services for subscriber ID: " + subscriberId);
+    @Cacheable(value = "subscriberServicesCache", key = "#subscriberID")
+    public Map<String, List<ServiceReport>> getSubscriberServices(Integer subscriberID) {
+        System.out.println("Retrieving services for subscriber ID: " + subscriberID);
 
         // Try to retrieve services from in-memory map
-        List<ServiceReport> serviceReports = subscriberServiceMap.get(subscriberId);
+        List<ServiceReport> serviceReports = subscriberServiceMap.get(subscriberID);
 
         // If services are not found in memory, fall back to database
         if (serviceReports == null || serviceReports.isEmpty()) {
             // This is where a cache miss would occur, so log it
-            System.out.println("Cache miss for subscriber ID: " + subscriberId);
+            System.out.println("Cache miss for subscriber ID: " + subscriberID);
             
             // Fetch all interactions from the database for the subscriber (handling multiple services)
-            List<Interaction> interactions = interactionRepository.findBySubscriberID(subscriberId);
+            List<Interaction> interactions = interactionRepository.findBySubscriberID(subscriberID);
             
             if (interactions == null || interactions.isEmpty()) {
-                throw new RuntimeException("No services found for subscriber with ID: " + subscriberId);
+                throw new RuntimeException("No services found for subscriber with ID: " + subscriberID);
             }
 
             // Convert each interaction to a ServiceReport (handle multiple services)
             serviceReports = convertInteractionsToServiceReports(interactions);
 
             // Repopulate the in-memory map and cache with the fetched data
-            subscriberServiceMap.put(subscriberId, serviceReports);
+            subscriberServiceMap.put(subscriberID, serviceReports);
 
             // Cache the result (repopulate cache after cache miss)
             Map<String, List<ServiceReport>> services = new HashMap<>();

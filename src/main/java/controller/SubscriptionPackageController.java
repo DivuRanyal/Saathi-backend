@@ -10,6 +10,8 @@ import service.SubscriptionPackageService;
 
 import java.util.List;
 
+import javax.transaction.Transactional;
+
 @RestController
 @RequestMapping("/subscription-package")
 public class SubscriptionPackageController {
@@ -23,12 +25,14 @@ public class SubscriptionPackageController {
         return ResponseEntity.ok(createdPackage);
     }
 
+    @Transactional
     @PutMapping("/{id}")
     public ResponseEntity<SubscriptionPackageDTO> updateSubscriptionPackage(@PathVariable Integer id, @RequestBody SubscriptionPackageDTO subscriptionPackageDTO) {
         SubscriptionPackageDTO updatedPackage = subscriptionPackageService.updateSubscriptionPackage(id, subscriptionPackageDTO);
         return ResponseEntity.ok(updatedPackage);
     }
 
+    @Transactional
     @GetMapping("/{id}")
     public ResponseEntity<SubscriptionPackageDTO> getSubscriptionPackageById(@PathVariable Integer id) {
         SubscriptionPackageDTO packageDTO = subscriptionPackageService.getSubscriptionPackageById(id);
@@ -39,12 +43,14 @@ public class SubscriptionPackageController {
         }
     }
 
+    @Transactional
     @GetMapping("/all")
     public ResponseEntity<List<SubscriptionPackageDTO>> getAllSubscriptionPackages() {
         List<SubscriptionPackageDTO> packages = subscriptionPackageService.getAllSubscriptionPackages();
         return ResponseEntity.ok(packages);
     }
 
+    @Transactional
     @GetMapping("/active")
     public ResponseEntity<List<SubscriptionPackageDTO>> getActiveSubscriptionPackages() {
         List<SubscriptionPackageDTO> activePackages = subscriptionPackageService.getActiveSubscriptionPackages();
@@ -56,4 +62,5 @@ public class SubscriptionPackageController {
         List<PackageServiceDTO> services = subscriptionPackageService.getPackageServicesByPackageId(packageId);
         return ResponseEntity.ok(services);
     }
+    
 }
