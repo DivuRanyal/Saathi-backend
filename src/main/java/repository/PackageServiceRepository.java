@@ -33,4 +33,6 @@ public interface PackageServiceRepository extends JpaRepository<PackageServices,
     @Query("SELECT ps FROM PackageServices ps WHERE ps.status = 1")
     List<PackageServices> findActivePackageServices();
     
+    void deleteAllBySubscriptionPackage(SubscriptionPackage subscriptionPackage);
+    
 }

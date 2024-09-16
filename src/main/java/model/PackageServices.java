@@ -7,7 +7,9 @@ import java.util.Date;
 import javax.persistence.*;
 
 @Entity
-@Table(name = "PackageServices")
+@Table(name = "PackageServices", uniqueConstraints = {
+	    @UniqueConstraint(columnNames = {"PackageID", "ServiceID"})
+	})
 public class PackageServices {
 
     @Id
@@ -30,12 +32,6 @@ public class PackageServices {
     @Transient
     private String frequencyUnit;
 
-    @Column(name = "PriceUSD")
-    private BigDecimal priceUSD;
-
-    @Column(name = "PriceINR")
-    private BigDecimal priceINR;
-
     @Column(name = "CreatedDate")
     private Date createdDate;
 
@@ -53,7 +49,6 @@ public class PackageServices {
 
     @ManyToOne
     private Subscriber subscriber;
-    
     
     public Subscriber getSubscriber() {
 		return subscriber;
@@ -118,22 +113,6 @@ public class PackageServices {
 		this.frequencyUnit = frequencyUnit;
 	}
 
-	public BigDecimal getPriceUSD() {
-		return priceUSD;
-	}
-
-	public void setPriceUSD(BigDecimal priceUSD) {
-		this.priceUSD = priceUSD;
-	}
-
-	public BigDecimal getPriceINR() {
-		return priceINR;
-	}
-
-	public void setPriceINR(BigDecimal priceINR) {
-		this.priceINR = priceINR;
-	}
-
 	public Date getCreatedDate() {
 		return createdDate;
 	}
@@ -158,6 +137,16 @@ public class PackageServices {
 		this.status = status;
 	}
 
+	 @PrePersist
+	    protected void onCreate() {
+	        createdDate = new Date();  // Set the current timestamp for createdDate
+	        
+	    }
+
+	 @PreUpdate
+	    protected void onUpdate() {
+	        lastUpdatedDate = new Date();  // Set the current timestamp for lastUpdatedDate
+	    }
     // Getters and Setters
     
 }

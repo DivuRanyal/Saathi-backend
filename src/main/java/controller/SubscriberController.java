@@ -403,14 +403,14 @@ public class SubscriberController {
             @RequestParam("description") String description) {
 
         // Step 1: Fetch the packageServiceID associated with the subscriber
-        Integer packageServiceID = subscriberService.getPackageServiceIDBySubscriber(subscriberId);
-        System.out.println("packageServiceID: " + packageServiceID);
+        Integer packageID = subscriberService.getPackageIDBySubscriber(subscriberId);
+        System.out.println("packageID: " + packageID);
 
         // Fetch ala-carte service ID
         Integer subscriberAlaCarteServicesID = service.getSubscriberAlaCarteServicesID(subscriberId, serviceId);
         System.out.println("subscriberAlaCarteServicesID: " + subscriberAlaCarteServicesID);
 
-        if (packageServiceID == null && subscriberAlaCarteServicesID == null) {
+        if (packageID == null && subscriberAlaCarteServicesID == null) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No valid package or ala-carte service found for the subscriber.");
         }
 
@@ -446,7 +446,7 @@ public class SubscriberController {
                                 interactionDTO.setSubscriberAlaCarteServicesID(subscriberAlaCarteServicesID);
                             } else {
                                 // Use the packageServiceID retrieved based on the subscriber
-                                interactionDTO.setPackageServicesID(packageServiceID);
+              //                  interactionDTO.setPackageID(packageID);
                             }
                             // Set the completion status only if the service is fully completed
                             interactionDTO.setCompletionStatus("Completed".equals(service.getCompletionStatus()) ? 1 : 0);

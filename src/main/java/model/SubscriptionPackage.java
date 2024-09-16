@@ -1,9 +1,14 @@
 package model;
 
 import javax.persistence.*;
+
+import jakarta.validation.constraints.NotNull;
+
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 @Entity
 @Table(name = "SubscriptionPackages")
@@ -14,7 +19,7 @@ public class SubscriptionPackage {
     @Column(name = "PackageID")
     private int packageID;
 
-    @Column(name = "PackageName")
+    @Column(name = "PackageName", nullable = false, unique = true)
     private String packageName;
 
     @Column(name = "PackageDescription")
@@ -25,8 +30,8 @@ public class SubscriptionPackage {
     private BigDecimal priceUSD = BigDecimal.valueOf(0.00);
 
     @Column(name = "PriceINR")
+    @NotNull(message = "Price cannot be null")
     private BigDecimal priceINR = BigDecimal.valueOf(0.00);
-
 
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "CreatedDate", nullable = false)
@@ -36,6 +41,7 @@ public class SubscriptionPackage {
     @Column(name = "LastUpdatedDate")
     private Date lastUpdatedDate;
 
+    
     @Column(name = "Status", nullable = false)
     private int status;
 
@@ -44,6 +50,9 @@ public class SubscriptionPackage {
 
     @Column(name = "UpdatedBy")
     private Integer updatedBy;
+
+    @OneToMany(mappedBy = "subscriptionPackage", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+    private List<PackageServices> packageServices=new ArrayList(); // Add relationship to PackageServices
 
     public Integer getCreatedBy() {
         return createdBy;
@@ -175,6 +184,13 @@ public class SubscriptionPackage {
         this.status = status;
     }
 
+    public List<PackageServices> getPackageServices() { // Add getter for package services
+        return packageServices;
+    }
+
+    public void setPackageServices(List<PackageServices> packageServices) { // Add setter for package services
+        this.packageServices = packageServices;
+    }
     // toString method for easier debugging
     @Override
     public String toString() {
@@ -189,4 +205,5 @@ public class SubscriptionPackage {
                 ", status=" + status +
                 '}';
     }
+    
 }

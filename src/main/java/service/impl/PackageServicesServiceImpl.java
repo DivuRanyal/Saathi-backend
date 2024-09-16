@@ -45,8 +45,7 @@ public class PackageServicesServiceImpl implements PackageServicesService {
             updatedService.setSubscriptionPackage(packageServices.getSubscriptionPackage());
             updatedService.setService(packageServices.getService());
             updatedService.setFrequency(packageServices.getFrequency());
-            updatedService.setPriceUSD(packageServices.getPriceUSD());
-            updatedService.setPriceINR(packageServices.getPriceINR());
+           
             updatedService.setStatus(packageServices.getStatus());
             updatedService.setCreatedBy(packageServices.getCreatedBy());
             updatedService.setUpdatedBy(packageServices.getUpdatedBy());

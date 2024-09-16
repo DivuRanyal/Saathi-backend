@@ -8,9 +8,12 @@ import model.dto.SubscriptionPackageDTO;
 
 public interface SubscriptionPackageService {
 
-	SubscriptionPackage saveSubscriptionPackageWithServices(SubscriptionPackageDTO packageDTO);
-	SubscriptionPackage updateSubscriptionPackageWithServices(Integer packageId, SubscriptionPackageDTO packageDTO);
-	SubscriptionPackageDTO getSubscriptionPackageWithServices(Integer packageId);
-	List<SubscriptionPackageDTO> getAllSubscriptionPackagesWithServices() ;
-	List<PackageServiceDTO> getPackageServicesByPackageId(Integer packageId);
+	 SubscriptionPackageDTO createSubscriptionPackage(SubscriptionPackageDTO subscriptionPackageDTO);
+	    SubscriptionPackageDTO updateSubscriptionPackage(Integer packageID, SubscriptionPackageDTO subscriptionPackageDTO);
+	    SubscriptionPackageDTO getSubscriptionPackageById(Integer packageID);
+	    List<SubscriptionPackageDTO> getAllSubscriptionPackages();
+	    List<SubscriptionPackageDTO> getActiveSubscriptionPackages();  // Method to get only active packages
+	    List<PackageServiceDTO> getPackageServicesByPackageId(Integer packageId);
+	    void deleteSubscriptionPackage(Integer packageID);
+	
 }

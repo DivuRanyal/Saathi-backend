@@ -47,8 +47,8 @@ public class Subscriber {
     private Date lastLoginTime;
 
     @ManyToOne
-    @JoinColumn(name = "PackageServiceID", referencedColumnName = "PackageServicesID", foreignKey = @ForeignKey(name = "PackageServiceID"))
-    private PackageServices packageServices;
+    @JoinColumn(name = "PackageID", referencedColumnName = "PackageID", foreignKey = @ForeignKey(name = "PackageID"))
+    private SubscriptionPackage subscriptionPackage;
 
     @Column(name = "StartDate")
     @Temporal(TemporalType.DATE)
@@ -148,15 +148,6 @@ public class Subscriber {
 		this.lastLoginTime = lastLoginTime;
 	}
 
-	
-	 public PackageServices getPackageServices() {
-		return packageServices;
-	}
-
-	public void setPackageServices(PackageServices packageServices) {
-		this.packageServices = packageServices;
-	}
-
 	public String getStartDate() {
 	        return startDate != null ? DATE_FORMAT.format(startDate) : null;
 	    }
@@ -250,6 +241,15 @@ public class Subscriber {
         lastUpdatedDate = new Date();  // Set the current timestamp for lastUpdatedDate
     }
 
+	public SubscriptionPackage getSubscriptionPackage() {
+		return subscriptionPackage;
+	}
+
+	public void setSubscriptionPackage(SubscriptionPackage subscriptionPackage) {
+		this.subscriptionPackage = subscriptionPackage;
+	}
+
+    
     // Getters and Setters
    
 }

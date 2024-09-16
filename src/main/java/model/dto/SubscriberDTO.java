@@ -22,7 +22,7 @@ public class SubscriberDTO {
     private String countryCode;
     private String password;
     private Date lastLoginTime;
-    private Integer packageServiceID; // Assume this is the ID only, you can also have the entire object if needed
+    private Integer packageID; // Assume this is the ID only, you can also have the entire object if needed
     private Date startDate;
     private Date endDate;
     private int billingStatus;
@@ -108,11 +108,11 @@ public class SubscriberDTO {
 	}
 	
 	
-	 public Integer getPackageServiceID() {
-		return packageServiceID;
+	 public Integer getPackageID() {
+		return packageID;
 	}
-	public void setPackageServiceID(Integer packageServiceID) {
-		this.packageServiceID = packageServiceID;
+	public void setPackageID(Integer packageID) {
+		this.packageID = packageID;
 	}
 	public String getStartDate() {
 	        return startDate != null ? DATE_FORMAT.format(startDate) : null;

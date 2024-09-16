@@ -4,18 +4,25 @@ import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+
 public class PackageServiceDTO {
 
 	private Integer packageServiceID;
     private Integer serviceID;
+    private Integer packageID;
+    private String packageName;
     private String serviceName;
     private Integer frequency;
     private String frequencyUnit;
     private BigDecimal priceUSD;
     private BigDecimal priceINR;
     private Integer status;
-    private Date createdDate; // Add this field
-    private Date lastUpdatedDate; // Add this field
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
+    private Date createdDate;
+
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
+    private Date lastUpdatedDate;
     private Integer createdBy;  // Add createdBy in DTO
     private Integer updatedBy;
  public Integer getCreatedBy() {
@@ -101,5 +108,18 @@ public class PackageServiceDTO {
 	public void setServiceName(String serviceName) {
 		this.serviceName = serviceName;
 	}
+	public Integer getPackageID() {
+		return packageID;
+	}
+	public void setPackageID(Integer packageID) {
+		this.packageID = packageID;
+	}
+	public String getPackageName() {
+		return packageName;
+	}
+	public void setPackageName(String packageName) {
+		this.packageName = packageName;
+	}
     
+	
 }
