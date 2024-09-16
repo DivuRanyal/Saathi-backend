@@ -38,6 +38,13 @@ public interface PackageServiceRepository extends JpaRepository<PackageServices,
     
     @Modifying
     @Transactional
-    @Query("DELETE FROM PackageServices ps WHERE ps.subscriptionPackage = :subscriptionPackage")
-    void deleteAllBySubscriptionPackage( SubscriptionPackage subscriptionPackage);
+    @Query("DELETE FROM PackageServices ps WHERE ps.subscriptionPackage.id = :subscriptionPackageId")
+    void deleteAllBySubscriptionPackage(@Param("subscriptionPackageId") Integer subscriptionPackageId);
+
+    @Modifying
+    @Transactional
+    @Query("DELETE FROM PackageServices ps WHERE ps.id = :id")
+    void deleteById( Integer id);
+
+    
 }

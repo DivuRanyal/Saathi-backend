@@ -13,7 +13,9 @@ import repository.PackageServiceRepository;
 import service.SubscriptionPackageService;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import org.springframework.dao.DataIntegrityViolationException;
 
@@ -106,18 +108,9 @@ public class SubscriptionPackageServiceImpl implements SubscriptionPackageServic
             subscriptionPackage.setUpdatedBy(subscriptionPackageDTO.getUpdatedBy());
         }
 
-        // Check if package services are provided and update them
+        // Handle PackageServices update
         if (subscriptionPackageDTO.getPackageServices() != null && !subscriptionPackageDTO.getPackageServices().isEmpty()) {
-        	
-        	System.out.println("hhh");
-            // Delete all existing package services for this package
-            packageServicesRepository.deleteAllBySubscriptionPackage(subscriptionPackage);
-            
-            // Clear the persistence context to avoid ObjectDeletedException
-            entityManager.clear();  // Ensure entityManager is injected
-
-            // Add the new package services
-            savePackageServices(subscriptionPackage, subscriptionPackageDTO.getPackageServices(), subscriptionPackageDTO.getUpdatedBy());
+            updatePackageServices(subscriptionPackage, subscriptionPackageDTO.getPackageServices(), subscriptionPackageDTO.getUpdatedBy());
         }
 
         // Save the updated subscription package
@@ -125,6 +118,66 @@ public class SubscriptionPackageServiceImpl implements SubscriptionPackageServic
 
         return mapToDTO(subscriptionPackage);
     }
+
+    private void updatePackageServices(SubscriptionPackage subscriptionPackage, List<PackageServiceDTO> packageServicesDTOList, Integer updatedBy) {
+        // Fetch existing services from the database
+        List<PackageServices> existingServices = packageServicesRepository.findBySubscriptionPackage(subscriptionPackage);
+
+        // Manually create a map of incoming services using serviceID as the key
+        Map<Integer, PackageServiceDTO> incomingServicesMap = new HashMap<>();
+        for (PackageServiceDTO dto : packageServicesDTOList) {
+            incomingServicesMap.put(dto.getServiceID(), dto);
+        }
+
+        // Handle deletion of services that no longer exist in the incoming DTO
+        for (PackageServices existingService : existingServices) {
+            Integer existingServiceId = existingService.getService().getServiceID();
+            if (!incomingServicesMap.containsKey(existingServiceId)) {
+                // If the existing service is not in the incoming list, delete it
+                System.out.println("Deleting service with ID: " + existingServiceId);
+                packageServicesRepository.deleteById(existingServiceId);
+               
+                // Flush the persistence context to avoid ObjectDeletedException
+                packageServicesRepository.flush();
+            } else {
+                // Update the existing service with new values from DTO
+                PackageServiceDTO serviceDTO = incomingServicesMap.get(existingServiceId);
+                System.out.println("Updating service with ID: " + existingServiceId);
+                
+                if (serviceDTO.getFrequency() != null) {
+                    existingService.setFrequency(serviceDTO.getFrequency());
+                }
+                if (serviceDTO.getStatus() != null) {
+                    existingService.setStatus(serviceDTO.getStatus());
+                }
+                existingService.setUpdatedBy(updatedBy);
+
+                // Save the updated service
+                packageServicesRepository.save(existingService);
+
+                // Remove the updated service from the map to track which new services need to be added
+                incomingServicesMap.remove(existingServiceId);
+            }
+        }
+
+        // Add new services that are in the DTO but not in the existing services
+        for (PackageServiceDTO newServiceDTO : incomingServicesMap.values()) {
+            System.out.println("Adding new service with ID: " + newServiceDTO.getServiceID());
+            
+            PackageServices newService = new PackageServices();
+            newService.setSubscriptionPackage(subscriptionPackage);
+
+            AlaCarteService alaCarteService = alaCarteServiceRepository.findById(newServiceDTO.getServiceID())
+                    .orElseThrow(() -> new RuntimeException("AlaCarteService not found with ID: " + newServiceDTO.getServiceID()));
+            newService.setService(alaCarteService);
+            newService.setFrequency(newServiceDTO.getFrequency());
+            newService.setStatus(newServiceDTO.getStatus());
+            newService.setCreatedBy(updatedBy);
+
+            packageServicesRepository.save(newService);  // Save the new service
+        }
+    }
+
 
     private void savePackageServices(SubscriptionPackage subscriptionPackage, List<PackageServiceDTO> packageServicesDTOList, Integer createdBy) {
         for (PackageServiceDTO packageServicesDTO : packageServicesDTOList) {
