@@ -386,7 +386,8 @@ public class SubscriberServiceImpl implements SubscriberService {
         dto.setEmail(subscriber.getEmail());
         dto.setContactNo(subscriber.getContactNo());
         dto.setStatus(subscriber.getStatus());
-
+        dto.setPackageID(subscriber.getSubscriptionPackage().getPackageID());
+        dto.setPackageName(subscriber.getSubscriptionPackage().getPackageName());
         AdminUser saathi = subscriber.getSaathi();
         if (saathi != null) {
             dto.setSaathi(saathi);
