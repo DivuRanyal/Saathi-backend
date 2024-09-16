@@ -16,11 +16,15 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.springframework.dao.DataIntegrityViolationException;
+
+import javax.persistence.EntityManager;
 import javax.transaction.Transactional;
 
 @Service
 public class SubscriptionPackageServiceImpl implements SubscriptionPackageService {
 
+	@Autowired
+	private EntityManager entityManager;
     @Autowired
     private SubscriptionPackageRepository subscriptionPackageRepository;
 
@@ -104,8 +108,13 @@ public class SubscriptionPackageServiceImpl implements SubscriptionPackageServic
 
         // Check if package services are provided and update them
         if (subscriptionPackageDTO.getPackageServices() != null && !subscriptionPackageDTO.getPackageServices().isEmpty()) {
+        	
+        	System.out.println("hhh");
             // Delete all existing package services for this package
             packageServicesRepository.deleteAllBySubscriptionPackage(subscriptionPackage);
+            
+            // Clear the persistence context to avoid ObjectDeletedException
+            entityManager.clear();  // Ensure entityManager is injected
 
             // Add the new package services
             savePackageServices(subscriptionPackage, subscriptionPackageDTO.getPackageServices(), subscriptionPackageDTO.getUpdatedBy());
