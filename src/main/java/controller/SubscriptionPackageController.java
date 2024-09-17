@@ -8,7 +8,9 @@ import model.dto.PackageServiceDTO;
 import model.dto.SubscriptionPackageDTO;
 import service.SubscriptionPackageService;
 
+import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.transaction.Transactional;
 
@@ -54,8 +56,15 @@ public class SubscriptionPackageController {
     @GetMapping("/active")
     public ResponseEntity<List<SubscriptionPackageDTO>> getActiveSubscriptionPackages() {
         List<SubscriptionPackageDTO> activePackages = subscriptionPackageService.getActiveSubscriptionPackages();
-        return ResponseEntity.ok(activePackages);
+        
+        // Sorting the list by packageName and wrapping it in ResponseEntity
+        List<SubscriptionPackageDTO> sortedPackages = activePackages.stream()
+                .sorted(Comparator.comparing(SubscriptionPackageDTO::getPackageName))
+                .collect(Collectors.toList());
+        
+        return ResponseEntity.ok(sortedPackages);
     }
+
     
     @GetMapping("/{packageId}/services")
     public ResponseEntity<List<PackageServiceDTO>> getPackageServices(@PathVariable Integer packageId) {
