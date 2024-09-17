@@ -108,6 +108,8 @@ public class PatronServiceImpl implements PatronService {
         dto.setRelation(patron.getRelation());
         dto.setCreatedDate(patron.getCreatedDate());
         dto.setLastUpdatedDate(patron.getLastUpdatedDate());
+        dto.setCreatedBy(patron.getCreatedBy());
+        dto.setUpdatedBy(patron.getUpdatedBy());
         return dto;
     }
 
@@ -135,6 +137,8 @@ public class PatronServiceImpl implements PatronService {
         patron.setCountry(dto.getCountry());
         patron.setRelation(dto.getRelation());
         patron.setComments(dto.getComments());
+        patron.setCreatedBy(dto.getCreatedBy());
+        patron.setUpdatedBy(dto.getUpdatedBy());
         return patron;
     }
     
