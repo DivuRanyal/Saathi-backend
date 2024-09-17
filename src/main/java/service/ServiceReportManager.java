@@ -16,13 +16,13 @@ public class ServiceReportManager {
     private Map<Integer, List<ServiceReport>> subscriberReports = new HashMap<>();
 
     // Method to add a report for a specific subscriber
-    public void addServiceReport(Integer subscriberId, ServiceReport report) {
-        subscriberReports.computeIfAbsent(subscriberId, k -> new ArrayList<>()).add(report);
+    public void addServiceReport(Integer subscriberID, ServiceReport report) {
+        subscriberReports.computeIfAbsent(subscriberID, k -> new ArrayList<>()).add(report);
     }
 
     // Method to get all reports for a specific subscriber
-    public List<ServiceReport> getServiceReports(Integer subscriberId) {
-        return subscriberReports.getOrDefault(subscriberId, new ArrayList<>());
+    public List<ServiceReport> getServiceReports(Integer subscriberID) {
+        return subscriberReports.getOrDefault(subscriberID, new ArrayList<>());
     }
 
     // Method to get the entire map (for further processing or printing)

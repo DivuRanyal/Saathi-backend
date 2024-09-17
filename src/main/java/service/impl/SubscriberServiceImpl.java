@@ -22,6 +22,7 @@ import exception.EmailAlreadyRegisteredException;
 import freemarker.template.TemplateException;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -252,6 +253,20 @@ public class SubscriberServiceImpl implements SubscriberService {
             subscriberDTO.setSaathi(subscriber.getSaathi());
         }
 
+        List<PatronDTO> patronDTOs = new ArrayList<>();
+
+        if (subscriber != null && subscriber.getSubscriberId() != 0) {
+            List<Patron> patrons = patronRepository.findBySubscriber_SubscriberID(subscriber.getSubscriberId());
+            
+            if (patrons != null && !patrons.isEmpty()) {
+                patronDTOs = patrons.stream()
+                    .map(this::mapToPatronDTO)
+                    .collect(Collectors.toList());
+            }
+        }
+
+        // Set the PatronDTOs, either the mapped list or an empty list
+        subscriberDTO.setPatrons(patronDTOs);
         return subscriberDTO;
     }
 

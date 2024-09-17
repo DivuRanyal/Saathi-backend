@@ -325,21 +325,21 @@ public class SubscriberController {
     }
     
  // Define an endpoint to get the services for a subscriber
-    @GetMapping("/{subscriberId}/services")
-    public ResponseEntity<?> getSubscriberServices(@PathVariable Integer subscriberId) {
+    @GetMapping("/{subscriberID}/services")
+    public ResponseEntity<?> getSubscriberServices(@PathVariable Integer subscriberID) {
         try {
             // Fetch the services for the subscriber
-            Map<String, List<ServiceReport>> services = serviceCompletionService.getSubscriberServices(subscriberId);
+            Map<String, List<ServiceReport>> services = serviceCompletionService.getSubscriberServices(subscriberID);
 
             // Check if the list of services is null or empty
             if (services == null || services.isEmpty() || !services.containsKey("allServices")) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No services found for subscriber with ID: " + subscriberId);
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No services found for subscriber with ID: " + subscriberID);
             }
 
             List<ServiceReport> serviceReports = services.get("allServices");
             
             if (serviceReports == null || serviceReports.isEmpty()) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No services found for subscriber with ID: " + subscriberId);
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No services found for subscriber with ID: " + subscriberID);
             }
 
             // Return the list of service reports
@@ -348,7 +348,7 @@ public class SubscriberController {
         } catch (Exception e) {
             // Log the error and return a response with status 500
             e.printStackTrace();
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occurred while retrieving services for subscriber ID: " + subscriberId);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occurred while retrieving services for subscriber ID: " + subscriberID);
         }
     }
 
@@ -428,6 +428,7 @@ public class SubscriberController {
                     File dest = new File(filePath);
                     file.transferTo(dest);
                 }
+
                 // Step 4: Create and add interaction when the service is completed
                 InteractionDTO interactionDTO = new InteractionDTO();
                 interactionDTO.setSubscriberID(subscriberID);
@@ -435,6 +436,7 @@ public class SubscriberController {
                 interactionDTO.setLastUpdatedDate(LocalDateTime.now());
                 interactionDTO.setDescription(description); // Get the description from the request payload
                 interactionDTO.setDocuments(filePath);  // Store the file path in the documents attribute
+
                 // Step 5: Check service completion status and differentiate between package and ala-carte services
                 List<ServiceReport> services = updatedServices.get("allServices");
                 if (services != null) {
@@ -446,13 +448,15 @@ public class SubscriberController {
                                 interactionDTO.setSubscriberAlaCarteServicesID(subscriberAlaCarteServicesID);
                             } else {
                                 // Use the packageServiceID retrieved based on the subscriber
-              //                  interactionDTO.setPackageID(packageID);
+                                
+                                interactionDTO.setPackageServicesID(service.getPackageServiceID()); // Set the packageServiceID
                             }
                             // Set the completion status only if the service is fully completed
                             interactionDTO.setCompletionStatus("Completed".equals(service.getCompletionStatus()) ? 1 : 0);
                         }
                     }
                 }
+
                 // Step 6: Save the interaction to the database
                 interactionService.createInteraction(interactionDTO);
                 // Return a success message
@@ -468,5 +472,6 @@ public class SubscriberController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Service not found for the subscriber.");
         }
     }
+
    
 }

@@ -42,22 +42,22 @@ public class ServiceCompletionServiceNew {
     private InteractionRepository interactionRepository;
 
     // Complete a service by marking it in the report
-    public void completeService(Integer subscriberId, Integer serviceId) {
-        List<ServiceReport> services = subscriberServiceMap.get(subscriberId);
+    public void completeService(Integer subscriberID, Integer serviceID) {
+        List<ServiceReport> services = subscriberServiceMap.get(subscriberID);
 
         if (services != null) {
             for (ServiceReport service : services) {
-                if (service.getServiceID() == serviceId) {
+                if (service.getServiceID() == serviceID) {
                     service.setCompletions(1); // Assuming one-time completion for manual completion
                     service.setCompletionStatus("Completed");
                     service.setCompletionDate(LocalDateTime.now());
-                    inMemoryServiceTracker.updateTracking(subscriberId, services); // Update in-memory tracking
+                    inMemoryServiceTracker.updateTracking(subscriberID, services); // Update in-memory tracking
                     return;
                 }
             }
-            System.out.println("Service with ID: " + serviceId + " not found for subscriber ID: " + subscriberId);
+            System.out.println("Service with ID: " + serviceID + " not found for subscriber ID: " + subscriberID);
         } else {
-            System.out.println("No services found for subscriber ID: " + subscriberId);
+            System.out.println("No services found for subscriber ID: " + subscriberID);
         }
     }
 
@@ -167,7 +167,7 @@ public class ServiceCompletionServiceNew {
 
 */
     // Track package and ala-carte services for a subscriber and store them in cache
-    @CachePut(value = "subscriberServicesCache", key = "#subscriberId")
+    @CachePut(value = "subscriberServicesCache", key = "#subscriberID")
     public Map<String, List<ServiceReport>> trackSubscriberServices(Integer subscriberID, int packageID, int alaCarteServiceID) {
         System.out.println("Tracking services for subscriber ID: " + subscriberID);
         
@@ -316,16 +316,33 @@ public class ServiceCompletionServiceNew {
  // Utility method to convert a list of Interactions to ServiceReport objects (handles multiple services)
     private List<ServiceReport> convertInteractionsToServiceReports(List<Interaction> interactions) {
         List<ServiceReport> serviceReports = new ArrayList<>();
-        
+
         for (Interaction interaction : interactions) {
             ServiceReport serviceReport = new ServiceReport();
-            serviceReport.setServiceID(interaction.getSubscriberAlaCarteServices().getSubscriberAlaCarteServicesID());
+            
+            // Handle Ala-carte services
+            if (interaction.getSubscriberAlaCarteServices() != null) {
+                serviceReport.setServiceID(interaction.getSubscriberAlaCarteServices().getSubscriberAlaCarteServicesID());
+                serviceReport.setServiceName(interaction.getSubscriberAlaCarteServices().getServiceName()); // Assuming there's a service name field in SubscriberAlaCarteServices
+            }
+            // Handle Package-based services (if packageID or packageServiceID is involved)
+            else if (interaction.getPackageID() != null) {
+                serviceReport.setServiceID(interaction.getPackageServicesID()); // Assuming Interaction contains packageServiceID
+                serviceReport.setServiceName("Package Service " + interaction.getPackageServicesID()); // Use a meaningful name or fetch from the service table
+            } else {
+                // If neither ala-carte nor package is present, skip this interaction or handle appropriately
+                continue;
+            }
+            
+            // Set the completion status based on interaction
             serviceReport.setCompletionStatus(interaction.getCompletionStatus() == 1 ? "Completed" : "In Progress");
             serviceReport.setCompletionDate(interaction.getLastUpdatedDate());
-            serviceReport.setServiceName("Service " + interaction.getSubscriberAlaCarteServices()); // Assuming service name can be generated from ID
+
+            // Add the constructed ServiceReport to the list
             serviceReports.add(serviceReport);
         }
-        
+
         return serviceReports; // Returns list of service reports representing all services availed by the subscriber
     }
+
 }
