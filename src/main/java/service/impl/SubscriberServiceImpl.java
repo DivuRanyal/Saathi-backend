@@ -354,6 +354,8 @@ public class SubscriberServiceImpl implements SubscriberService {
         dto.setFirstName(patron.getFirstName());
         dto.setLastName(patron.getLastName());
         dto.setEmail(patron.getEmail());
+        dto.setCountryCode(patron.getCountryCode());
+        dto.setDob(patron.getDob());
         dto.setContactNo(patron.getContactNo());
         dto.setAddress1(patron.getAddress1());
         dto.setAddress2(patron.getAddress2());
