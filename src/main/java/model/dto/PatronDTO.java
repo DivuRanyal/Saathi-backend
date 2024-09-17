@@ -4,6 +4,8 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+import javax.persistence.Column;
+
 public class PatronDTO {
 
     private int patronID;
@@ -23,6 +25,8 @@ public class PatronDTO {
     private Date createdDate;
     private Date lastUpdatedDate;
     private String comments;
+    private Integer createdBy;
+    private Integer updatedBy;
 
  public String getComments() {
 		return comments;
@@ -173,4 +177,21 @@ public class PatronDTO {
         this.lastUpdatedDate = lastUpdatedDate;
     }
 
+	public Integer getCreatedBy() {
+		return createdBy;
+	}
+
+	public void setCreatedBy(Integer createdBy) {
+		this.createdBy = createdBy;
+	}
+
+	public Integer getUpdatedBy() {
+		return updatedBy;
+	}
+
+	public void setUpdatedBy(Integer updatedBy) {
+		this.updatedBy = updatedBy;
+	}
+
+    
 }

@@ -12,6 +12,7 @@ public class SubscriptionPackageDTO {
     private String packageDescription;
     private BigDecimal priceUSD;
     private BigDecimal priceINR;
+    private BigDecimal packageDiscount;
     private Integer status;
     private Integer createdBy;  // Add createdBy in DTO
     private Integer updatedBy;  // Add updatedBy in DTO
@@ -92,7 +93,14 @@ public class SubscriptionPackageDTO {
 	public void setPackageServices(List<PackageServiceDTO> packageServices) {
 		this.packageServices = packageServices;
 	}
+	public BigDecimal getPackageDiscount() {
+		return packageDiscount;
+	}
+	public void setPackageDiscount(BigDecimal packageDiscount) {
+		this.packageDiscount = packageDiscount;
+	}
 
+	
     
     // Getters and Setters
 }

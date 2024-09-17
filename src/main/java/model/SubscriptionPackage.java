@@ -29,6 +29,10 @@ public class SubscriptionPackage {
     @Column(name = "PriceUSD")
     private BigDecimal priceUSD = BigDecimal.valueOf(0.00);
 
+    @Column(name = "PackageDiscount")
+    private BigDecimal packageDiscount = BigDecimal.valueOf(0.00);
+
+    
     @Column(name = "PriceINR")
     @NotNull(message = "Price cannot be null")
     private BigDecimal priceINR = BigDecimal.valueOf(0.00);
@@ -191,7 +195,17 @@ public class SubscriptionPackage {
     public void setPackageServices(List<PackageServices> packageServices) { // Add setter for package services
         this.packageServices = packageServices;
     }
-    // toString method for easier debugging
+    
+    
+    public BigDecimal getPackageDiscount() {
+		return packageDiscount;
+	}
+
+	public void setPackageDiscount(BigDecimal packageDiscount) {
+		this.packageDiscount = packageDiscount;
+	}
+
+	// toString method for easier debugging
     @Override
     public String toString() {
         return "SubscriptionPackage{" +

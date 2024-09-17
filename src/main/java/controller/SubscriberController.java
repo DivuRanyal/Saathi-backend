@@ -65,9 +65,7 @@ public class SubscriberController {
     @Autowired
     private ServiceCompletionServiceNew serviceCompletionService;
 
-    @Autowired
-    private ServiceCompletionService serviceCompletionService1;
-
+ 
     @Autowired
     private InteractionService interactionService;
     

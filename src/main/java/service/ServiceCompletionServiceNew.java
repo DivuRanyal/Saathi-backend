@@ -315,7 +315,7 @@ public class ServiceCompletionServiceNew {
 
  // Utility method to convert a list of Interactions to ServiceReport objects (handles multiple services)
     private List<ServiceReport> convertInteractionsToServiceReports(List<Interaction> interactions) {
-  /*      List<ServiceReport> serviceReports = new ArrayList<>();
+        List<ServiceReport> serviceReports = new ArrayList<>();
 
         for (Interaction interaction : interactions) {
             ServiceReport serviceReport = new ServiceReport();
@@ -323,12 +323,12 @@ public class ServiceCompletionServiceNew {
             // Handle Ala-carte services
             if (interaction.getSubscriberAlaCarteServices() != null) {
                 serviceReport.setServiceID(interaction.getSubscriberAlaCarteServices().getSubscriberAlaCarteServicesID());
-  //              serviceReport.setServiceName(interaction.getSubscriberAlaCarteServices().getServiceName()); // Assuming there's a service name field in SubscriberAlaCarteServices
+                serviceReport.setServiceName(interaction.getSubscriberAlaCarteServices().getService().getServiceName()); // Assuming there's a service name field in SubscriberAlaCarteServices
             }
             // Handle Package-based services (if packageID or packageServiceID is involved)
-            else if (interaction.getPackageID() != null) {
-                serviceReport.setServiceID(interaction.getPackageServicesID()); // Assuming Interaction contains packageServiceID
-                serviceReport.setServiceName("Package Service " + interaction.getPackageServicesID()); // Use a meaningful name or fetch from the service table
+            else if (interaction.getPackageServices() != null) {
+                serviceReport.setServiceID(interaction.getPackageServices().getService().getServiceID()); // Assuming Interaction contains packageServiceID
+                serviceReport.setServiceName("Package Service " + interaction.getPackageServices().getService().getServiceName()); // Use a meaningful name or fetch from the service table
             } else {
                 // If neither ala-carte nor package is present, skip this interaction or handle appropriately
                 continue;
@@ -343,6 +343,6 @@ public class ServiceCompletionServiceNew {
         }
 
         return serviceReports; // Returns list of service reports representing all services availed by the subscriber
- */       return null;   }
+    }
 
 }

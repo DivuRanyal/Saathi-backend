@@ -66,6 +66,13 @@ public class Patron {
     @Column(name = "Comments", columnDefinition = "TEXT")
     private String comments;
 
+    @Column(name = "CreatedBy")
+    private Integer createdBy;
+
+    @Column(name = "UpdatedBy")
+    private Integer updatedBy;
+
+    
     // Getters and Setters
  // Date format to be used for date fields
     private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
@@ -204,6 +211,23 @@ public class Patron {
 
 	public void setComments(String comments) {
 		this.comments = comments;
+	}
+
+	
+	public Integer getCreatedBy() {
+		return createdBy;
+	}
+
+	public void setCreatedBy(Integer createdBy) {
+		this.createdBy = createdBy;
+	}
+
+	public Integer getUpdatedBy() {
+		return updatedBy;
+	}
+
+	public void setUpdatedBy(Integer updatedBy) {
+		this.updatedBy = updatedBy;
 	}
 
 	@PrePersist

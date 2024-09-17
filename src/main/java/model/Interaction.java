@@ -33,8 +33,10 @@ public class Interaction {
     @Column(name = "CompletionStatus")
     private Integer completionStatus;
 
-    @Column(name = "PackageServicesID")
-    private Integer packageServicesID;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "PackageServicesID", referencedColumnName = "PackageServicesID", nullable = true)
+    private PackageServices packageServices;
+
 
     @Column(name = "Subscriber", length = 45)
     private String subscriber;
@@ -112,16 +114,16 @@ public class Interaction {
 	public void setCompletionStatus(Integer completionStatus) {
 		this.completionStatus = completionStatus;
 	}
+	
+    public PackageServices getPackageServices() {
+		return packageServices;
+	}
 
-	public Integer getPackageServicesID() {
-        return packageServicesID;
-    }
+	public void setPackageServices(PackageServices packageServices) {
+		this.packageServices = packageServices;
+	}
 
-    public void setPackageServicesID(Integer packageServicesID) {
-        this.packageServicesID = packageServicesID;
-    }
-
-    public String getSubscriber() {
+	public String getSubscriber() {
         return subscriber;
     }
 

@@ -61,7 +61,10 @@ public class SubscriptionPackageServiceImpl implements SubscriptionPackageServic
             if (subscriptionPackageDTO.getCreatedBy() != null) {
                 subscriptionPackage.setCreatedBy(subscriptionPackageDTO.getCreatedBy());
             }
-
+            if (subscriptionPackageDTO.getPackageDiscount() != null) {
+                subscriptionPackage.setPackageDiscount(subscriptionPackageDTO.getPackageDiscount());
+            }
+            
             // Save the new subscription package
             subscriptionPackage = subscriptionPackageRepository.save(subscriptionPackage);
 
@@ -108,6 +111,10 @@ public class SubscriptionPackageServiceImpl implements SubscriptionPackageServic
             subscriptionPackage.setUpdatedBy(subscriptionPackageDTO.getUpdatedBy());
         }
 
+        if (subscriptionPackageDTO.getPackageDiscount() != null) {
+            subscriptionPackage.setPackageDiscount(subscriptionPackageDTO.getPackageDiscount());
+        }
+        
         // Handle PackageServices update
         if (subscriptionPackageDTO.getPackageServices() != null && !subscriptionPackageDTO.getPackageServices().isEmpty()) {
             updatePackageServices(subscriptionPackage, subscriptionPackageDTO.getPackageServices(), subscriptionPackageDTO.getUpdatedBy());
@@ -249,7 +256,7 @@ public class SubscriptionPackageServiceImpl implements SubscriptionPackageServic
         dto.setStatus(subscriptionPackage.getStatus());
         dto.setCreatedBy(subscriptionPackage.getCreatedBy());
         dto.setUpdatedBy(subscriptionPackage.getUpdatedBy());
-
+        dto.setPackageDiscount(subscriptionPackage.getPackageDiscount());
         if (subscriptionPackage.getPackageServices() != null) {
             List<PackageServiceDTO> packageServicesDTOList = subscriptionPackage.getPackageServices()
                     .stream()
