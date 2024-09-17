@@ -122,7 +122,7 @@ public class SubscriptionPackageServiceImpl implements SubscriptionPackageServic
 
         // Save the updated subscription package
         subscriptionPackage = subscriptionPackageRepository.save(subscriptionPackage);
-
+ //       entityManager.refresh(subscriptionPackage); 
         return mapToDTO(subscriptionPackage);
     }
 
@@ -142,10 +142,14 @@ public class SubscriptionPackageServiceImpl implements SubscriptionPackageServic
             if (!incomingServicesMap.containsKey(existingServiceId)) {
                 // If the existing service is not in the incoming list, delete it
                 System.out.println("Deleting service with ID: " + existingServiceId);
-                packageServicesRepository.deleteById(existingServiceId);
-               
+                packageServicesRepository.deleteById(existingService.getPackageServicesID());
+                packageServicesRepository.flush();  // Ensure changes are flushed to the database
+   //             if (packageServicesRepository.existsById(existingServiceId)) {
+   //                 entityManager.refresh(existingService);
+  //              }
+
                 // Flush the persistence context to avoid ObjectDeletedException
-                packageServicesRepository.flush();
+                
             } else {
                 // Update the existing service with new values from DTO
                 PackageServiceDTO serviceDTO = incomingServicesMap.get(existingServiceId);
@@ -161,7 +165,7 @@ public class SubscriptionPackageServiceImpl implements SubscriptionPackageServic
 
                 // Save the updated service
                 packageServicesRepository.save(existingService);
-
+               
                 // Remove the updated service from the map to track which new services need to be added
                 incomingServicesMap.remove(existingServiceId);
             }
