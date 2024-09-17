@@ -39,7 +39,7 @@ public interface SubscriberService {
     SubscriberDTO convertToSubscriberDTO(Subscriber subscriber);
 
     // Assign a Saathi (AdminUser) to a subscriber
-    SubscriberDTO assignSaathiToSubscriber(int subscriberId, int saathiId);
+    SubscriberDTO assignSaathiToSubscriber(int subscriberId, int saathiId, String reasonForChange);
 
     // Get subscribers who do not have a Saathi assigned
     List<Subscriber> getSubscribersWithoutSaathi();

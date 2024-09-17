@@ -110,7 +110,10 @@ public class SubscriberServiceImpl implements SubscriberService {
         }
         if (subscriberDTO.getStatus() != null) {
             existingSubscriber.setStatus(subscriberDTO.getStatus());
-
+            }
+            if (subscriberDTO.getReasonForChange() != null) {
+                existingSubscriber.setReasonForChange(subscriberDTO.getReasonForChange());
+            }
             if (subscriberDTO.getStatus() == 1) { // Assuming '1' is the status for active
                 AdminUser assignedSaathi = existingSubscriber.getSaathi();
                 if (assignedSaathi != null) {
@@ -131,7 +134,7 @@ public class SubscriberServiceImpl implements SubscriberService {
                     }
                 }
             }
-        }
+        
 
         if (subscriberDTO.getComments() != null) {
             existingSubscriber.setComments(subscriberDTO.getComments());
@@ -165,9 +168,8 @@ public class SubscriberServiceImpl implements SubscriberService {
         }
 
         Subscriber updatedSubscriber = subscriberRepository.save(existingSubscriber);
-        return convertToDTO(updatedSubscriber);
+        return convertToDTO(updatedSubscriber);    
     }
-
     @Override
     public SubscriberDTO getSubscriberById(int subscriberId) {
         Subscriber subscriber = subscriberRepository.findById(subscriberId)
@@ -224,7 +226,7 @@ public class SubscriberServiceImpl implements SubscriberService {
         subscriberDTO.setPassword(subscriber.getPassword());
         subscriberDTO.setLastLoginTime(subscriber.getLastLoginTime());
         subscriberDTO.setComments(subscriber.getComments());
-        
+        subscriberDTO.setReasonForChange(subscriber.getReasonForChange());
         if (subscriber.getSubscriptionPackage() != null) {
             subscriberDTO.setPackageID(subscriber.getSubscriptionPackage().getPackageID());
             subscriberDTO.setPackageName(subscriber.getSubscriptionPackage().getPackageName());
@@ -293,7 +295,7 @@ public class SubscriberServiceImpl implements SubscriberService {
         subscriber.setEndDate(subscriberDTO.getEndDate());
         subscriber.setBillingStatus(subscriberDTO.getBillingStatus());
         subscriber.setComments(subscriberDTO.getComments());
-
+        subscriber.setReasonForChange(subscriberDTO.getReasonForChange());
         if (subscriberDTO.getPackageID() != null) {
             SubscriptionPackage subscriptionPackage = subscriptionPackageRepository.findById(subscriberDTO.getPackageID())
                     .orElseThrow(() -> new RuntimeException("SubscriptionPackage not found with ID: " + subscriberDTO.getPackageID()));
@@ -375,12 +377,13 @@ public class SubscriberServiceImpl implements SubscriberService {
     }
 
     @Override
-    public SubscriberDTO assignSaathiToSubscriber(int subscriberId, int saathiId) {
+    public SubscriberDTO assignSaathiToSubscriber(int subscriberId, int saathiId,String reasonForChange) {
         Subscriber subscriber = subscriberRepository.findById(subscriberId)
                 .orElseThrow(() -> new RuntimeException("Subscriber not found with ID: " + subscriberId));
         AdminUser saathi = adminUserRepository.findById(saathiId)
                 .orElseThrow(() -> new RuntimeException("Saathi not found with ID: " + saathiId));
         subscriber.setSaathi(saathi);
+        subscriber.setReasonForChange(reasonForChange);
         Subscriber updatedSubscriber = subscriberRepository.save(subscriber);
         return convertToDTO(updatedSubscriber);
     }

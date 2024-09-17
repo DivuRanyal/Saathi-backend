@@ -83,6 +83,9 @@ public class Subscriber {
     @Column(name = "Comments", columnDefinition = "TEXT")
     private String comments;
 
+    @Column(name = "ReasonForChange", columnDefinition = "TEXT")
+    private String reasonForChange;
+
     @OneToOne(mappedBy = "subscriber", cascade = CascadeType.ALL)
     @JsonIgnore
     private CreditCard creditCard;
@@ -254,6 +257,15 @@ public class Subscriber {
 		this.subscriptionPackage = subscriptionPackage;
 	}
 
+	public String getReasonForChange() {
+		return reasonForChange;
+	}
+
+	public void setReasonForChange(String reasonForChange) {
+		this.reasonForChange = reasonForChange;
+	}
+
+	
     
     // Getters and Setters
    

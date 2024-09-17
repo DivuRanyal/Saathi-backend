@@ -255,8 +255,10 @@ public class SubscriberController {
     
     @PutMapping("/{subscriberID}/assign-saathi")
     public ResponseEntity<Map<String, Object>> assignSaathiToSubscriber(
-            @PathVariable int subscriberID, @RequestParam int saathiID) throws IOException, TemplateException {
+            @PathVariable int subscriberID, @RequestParam int saathiID,  @RequestBody(required = false)
+            Map<String, String> reason) throws IOException, TemplateException {
 
+    	
     	 // Step 1: Check if the Subscriber exists
         boolean subscriberExists = subscriberService.subscriberExists(subscriberID); // You should implement this method
         if (!subscriberExists) {
@@ -272,12 +274,18 @@ public class SubscriberController {
             errorResponse.put("error", "Saathi not found with ID: " + saathiID);
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
         }
+        
+        // Step 3: Extract Reason from the request body if present
+        String reasonForChange = reason != null ? reason.getOrDefault("Reason", "") : ""; // Use the correct key
+        System.out.println("Reason for change: " + reasonForChange);
+
         // Step 1: Assign Saathi to Subscriber and get the updated subscriber
-        SubscriberDTO updatedSubscriber = subscriberService.assignSaathiToSubscriber(subscriberID, saathiID);
+        SubscriberDTO updatedSubscriber = subscriberService.assignSaathiToSubscriber(subscriberID, saathiID, reasonForChange);
 //        System.out.println(updatedSubscriber.getSaathi().getAdminUserID());
         // Step 2: Fetch the Patron details for the Subscriber
  //       PatronDTO patronDetails = patronService.getPatronBySubscriberId(subscriberID);
 
+        
         // Step 3: Create a response model (Map) with additional details
         Map<String, Object> model = new HashMap<>();
 
@@ -312,6 +320,7 @@ public class SubscriberController {
             model.put("emailStatus", "Failed to send email.");
         }
 
+        
         // Step 7: Return the model and HttpStatus.OK
         return new ResponseEntity<>(model, HttpStatus.OK);
     }

@@ -30,7 +30,8 @@ public class SubscriberDTO {
     private Date createdDate;
     private Date lastUpdatedDate;
     private int status;
-    private AdminUser saathi; 
+    private AdminUser saathi;
+    private String ReasonForChange;
  // Add fields for Subscription Package details
     private String packageName;
     private BigDecimal priceINR;
@@ -221,6 +222,16 @@ public class SubscriberDTO {
 	public void setPatron(PatronDTO patron) {
 		this.patron = patron;
 	}
+	
+	
+	public String getReasonForChange() {
+		return ReasonForChange;
+	}
+
+	public void setReasonForChange(String reasonForChange) {
+		ReasonForChange = reasonForChange;
+	}
+
 	// Constructor
     public SubscriberDTO(int subscriberID, String firstName, String lastName, String email, String contactNo, AdminUser saathi) {
         this.subscriberID = subscriberID;
