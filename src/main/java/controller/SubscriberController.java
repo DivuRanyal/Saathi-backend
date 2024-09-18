@@ -15,7 +15,7 @@ import service.AdminUsersService;
 import service.EmailService;
 import service.InteractionService;
 import service.PatronService;
-import service.ServiceCompletionService;
+//import service.ServiceCompletionService;
 import service.ServiceCompletionServiceNew;
 import service.SubscriberAlaCarteServicesService;
 import service.SubscriberService;
@@ -386,22 +386,19 @@ public class SubscriberController {
             @RequestParam(required = false, defaultValue = "0") int packageID,
             @RequestParam(required = false, defaultValue = "0") int subscriberAlaCarteServiceID
     		) {
-
         // Call the service method to track services
         Map<String, List<ServiceReport>> trackedServices = serviceCompletionService.trackSubscriberServices(subscriberID, packageID, subscriberAlaCarteServiceID);
-
         // Check if any services were tracked
         if (trackedServices == null || trackedServices.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                    .body(null);
        }
-
         // Return the tracked services in the response
         return ResponseEntity.ok(trackedServices);
-    	
    //     return null;
     }
-      
+       
+    
     @PostMapping("/{subscriberID}/services/{serviceID}/complete")
     public ResponseEntity<String> updateServiceCompletion(
             @PathVariable Integer subscriberID,
@@ -480,5 +477,4 @@ public class SubscriberController {
         }
     }
 
-   
 }

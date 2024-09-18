@@ -23,15 +23,16 @@ public class SubscriberServiceDetailsDTO {
     private Date lastUpdatedDate;
     
     private Boolean isAccepted;
+    private Boolean isPackageService;
     private Integer subscriberAlaCarteServicesID;
     private Integer completionStatus;
     private String serviceName;
-
+    
     // Constructor with all the necessary parameters
     public SubscriberServiceDetailsDTO(Integer subscriberID, int serviceID, Date serviceDate, Date serviceTime,
                                        Integer billingStatus, Date createdDate, Date lastUpdatedDate,
                                        Boolean isAccepted, Integer subscriberAlaCarteServicesID, Integer completionStatus,
-                                       String serviceName) {
+                                       String serviceName,Boolean isPackageService) {
         this.subscriberID = subscriberID;
         this.serviceID = serviceID;
         this.serviceDate = serviceDate;
@@ -43,6 +44,7 @@ public class SubscriberServiceDetailsDTO {
         this.subscriberAlaCarteServicesID = subscriberAlaCarteServicesID;
         this.completionStatus = completionStatus;
         this.serviceName = serviceName;
+        this.isPackageService = isPackageService;
     }
 
     // Getters and Setters
@@ -133,4 +135,13 @@ public class SubscriberServiceDetailsDTO {
     public void setServiceName(String serviceName) {
         this.serviceName = serviceName;
     }
+    
+	public Boolean getIsPackageService() {
+		return isPackageService;
+	}
+	
+	public void setIsPackageService(Boolean isPackageService) {
+		this.isPackageService = isPackageService;
+	}
 }
+

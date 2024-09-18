@@ -18,7 +18,7 @@ import model.SubscriberAlaCarteServices;
 import repository.PackageServiceRepository;
 import repository.SubscriberAlaCarteServicesRepository;
 import repository.SubscriberRepository;
-
+/*
 @Service
 public class ServiceCompletionService {
 
@@ -117,6 +117,7 @@ public class ServiceCompletionService {
         return services;
     }
 */
+/*
     // Update the service completion for a subscriber
     @CachePut(value = "subscriberServicesCache", key = "#subscriberId")
     public Map<String, List<ServiceReport>> updateServiceCompletion(Integer subscriberId, Integer serviceId) {
@@ -214,3 +215,4 @@ public class ServiceCompletionService {
     }
 
 }
+*/

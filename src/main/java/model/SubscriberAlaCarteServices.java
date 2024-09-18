@@ -41,6 +41,9 @@ public class SubscriberAlaCarteServices {
     @Column(name = "IsAccepted")
     private Boolean isAccepted;
 
+    @Column(name = "IsPackageService")
+    private Boolean isPackageService;
+
  // Correctly map the ManyToOne relationship
     @ManyToOne
     @JoinColumn(name = "subscriber_id")
@@ -150,6 +153,15 @@ public class SubscriberAlaCarteServices {
 	public void setService(AlaCarteService service) {
 		this.service = service;
 	}
+
+	public Boolean getIsPackageService() {
+		return isPackageService;
+	}
+
+	public void setIsPackageService(Boolean isPackageService) {
+		this.isPackageService = isPackageService;
+	}
     
+	
 
 }

@@ -1,6 +1,8 @@
 package service;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -169,10 +171,8 @@ public class ServiceCompletionServiceNew {
     // Track package and ala-carte services for a subscriber and store them in cache
     @CachePut(value = "subscriberServicesCache", key = "#subscriberID")
     public Map<String, List<ServiceReport>> trackSubscriberServices(Integer subscriberID, int packageID, int alaCarteServiceID) {
-        System.out.println("Tracking services for subscriber ID: " + subscriberID);
-        
+        System.out.println("Tracking services for subscriber ID: " + subscriberID); 
         List<ServiceReport> serviceReports = new ArrayList<>();
-
         // Handle package services
         if (packageID != 0) {
             List<PackageServices> packageServices = packageServiceRepository.findServicesByPackageId(packageID);
@@ -188,18 +188,17 @@ public class ServiceCompletionServiceNew {
                         packageService.getFrequencyUnit(),
                         0,
                         "Not Completed",
-                        null,false,packageService.getPackageServicesID()
+                        null,false,packageService.getPackageServicesID(),null,null
                     );
                     serviceReports.add(report);
                 }
             }
         }
-
+       
         // Handle ala-carte services
         if (alaCarteServiceID != 0) {
             SubscriberAlaCarteServices alaCarteService = alaCarteServicesRepository.findById(alaCarteServiceID)
                     .orElseThrow(() -> new RuntimeException("Ala-carte service not found"));
-
             ServiceReport alaCarteServiceReport = new ServiceReport(
                 alaCarteService.getService().getServiceID(),
                 alaCarteService.getService().getServiceName(),
@@ -208,7 +207,7 @@ public class ServiceCompletionServiceNew {
                 "Single",
                 0,
                 "Not Completed",
-                null,true,0
+                null,true,0,null,null
             );
             serviceReports.add(alaCarteServiceReport);
         }
@@ -221,6 +220,50 @@ public class ServiceCompletionServiceNew {
         services.put("allServices", serviceReports);
         return services;
     }
+    
+    @CachePut(value = "subscriberServicesCache", key = "#subscriberID")
+    public ServiceReport updateServiceRequest(Integer subscriberID, int serviceID, LocalDate requestedDate, LocalTime requestedTime) {
+        // Fetch the cached list of services for the subscriber
+        List<ServiceReport> allServices = subscriberServiceMap.get(subscriberID);
+        ServiceReport updatedReport = null;
+
+        if (allServices != null) {
+            // Iterate over the list of all services to find the one that matches the serviceID
+            for (ServiceReport report : allServices) {
+                if (report.getServiceID() == serviceID) {
+                    // Check if the service is ala-carte or package
+                    if (report.isAlaCarte()) {
+                        System.out.println("Updating requested date/time for an ala-carte service.");
+                        // Optionally update in the database as well
+      //                  updateAlaCarteServiceInDatabase(subscriberID, serviceID, requestedDate, requestedTime);
+                    } else {
+                        System.out.println("Updating requested date/time for a package service.");
+                        // Optionally update in the database as well
+      //                  updatePackageServiceInDatabase(subscriberID, serviceID, requestedDate, requestedTime);
+                    }
+
+                    // Update the requested date and time for the cached service report
+                    report.setRequestedDate(requestedDate);
+                    report.setRequestedTime(requestedTime);
+                    updatedReport = report;  // Keep track of the updated report
+                    break;  // Break the loop since we found and updated the correct report
+                }
+            }
+
+            // Update the cache with the modified list of services
+            if (updatedReport != null) {
+                subscriberServiceMap.put(subscriberID, allServices);  // Update cache with modified list
+            } else {
+                throw new RuntimeException("Service report not found for subscriber: " + subscriberID + " and serviceID: " + serviceID);
+            }
+        } else {
+            throw new RuntimeException("No cached data found for subscriber: " + subscriberID);
+        }
+
+        return updatedReport;
+    }
+
+
     
     @CachePut(value = "subscriberServicesCache", key = "#subscriberID")
     public Map<String, List<ServiceReport>> updateServiceCompletion(Integer subscriberID, Integer serviceID) {

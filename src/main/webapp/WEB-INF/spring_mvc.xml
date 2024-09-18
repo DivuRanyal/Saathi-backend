@@ -16,28 +16,23 @@
            http://www.springframework.org/schema/data/jpa/spring-jpa.xsd
            http://www.springframework.org/schema/tx 
            http://www.springframework.org/schema/tx/spring-tx.xsd">
-
     <!-- Enable component scanning -->
     <context:component-scan base-package="controller,service,model,repository,config" />
-
     <!-- Enable Spring MVC configuration -->
     <mvc:annotation-driven />
-
-    <!-- View resolver -->
+<!-- View resolver -->
     <bean class="org.springframework.web.servlet.view.InternalResourceViewResolver">
         <property name="prefix" value="/WEB-INF/views/" />
         <property name="suffix" value=".jsp" />
     </bean>
-
-    <!-- Data Source -->
+<!-- Data Source -->
     <bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
         <property name="driverClassName" value="com.mysql.cj.jdbc.Driver" />
         <property name="url" value="jdbc:mysql://localhost:3306/Saathi" />
         <property name="username" value="root" />
         <property name="password" value="Root@12345" />
     </bean>
-
-    <!-- EntityManagerFactory -->
+ <!-- EntityManagerFactory -->
 <bean id="entityManagerFactory" class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">
     <property name="dataSource" ref="dataSource" />
     <property name="packagesToScan" value="model" />
@@ -52,7 +47,6 @@
         </props>
     </property>
 </bean>
-
 <!-- Transaction Manager -->
 <bean id="transactionManager" class="org.springframework.orm.jpa.JpaTransactionManager">
     <property name="entityManagerFactory" ref="entityManagerFactory" />
@@ -60,22 +54,18 @@
     <bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver" />
     <!-- Enable JPA repositories -->
     <jpa:repositories base-package="repository" />
-
-    <!-- Enable annotation-driven transaction management -->
-    <tx:annotation-driven transaction-manager="transactionManager" />
-    
+	<!-- Enable annotation-driven transaction management -->
+    <tx:annotation-driven transaction-manager="transactionManager" />    
     <!-- FreeMarker Configuration -->
     <bean id="freemarkerConfig" class="org.springframework.ui.freemarker.FreeMarkerConfigurationFactoryBean">
         <property name="templateLoaderPath" value="/WEB-INF/templates/" />
         <property name="defaultEncoding" value="UTF-8" />
-    </bean>
-     
+    </bean>  
    <bean id="mailSender" class="org.springframework.mail.javamail.JavaMailSenderImpl">
     <property name="host" value="smtpout.secureserver.net"/>
     <property name="port" value="465"/>
     <property name="username" value="info@etheriumtech.com"/>
     <property name="password" value="Admin@1234"/>
-   
     <property name="javaMailProperties">
         <props>
             <prop key="mail.transport.protocol">smtp</prop>
@@ -88,5 +78,4 @@
         </props>
     </property>
 </bean>
-
 </beans>

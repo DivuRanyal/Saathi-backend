@@ -1,7 +1,9 @@
 package model;
 
 import java.io.Serializable;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 
@@ -15,14 +17,18 @@ public class ServiceReport implements Serializable {
     private int completions; // How many times the service has been completed
     private String completionStatus; // Could be "In Progress", "Completed", etc.
     private boolean isAlaCarte;
+    
     // Define the JSON format to return only the date part of the LocalDateTime
     @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDateTime completionDate;
+    
+    private LocalDate requestedDate; // Date requested by the subscriber
+    private LocalTime requestedTime; // Time requested by the subscriber
 
- // Constructor
+    // Constructor
     public ServiceReport(int serviceID, String serviceName, String packageName, int frequency, 
                          String frequencyUnit, int completions, String completionStatus, LocalDateTime completionDate, 
-                         boolean isAlaCarte, int packageServiceID) {
+                         boolean isAlaCarte, int packageServiceID, LocalDate requestedDate, LocalTime requestedTime) {
         this.serviceID = serviceID;
         this.serviceName = serviceName;
         this.packageName = packageName;
@@ -33,9 +39,16 @@ public class ServiceReport implements Serializable {
         this.completionDate = completionDate;
         this.isAlaCarte = isAlaCarte;
         this.packageServiceID = packageServiceID;
+        this.requestedDate = requestedDate;
+        this.requestedTime = requestedTime;
     }
 
+    // Default constructor
+    public ServiceReport() {
+        super();
+    }
 
+    // Getters and setters
     public int getServiceID() {
         return serviceID;
     }
@@ -44,7 +57,6 @@ public class ServiceReport implements Serializable {
         this.serviceID = serviceID;
     }
 
-    // Getters and setters
     public String getServiceName() {
         return serviceName;
     }
@@ -93,7 +105,6 @@ public class ServiceReport implements Serializable {
         this.completionStatus = completionStatus;
     }
 
-    // Return only the date part for completionDate
     public String getCompletionDate() {
         if (completionDate != null) {
             return completionDate.toLocalDate().toString();  // Convert to date format
@@ -105,40 +116,54 @@ public class ServiceReport implements Serializable {
         this.completionDate = completionDate;
     }
 
-    
     public boolean isAlaCarte() {
-		return isAlaCarte;
-	}
+        return isAlaCarte;
+    }
 
-	public void setAlaCarte(boolean isAlaCarte) {
-		this.isAlaCarte = isAlaCarte;
-	}
+    public void setAlaCarte(boolean isAlaCarte) {
+        this.isAlaCarte = isAlaCarte;
+    }
 
-	public int getPackageServiceID() {
-		return packageServiceID;
-	}
+    public int getPackageServiceID() {
+        return packageServiceID;
+    }
 
-	public void setPackageServiceID(int packageServiceID) {
-		this.packageServiceID = packageServiceID;
-	}
+    public void setPackageServiceID(int packageServiceID) {
+        this.packageServiceID = packageServiceID;
+    }
 
-	@Override
+    public LocalDate getRequestedDate() {
+        return requestedDate;
+    }
+
+    public void setRequestedDate(LocalDate requestedDate) {
+        this.requestedDate = requestedDate;
+    }
+
+    public LocalTime getRequestedTime() {
+        return requestedTime;
+    }
+
+    public void setRequestedTime(LocalTime requestedTime) {
+        this.requestedTime = requestedTime;
+    }
+
+    // Override toString method for printing the details of ServiceReport
+    @Override
     public String toString() {
         return "ServiceReport{" +
                 "serviceID=" + serviceID +
                 ", serviceName='" + serviceName + '\'' +
                 ", packageName='" + packageName + '\'' +
+                ", packageServiceID=" + packageServiceID +
                 ", frequency=" + frequency +
                 ", frequencyUnit='" + frequencyUnit + '\'' +
                 ", completions=" + completions +
                 ", completionStatus='" + completionStatus + '\'' +
                 ", completionDate=" + getCompletionDate() +
+                ", requestedDate=" + requestedDate +
+                ", requestedTime=" + requestedTime +
                 ", isAlaCarte=" + isAlaCarte +
                 '}';
     }
-	
-	public ServiceReport() {
-		super();
-	}
-	
 }
