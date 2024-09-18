@@ -1,10 +1,12 @@
 package service.impl;
 
 import model.dto.CreditCardDTO;
+import model.dto.PackageServiceDTO;
 import model.dto.PatronDTO;
 import model.dto.SubscriberDTO;
 import model.AdminUser;
 import model.CreditCard;
+import model.PackageServices;
 import model.Subscriber;
 import model.SubscriptionPackage;
 import model.Patron;
@@ -234,6 +236,14 @@ public class SubscriberServiceImpl implements SubscriberService {
             subscriberDTO.setPriceUSD(subscriber.getSubscriptionPackage().getPriceUSD());
         }
 
+     // Map PackageServices to PackageServicesDTO
+        List<PackageServiceDTO> packageServiceDTOs = subscriber.getSubscriptionPackage().getPackageServices()
+            .stream()
+            .map(this::mapToPackageServiceDTO)
+            .collect(Collectors.toList());
+
+        subscriberDTO.setPackageServices(packageServiceDTOs);
+    
         if (subscriber.getCreditCard() != null) {
             CreditCardDTO creditCardDTO = new CreditCardDTO();
             creditCardDTO.setNameOnCard(subscriber.getCreditCard().getNameOnCard());
@@ -409,6 +419,7 @@ public class SubscriberServiceImpl implements SubscriberService {
         dto.setStatus(subscriber.getStatus());
         dto.setPackageID(subscriber.getSubscriptionPackage().getPackageID());
         dto.setPackageName(subscriber.getSubscriptionPackage().getPackageName());
+        
         AdminUser saathi = subscriber.getSaathi();
         if (saathi != null) {
             dto.setSaathi(saathi);
@@ -438,4 +449,11 @@ public class SubscriberServiceImpl implements SubscriberService {
         }
     }
 
+    private PackageServiceDTO mapToPackageServiceDTO(PackageServices packageService) {
+        PackageServiceDTO packageServiceDTO = new PackageServiceDTO();
+        packageServiceDTO.setServiceID(packageService.getService().getServiceID());
+        packageServiceDTO.setServiceName(packageService.getService().getServiceName());
+      
+        return packageServiceDTO;
+    }
 }

@@ -53,6 +53,11 @@ public class Subscriber {
     @JsonIgnore
     private SubscriptionPackage subscriptionPackage;
 
+    // OneToMany relationship with PackageServices
+    @OneToMany(mappedBy = "subscriptionPackage", cascade = CascadeType.ALL)
+    @JsonIgnore
+    private List<PackageServices> packageServices;
+
     @Column(name = "StartDate")
     @Temporal(TemporalType.DATE)
     private Date startDate;
@@ -265,6 +270,13 @@ public class Subscriber {
 		this.reasonForChange = reasonForChange;
 	}
 
+	public List<PackageServices> getPackageServices() {
+		return packageServices;
+    }
+	
+	public void setPackageServices(List<PackageServices> packageServices) {
+			this.packageServices = packageServices;
+	}
 	
     
     // Getters and Setters

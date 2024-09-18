@@ -40,6 +40,7 @@ public class SubscriberDTO {
     private CreditCardDTO creditCard;
  // Add patron details field
     private PatronDTO patron;
+    private List<PackageServiceDTO> packageServices;
     private List<PatronDTO> patrons=new ArrayList<>();;
 
     // Getters and setters for patrons
@@ -231,6 +232,16 @@ public class SubscriberDTO {
 	public void setReasonForChange(String reasonForChange) {
 		ReasonForChange = reasonForChange;
 	}
+
+	
+	 // Getter and Setter for packageServices
+    public List<PackageServiceDTO> getPackageServices() {
+        return packageServices;
+    }
+
+    public void setPackageServices(List<PackageServiceDTO> packageServices) {
+        this.packageServices = packageServices;
+    }
 
 	// Constructor
     public SubscriberDTO(int subscriberID, String firstName, String lastName, String email, String contactNo, AdminUser saathi) {
