@@ -202,6 +202,7 @@ public class ServiceCompletionServiceNew {
         if (alaCarteServiceID != 0) {
             SubscriberAlaCarteServices alaCarteService = alaCarteServicesRepository.findById(alaCarteServiceID)
                     .orElseThrow(() -> new RuntimeException("Ala-carte service not found"));
+            System.out.println(alaCarteService.getService().getServiceID() + alaCarteService.getService().getServiceName());
             ServiceReport alaCarteServiceReport = new ServiceReport(
                 alaCarteService.getService().getServiceID(),
                 alaCarteService.getService().getServiceName(),

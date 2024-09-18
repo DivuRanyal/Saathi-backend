@@ -426,7 +426,7 @@ public class SubscriberController {
                 String filePath = null;
                 // Step 3: Upload file if present and get file path
                 if (file != null && !file.isEmpty()) {
-                    String uploadDirectory = "/home/saathi/tomcat/webapps/saathi_images/"; // Specify the directory where you want to store the file
+                    String uploadDirectory = "C:\\Users\\ether\\Divya\\"; // Specify the directory where you want to store the file
                     filePath = uploadDirectory + file.getOriginalFilename(); // Get the original file name
                     // Save the file to the server
                     File dest = new File(filePath);
