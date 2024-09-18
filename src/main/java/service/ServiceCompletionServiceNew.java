@@ -172,6 +172,7 @@ public class ServiceCompletionServiceNew {
     @CachePut(value = "subscriberServicesCache", key = "#subscriberID")
     public Map<String, List<ServiceReport>> trackSubscriberServices(Integer subscriberID, int packageID, int alaCarteServiceID) {
         System.out.println("Tracking services for subscriber ID: " + subscriberID); 
+        
         List<ServiceReport> serviceReports = new ArrayList<>();
         // Handle package services
         if (packageID != 0) {
@@ -180,12 +181,14 @@ public class ServiceCompletionServiceNew {
                 System.out.println("No package services found for packageId: " + packageID);
             } else {
                 for (PackageServices packageService : packageServices) {
+                	int calculatedFrequency = packageService.getService().getFrequency() * packageService.getFrequency();
+
                     ServiceReport report = new ServiceReport(
                         packageService.getService().getServiceID(),
                         packageService.getService().getServiceName(),
                         packageService.getSubscriptionPackage().getPackageName(),
-                        packageService.getFrequency(),
-                        packageService.getFrequencyUnit(),
+                        calculatedFrequency,
+                        packageService.getService().getFrequencyUnit(),
                         0,
                         "Not Completed",
                         null,false,packageService.getPackageServicesID(),null,null
@@ -268,20 +271,22 @@ public class ServiceCompletionServiceNew {
     @CachePut(value = "subscriberServicesCache", key = "#subscriberID")
     public Map<String, List<ServiceReport>> updateServiceCompletion(Integer subscriberID, Integer serviceID) {
         // Retrieve the services for the subscriber from the in-memory map
-    	 List<ServiceReport> services = subscriberServiceMap.get(subscriberID);
+        List<ServiceReport> services = subscriberServiceMap.get(subscriberID);
         System.out.println("Retrieved services from in-memory map: " + services);
+
         // If services are not found, return null or throw an appropriate exception
         if (services == null || services.isEmpty()) {
             System.out.println("No services found for subscriber ID: " + subscriberID);
             return null;
         }
+        
         boolean serviceUpdated = false;
 
         // Iterate over the services (both package and ala-carte)
         for (ServiceReport service : services) {
             if (service.getServiceID() == serviceID) {
                 // Check if the service has already reached the frequency limit
-                if (service.getCompletions() >= service.getFrequency()) {
+                if (service.getCompletions() >= service.getFrequencyCount()) {
                     System.out.println("Service: " + service.getServiceName() + " is already completed.");
                     return null; // Prevent further updates
                 }
@@ -290,8 +295,12 @@ public class ServiceCompletionServiceNew {
                 int newCompletions = service.getCompletions() + 1;
                 service.setCompletions(newCompletions);
 
+                // Recalculate the pending count
+                service.setFrequencyCount(service.getFrequency());  // Recalculate frequencyCount based on current logic
+                service.setPending(service.getFrequencyCount() - newCompletions);  // Recalculate pending
+
                 // Check if the service is fully completed
-                if (newCompletions >= service.getFrequency()) {
+                if (newCompletions >= service.getFrequencyCount()) {
                     service.setCompletionStatus("Completed");
                     service.setCompletionDate(LocalDateTime.now()); // Set the completion date
                     System.out.println("Service: " + service.getServiceName() + " marked as completed on " + service.getCompletionDate());
@@ -313,7 +322,7 @@ public class ServiceCompletionServiceNew {
             return updatedServices;
         }
 
-        // If no service was found with the given serviceId
+        // If no service was found with the given serviceID
         System.out.println("Service not found for the subscriber.");
         return null;
     }
