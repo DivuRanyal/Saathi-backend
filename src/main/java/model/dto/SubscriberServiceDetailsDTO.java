@@ -32,7 +32,7 @@ public class SubscriberServiceDetailsDTO {
     public SubscriberServiceDetailsDTO(Integer subscriberID, int serviceID, Date serviceDate, Date serviceTime,
                                        Integer billingStatus, Date createdDate, Date lastUpdatedDate,
                                        Boolean isAccepted, Integer subscriberAlaCarteServicesID, Integer completionStatus,
-                                       String serviceName,Boolean isPackageService) {
+                                       String serviceName) {
         this.subscriberID = subscriberID;
         this.serviceID = serviceID;
         this.serviceDate = serviceDate;
@@ -44,7 +44,7 @@ public class SubscriberServiceDetailsDTO {
         this.subscriberAlaCarteServicesID = subscriberAlaCarteServicesID;
         this.completionStatus = completionStatus;
         this.serviceName = serviceName;
-        this.isPackageService = isPackageService;
+       
     }
 
     // Getters and Setters
