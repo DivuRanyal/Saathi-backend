@@ -334,6 +334,11 @@ public class SubscriberController {
         return ResponseEntity.ok(subscribers);
     }
     
+    @GetMapping("/with-saathi")
+    public ResponseEntity<List<Subscriber>> getSubscribersWithSaathi() {
+        List<Subscriber> subscribers = subscriberService.getSubscribersWithSaathi();
+        return ResponseEntity.ok(subscribers);
+    }
  // Define an endpoint to get the services for a subscriber
     @GetMapping("/{subscriberID}/services")
     public ResponseEntity<?> getSubscriberServices(@PathVariable Integer subscriberID) {
@@ -441,8 +446,9 @@ public class SubscriberController {
                 String filePath = null;
                 // Step 3: Upload file if present and get file path
                 if (file != null && !file.isEmpty()) {
-                    String uploadDirectory = "C:\\Users\\ether\\Divya\\"; // Specify the directory where you want to store the file
-                    filePath = uploadDirectory + file.getOriginalFilename(); // Get the original file name
+   //                 String uploadDirectory = "C:\\Users\\ether\\Divya\\"; // Specify the directory where you want to store the file
+                	String uploadDirectory ="/home/saathi/tomcat/webapps/interaction/";
+                	filePath = uploadDirectory + file.getOriginalFilename(); // Get the original file name
                     // Save the file to the server
                     File dest = new File(filePath);
                     file.transferTo(dest);

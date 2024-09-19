@@ -405,6 +405,12 @@ public class SubscriberServiceImpl implements SubscriberService {
     }
 
     @Override
+    public List<Subscriber> getSubscribersWithSaathi() {
+ //       return subscriberRepository.findSubscribersWithoutSaathiNative();
+    	return subscriberRepository.findBySaathiIsNotNull();
+    }
+
+    @Override
     public SubscriberDTO convertToSubscriberDTO(Subscriber subscriber) {
         return convertToDTO(subscriber);
     }

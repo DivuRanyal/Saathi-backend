@@ -44,6 +44,9 @@ public interface SubscriberService {
     // Get subscribers who do not have a Saathi assigned
     List<Subscriber> getSubscribersWithoutSaathi();
 
+    // Get subscribers who  have a Saathi assigned
+    List<Subscriber> getSubscribersWithSaathi();
+
     // Convert a DTO to a subscriber entity
     Subscriber convertToEntity(SubscriberDTO subscriberDTO, boolean isPasswordRequired);
 

@@ -25,5 +25,7 @@ public interface SubscriberRepository extends JpaRepository<Subscriber, Integer>
 	 @Query(value = "SELECT * FROM Subscribers WHERE SaathiID IS NULL", nativeQuery = true)
 	 List<Subscriber> findSubscribersWithoutSaathiNative();
 	 List<Subscriber> findBySaathiIsNull();
+	 List<Subscriber> findBySaathiIsNotNull();
+
 	
 }

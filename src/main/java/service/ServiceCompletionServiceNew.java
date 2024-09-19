@@ -448,4 +448,58 @@ public class ServiceCompletionServiceNew {
         return serviceReports; // Returns list of service reports representing all services availed by the subscriber
     }
 
+    public Map<String, List<ServiceReport>> rebuildAllServices(int subscriberID) {
+        // Fetch all relevant interactions for the subscriber
+        List<Interaction> interactions = interactionRepository.findBySubscriberID(subscriberID);
+
+        // Initialize a list to hold ServiceReports
+        List<ServiceReport> serviceReports = new ArrayList<>();
+
+        // Loop through interactions and build ServiceReports
+        for (Interaction interaction : interactions) {
+            ServiceReport serviceReport = new ServiceReport();
+
+            // Check if it's an Ala-carte service or a package service
+            if (interaction.getSubscriberAlaCarteServices() != null) {
+                // Handle Ala-carte services
+                SubscriberAlaCarteServices alaCarteService = interaction.getSubscriberAlaCarteServices();
+                serviceReport.setServiceID(alaCarteService.getService().getServiceID());
+                serviceReport.setServiceName(alaCarteService.getService().getServiceName());
+                serviceReport.setPackageName("Ala-carte");
+                serviceReport.setAlaCarte(true); // It's an Ala-carte service
+            } else if (interaction.getPackageServices() != null) {
+                // Handle package services
+                PackageServices packageService = interaction.getPackageServices();
+                serviceReport.setServiceID(packageService.getService().getServiceID());
+                serviceReport.setServiceName(packageService.getService().getServiceName());
+                serviceReport.setPackageName(packageService.getSubscriptionPackage().getPackageName());
+                serviceReport.setAlaCarte(false); // It's a package service
+            } else {
+                // If neither ala-carte nor package is present, skip this interaction or handle appropriately
+                continue;
+            }
+
+            // Set completion status and date from Interaction data
+            serviceReport.setCompletionStatus(interaction.getCompletionStatus() == 1 ? "Completed" : "In Progress");
+            serviceReport.setCompletionDate(interaction.getLastUpdatedDate());
+            
+            // Set the requested date and time from Interaction
+            serviceReport.setRequestedDate(interaction.getCreatedDate().toLocalDate());
+            serviceReport.setRequestedTime(interaction.getCreatedDate().toLocalTime());
+
+            // Add the constructed ServiceReport to the list
+            serviceReports.add(serviceReport);
+        }
+
+        // Create a map structure similar to what is stored in Memcached
+        Map<String, List<ServiceReport>> allServicesMap = new HashMap<>();
+        allServicesMap.put("allServices", serviceReports);
+
+        // Store the rebuilt data in Memcached (if applicable)
+        // memcachedClient.set("allServices_" + subscriberID, allServicesMap);
+
+        // Return the rebuilt data
+        return allServicesMap;
+    }
+
 }
