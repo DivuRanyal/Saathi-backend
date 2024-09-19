@@ -342,7 +342,7 @@ public class ServiceCompletionServiceNew {
                         service.setCompletions(newCompletions);
 
                         // Recalculate the pending count and frequency count for package service
-                        service.setFrequencyCount(service.getFrequency());
+                        service.setFrequencyCount(service.getFrequencyCount());
                         service.setPending(service.getFrequencyCount() - newCompletions);
 
                         // Check if the package service is fully completed

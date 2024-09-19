@@ -4,6 +4,7 @@ import model.AdminUser;
 import model.ServiceReport;
 import model.dto.AdminUsersDTO;
 import model.dto.SubscriberDTO;
+import model.dto.SubscriberServicesDTO;
 import service.AdminUsersService;
 import service.EmailService;
 import service.ServiceCompletionServiceNew;
@@ -23,6 +24,7 @@ import freemarker.template.TemplateException;
 import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -268,11 +270,12 @@ public class AdminUsersController {
 
             // Check if the list of subscribers is null or empty
             if (subscribers == null || subscribers.isEmpty()) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No subscribers found for Saathi with ID: " + saathiId);
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body("No subscribers found for Saathi with ID: " + saathiId);
             }
 
-            // Create a map to hold each subscriber's services
-            Map<String, List<ServiceReport>> subscriberServicesMap = new HashMap<>();
+            // Create a list to hold each subscriber's services DTO
+            List<SubscriberServicesDTO> subscriberServicesDTOList = new ArrayList<>();
 
             // Loop through each subscriber and fetch their services
             for (SubscriberDTO subscriber : subscribers) {
@@ -284,25 +287,33 @@ public class AdminUsersController {
                     List<ServiceReport> serviceReports = services.get("allServices");
 
                     if (serviceReports != null && !serviceReports.isEmpty()) {
-                        // Add the subscriber's services to the map
-                        subscriberServicesMap.put(subscriber.getFirstName(), serviceReports);
+                        // Create and add the DTO to the list
+                        SubscriberServicesDTO dto = new SubscriberServicesDTO(
+                                subscriber.getSubscriberID(), 
+                                subscriber.getFirstName(),  // Assuming getSubscriberName() exists in SubscriberDTO
+                                serviceReports
+                        );
+                        subscriberServicesDTOList.add(dto);
                     }
                 }
             }
 
             // If no services were found for any subscribers
-            if (subscriberServicesMap.isEmpty()) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No services found for any subscribers under Saathi with ID: " + saathiId);
+            if (subscriberServicesDTOList.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body("No services found for any subscribers under Saathi with ID: " + saathiId);
             }
 
-            // Return the map containing subscriber names and their respective services
-            return ResponseEntity.ok(subscriberServicesMap);
+            // Return the list containing subscriber services DTO
+            return ResponseEntity.ok(subscriberServicesDTOList);
 
         } catch (Exception e) {
             // Log the error and return a response with status 500
             e.printStackTrace();
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occurred while retrieving services for Saathi ID: " + saathiId);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("An error occurred while retrieving services for Saathi ID: " + saathiId);
         }
     }
+
 
 }
