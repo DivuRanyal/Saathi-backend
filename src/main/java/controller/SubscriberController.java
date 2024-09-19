@@ -10,6 +10,7 @@ import model.dto.InteractionDTO;
 import model.dto.PatronDTO;
 import model.dto.PatronServiceDTO;
 import model.dto.SubscriberDTO;
+import repository.AlaCarteServiceRepository;
 import repository.SubscriberAlaCarteServicesRepository;
 import service.AdminUsersService;
 import service.EmailService;
@@ -56,6 +57,8 @@ public class SubscriberController {
     @Autowired
     private SubscriberAlaCarteServicesService service;
 
+    @Autowired
+    private AlaCarteServiceRepository alaCarteServicesRepository;
     @Autowired
     private PatronService patronService;
     
@@ -404,7 +407,8 @@ public class SubscriberController {
             @PathVariable Integer subscriberID,
             @PathVariable Integer serviceID,
             @RequestParam(value = "file", required = false) MultipartFile file,
-            @RequestParam("description") String description) {
+            @RequestParam("description") String description,
+            @RequestParam("isAlaCarte") Boolean isAlaCarte) {
 
         // Step 1: Fetch the packageServiceID associated with the subscriber
         Integer packageID = subscriberService.getPackageIDBySubscriber(subscriberID);
@@ -418,8 +422,19 @@ public class SubscriberController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No valid package or ala-carte service found for the subscriber.");
         }
 
-        // Step 2: Update service completion logic
-        Map<String, List<ServiceReport>> updatedServices = serviceCompletionService.updateServiceCompletion(subscriberID, serviceID);
+     // Step 2: Update service completion logic
+       
+        Map<String, List<ServiceReport>> updatedServices;
+
+        if (isAlaCarte) {
+        	
+            // Update ala-carte service completion
+            updatedServices = serviceCompletionService.updateServiceCompletion(subscriberID, serviceID, true);
+        } else {
+        	
+            // Update package service completion
+            updatedServices = serviceCompletionService.updateServiceCompletion(subscriberID, serviceID, false);
+        }
 
         if (updatedServices != null) {
             try {
@@ -451,8 +466,7 @@ public class SubscriberController {
                                 // Use the ala-carte service ID retrieved based on the subscriber
                                 interactionDTO.setSubscriberAlaCarteServicesID(subscriberAlaCarteServicesID);
                             } else {
-                                // Use the packageServiceID retrieved based on the subscriber
-                                
+                                // Use the packageServiceID retrieved based on the subscriber 
                                 interactionDTO.setPackageServicesID(service.getPackageServiceID()); // Set the packageServiceID
                             }
                             // Set the completion status only if the service is fully completed
@@ -476,5 +490,4 @@ public class SubscriberController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Service not found for the subscriber.");
         }
     }
-
 }

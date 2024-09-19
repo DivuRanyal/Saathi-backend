@@ -173,7 +173,10 @@ public class ServiceCompletionServiceNew {
     public Map<String, List<ServiceReport>> trackSubscriberServices(Integer subscriberID, int packageID, int alaCarteServiceID) {
         System.out.println("Tracking services for subscriber ID: " + subscriberID); 
         
-        List<ServiceReport> serviceReports = new ArrayList<>();
+ //       List<ServiceReport> serviceReports = new ArrayList<>();
+        // Fetch existing services from in-memory map (if any)
+        List<ServiceReport> serviceReports = subscriberServiceMap.getOrDefault(subscriberID, new ArrayList<>());
+        
         // Handle package services
         if (packageID != 0) {
             List<PackageServices> packageServices = packageServiceRepository.findServicesByPackageId(packageID);
@@ -193,7 +196,10 @@ public class ServiceCompletionServiceNew {
                         "Not Completed",
                         null,false,packageService.getPackageServicesID(),null,null
                     );
-                    serviceReports.add(report);
+                 // Avoid adding duplicate services to the list
+                    if (!serviceReports.contains(report)) {
+                        serviceReports.add(report);
+                    }
                 }
             }
         }
@@ -213,7 +219,10 @@ public class ServiceCompletionServiceNew {
                 "Not Completed",
                 null,true,0,null,null
             );
-            serviceReports.add(alaCarteServiceReport);
+            // Avoid adding duplicate ala-carte service
+            if (!serviceReports.contains(alaCarteServiceReport)) {
+                serviceReports.add(alaCarteServiceReport);
+            }
         }
 
         // Store the service reports in cache and in-memory
@@ -267,11 +276,10 @@ public class ServiceCompletionServiceNew {
         return updatedReport;
     }
 
-
-    
     @CachePut(value = "subscriberServicesCache", key = "#subscriberID")
-    public Map<String, List<ServiceReport>> updateServiceCompletion(Integer subscriberID, Integer serviceID) {
+    public Map<String, List<ServiceReport>> updateServiceCompletion(Integer subscriberID, Integer serviceID, boolean isAlaCarteService) {
         // Retrieve the services for the subscriber from the in-memory map
+    	System.out.println("isAlaCarteService"+isAlaCarteService);
         List<ServiceReport> services = subscriberServiceMap.get(subscriberID);
         System.out.println("Retrieved services from in-memory map: " + services);
 
@@ -280,38 +288,80 @@ public class ServiceCompletionServiceNew {
             System.out.println("No services found for subscriber ID: " + subscriberID);
             return null;
         }
-        
+
         boolean serviceUpdated = false;
 
         // Iterate over the services (both package and ala-carte)
         for (ServiceReport service : services) {
+            // Check if the serviceID matches first
             if (service.getServiceID() == serviceID) {
-                // Check if the service has already reached the frequency limit
-                if (service.getCompletions() >= service.getFrequencyCount()) {
-                    System.out.println("Service: " + service.getServiceName() + " is already completed.");
-                    return null; // Prevent further updates
-                }
+                System.out.println("Found matching serviceID: " + serviceID);
 
-                // Increment completions
-                int newCompletions = service.getCompletions() + 1;
-                service.setCompletions(newCompletions);
+                // Now, handle the case based on whether it's ala-carte or package service
+                if (isAlaCarteService && service.isAlaCarte()) {
+                    System.out.println("Found matching service type for serviceID: " + serviceID);
+                    // Check if the service has already reached the frequency limit
+                    if (service.getCompletions() >= service.getFrequencyCount()) {
+                        System.out.println("Service: " + service.getServiceName() + " is already completed.");
+                        return null; // Prevent further updates if the service is already completed
+                    }
 
-                // Recalculate the pending count
-                service.setFrequencyCount(service.getFrequency());  // Recalculate frequencyCount based on current logic
-                service.setPending(service.getFrequencyCount() - newCompletions);  // Recalculate pending
+                    // Increment completions
+                    int newCompletions = service.getCompletions() + 1;
+                    service.setCompletions(newCompletions);
 
-                // Check if the service is fully completed
-                if (newCompletions >= service.getFrequencyCount()) {
-                    service.setCompletionStatus("Completed");
-                    service.setCompletionDate(LocalDateTime.now()); // Set the completion date
-                    System.out.println("Service: " + service.getServiceName() + " marked as completed on " + service.getCompletionDate());
+                    // Recalculate the pending count and frequency count
+                    service.setFrequencyCount(service.getFrequency());  // Set the correct frequency count based on logic
+                    service.setPending(service.getFrequencyCount() - newCompletions);  // Recalculate pending based on completions
+
+                    // Check if the service is fully completed
+                    if (newCompletions >= service.getFrequencyCount()) {
+                        service.setCompletionStatus("Completed");
+                        service.setCompletionDate(LocalDateTime.now()); // Set the completion date
+                        System.out.println("Service: " + service.getServiceName() + " marked as completed on " + service.getCompletionDate());
+                    } else {
+                        service.setCompletionStatus("In Progress");
+                        System.out.println("Service: " + service.getServiceName() + " updated with completions: " + newCompletions);
+                    }
+                    serviceUpdated = true;
+                    break;  // Exit the loop as the relevant service has been updated
                 } else {
-                    service.setCompletionStatus("In Progress");
-                    System.out.println("Service: " + service.getServiceName() + " updated with completions: " + newCompletions);
-                }
+                    // Else block: If it's not ala-carte, handle package services here
+                    System.out.println("Service type mismatch for serviceID: " + serviceID + ". Handling it as a package service.");
+                    
+                    // Handle package services here as the `else` condition
+                    if (!isAlaCarteService) {
+                        // Update package service completion
+                        if (service.getCompletions() >= service.getFrequencyCount()) {
+                            System.out.println("Package Service: " + service.getServiceName() + " is already completed.");
+                            return null; // Prevent further updates if the service is already completed
+                        }
 
-                serviceUpdated = true;
-                break;  // Exit the loop as the relevant service has been updated
+                        // Increment completions for package service
+                        int newCompletions = service.getCompletions() + 1;
+                        service.setCompletions(newCompletions);
+
+                        // Recalculate the pending count and frequency count for package service
+                        service.setFrequencyCount(service.getFrequency());
+                        service.setPending(service.getFrequencyCount() - newCompletions);
+
+                        // Check if the package service is fully completed
+                        if (newCompletions >= service.getFrequencyCount()) {
+                            service.setCompletionStatus("Completed");
+                            service.setCompletionDate(LocalDateTime.now());
+                            System.out.println("Package Service: " + service.getServiceName() + " marked as completed on " + service.getCompletionDate());
+                        } else {
+                            service.setCompletionStatus("In Progress");
+                            System.out.println("Package Service: " + service.getServiceName() + " updated with completions: " + newCompletions);
+                        }
+
+                        serviceUpdated = true;
+                        break;
+                    } else {
+                        // If a service mismatch occurs where both types don't match, log it
+                        System.out.println("Service type mismatch: Expected ala-carte or package, but types didn't match.");
+                    }
+                }
             }
         }
 
@@ -323,7 +373,7 @@ public class ServiceCompletionServiceNew {
             return updatedServices;
         }
 
-        // If no service was found with the given serviceID
+        // If no service was found with the given serviceID and type
         System.out.println("Service not found for the subscriber.");
         return null;
     }
