@@ -389,12 +389,12 @@ public class ServiceCompletionServiceNew {
         if (serviceReports == null || serviceReports.isEmpty()) {
             // This is where a cache miss would occur, so log it
             System.out.println("Cache miss for subscriber ID: " + subscriberID);
-            
+
             // Fetch all interactions from the database for the subscriber (handling multiple services)
             List<Interaction> interactions = interactionRepository.findBySubscriberID(subscriberID);
-            
+
             if (interactions == null || interactions.isEmpty()) {
-                throw new RuntimeException("No services found for subscriber with ID: " + subscriberID);
+  //              throw new RuntimeException("No services found for subscriber with ID: " + subscriberID);
             }
 
             // Convert each interaction to a ServiceReport (handle multiple services)
@@ -410,10 +410,11 @@ public class ServiceCompletionServiceNew {
             return services;
         }
 
-        // Prepare the response map
-        Map<String, List<ServiceReport>> services = new HashMap<>();
-        services.put("allServices", serviceReports);
-        return services;
+        // If the services are already cached in-memory, return them
+        Map<String, List<ServiceReport>> cachedServices = new HashMap<>();
+        cachedServices.put("allServices", serviceReports);
+
+        return cachedServices;
     }
 
  // Utility method to convert a list of Interactions to ServiceReport objects (handles multiple services)
@@ -430,8 +431,8 @@ public class ServiceCompletionServiceNew {
             }
             // Handle Package-based services (if packageID or packageServiceID is involved)
             else if (interaction.getPackageServices() != null) {
-                serviceReport.setServiceID(interaction.getPackageServices().getService().getServiceID()); // Assuming Interaction contains packageServiceID
-                serviceReport.setServiceName("Package Service " + interaction.getPackageServices().getService().getServiceName()); // Use a meaningful name or fetch from the service table
+     //           serviceReport.setServiceID(interaction.getPackageServices().getService().getServiceID()); // Assuming Interaction contains packageServiceID
+     //           serviceReport.setServiceName("Package Service " + interaction.getPackageServices().getService().getServiceName()); // Use a meaningful name or fetch from the service table
             } else {
                 // If neither ala-carte nor package is present, skip this interaction or handle appropriately
                 continue;
@@ -439,7 +440,7 @@ public class ServiceCompletionServiceNew {
             
             // Set the completion status based on interaction
             serviceReport.setCompletionStatus(interaction.getCompletionStatus() == 1 ? "Completed" : "In Progress");
-            serviceReport.setCompletionDate(interaction.getLastUpdatedDate());
+  //          serviceReport.setCompletionDate(interaction.getLastUpdatedDate());
 
             // Add the constructed ServiceReport to the list
             serviceReports.add(serviceReport);
@@ -481,11 +482,11 @@ public class ServiceCompletionServiceNew {
 
             // Set completion status and date from Interaction data
             serviceReport.setCompletionStatus(interaction.getCompletionStatus() == 1 ? "Completed" : "In Progress");
-            serviceReport.setCompletionDate(interaction.getLastUpdatedDate());
+  //          serviceReport.setCompletionDate(interaction.getLastUpdatedDate());
             
             // Set the requested date and time from Interaction
-            serviceReport.setRequestedDate(interaction.getCreatedDate().toLocalDate());
-            serviceReport.setRequestedTime(interaction.getCreatedDate().toLocalTime());
+  //          serviceReport.setRequestedDate(interaction.getCreatedDate().toLocalDate());
+  //          serviceReport.setRequestedTime(interaction.getCreatedDate().toLocalTime());
 
             // Add the constructed ServiceReport to the list
             serviceReports.add(serviceReport);

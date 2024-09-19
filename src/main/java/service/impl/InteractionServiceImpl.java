@@ -45,7 +45,7 @@ public class InteractionServiceImpl implements InteractionService {
     @Override
     public InteractionDTO createInteraction(InteractionDTO interactionDTO) {
         Interaction interaction = convertToEntity(interactionDTO);
-        interaction.setCreatedDate(LocalDateTime.now());
+       
         interactionRepository.save(interaction);
         return convertToDTO(interaction);
     }
@@ -54,8 +54,7 @@ public class InteractionServiceImpl implements InteractionService {
     public InteractionDTO updateInteraction(Integer id, InteractionDTO interactionDTO) {
         Interaction interaction = interactionRepository.findById(id)
             .orElseThrow(() -> new RuntimeException("Interaction not found"));
-        interaction.setLastUpdatedDate(LocalDateTime.now());
-        
+ 
         
         // Update fields from DTO
         interaction.setSubscriberID(interactionDTO.getSubscriberID());
@@ -88,10 +87,14 @@ public class InteractionServiceImpl implements InteractionService {
     }
 
     @Override
-    public InteractionDTO getInteractionById(Integer id) {
-        Interaction interaction = interactionRepository.findById(id)
-            .orElseThrow(() -> new RuntimeException("Interaction not found"));
-        return convertToDTO(interaction);
+    public List<InteractionDTO> getInteractionsBySubscriberID(Integer subscriberID) {
+        // Assuming you have a repository to fetch interactions from the database
+        List<Interaction> interactions = interactionRepository.findBySubscriberID(subscriberID);
+
+        // Convert the Interaction entities to InteractionDTOs
+        return interactions.stream()
+            .map(this::convertToDTO)  // Assuming a method convertToDTO() exists to map Interaction to InteractionDTO
+            .collect(Collectors.toList());
     }
 
     @Override
@@ -121,10 +124,8 @@ public class InteractionServiceImpl implements InteractionService {
         interaction.setSaathiID(dto.getSaathiID());
         interaction.setInteractionType(dto.getInteractionType());
         interaction.setDocuments(dto.getDocuments());
-        interaction.setCreatedDate(dto.getCreatedDate());
-        interaction.setLastUpdatedDate(dto.getLastUpdatedDate());
         interaction.setCompletionStatus(dto.getCompletionStatus());
-       
+       interaction.setPackageID(dto.getPackageID());
         interaction.setDescription(dto.getDescription());
         
         // Fetch the SubscriberAlaCarteServices entity by its ID
@@ -156,6 +157,7 @@ public class InteractionServiceImpl implements InteractionService {
             dto.setPackageServicesID(null); // Set to null or handle it according to your logic
         }
 
+       dto.setPackageID(interaction.getPackageID());
         dto.setDescription(interaction.getDescription());
 
         // Map the `subscriberAlaCarteServicesID` from the Interaction entity

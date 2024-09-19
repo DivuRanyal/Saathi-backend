@@ -10,6 +10,6 @@ public interface InteractionService {
     InteractionDTO createInteraction(InteractionDTO interactionDTO);
     InteractionDTO updateInteraction(Integer id, InteractionDTO interactionDTO);
     void deleteInteraction(Integer id);
-    InteractionDTO getInteractionById(Integer id);
+    List<InteractionDTO> getInteractionsBySubscriberID(Integer id);
     List<InteractionDTO> getAllInteractions();
 }

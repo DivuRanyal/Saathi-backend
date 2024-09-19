@@ -6,6 +6,7 @@ import model.AdminUser;
 import model.Subscriber;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface SubscriberService {
 
@@ -33,6 +34,7 @@ public interface SubscriberService {
     // Get subscribers assigned to a specific Saathi (AdminUser)
     List<SubscriberDTO> getSubscribersBySaathi(int saathiId);
 
+    List<SubscriberDTO> getSubscribersBySaathiID(int saathiId) ;
     // Fetch Saathi (AdminUser) details of a subscriber by subscriber ID
     AdminUser getSubscriberDetails(int subscriberId);
 

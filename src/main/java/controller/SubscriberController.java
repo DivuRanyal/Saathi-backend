@@ -348,6 +348,7 @@ public class SubscriberController {
             // Fetch the services for the subscriber
             Map<String, List<ServiceReport>> services = serviceCompletionService.getSubscriberServices(subscriberID);
 
+            
             // Check if the list of services is null or empty
             if (services == null || services.isEmpty() || !services.containsKey("allServices")) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No services found for subscriber with ID: " + subscriberID);
@@ -355,12 +356,21 @@ public class SubscriberController {
 
             List<ServiceReport> serviceReports = services.get("allServices");
             
+         // Fetch interactions related to the subscriber
+            List<InteractionDTO> interactions = interactionService.getInteractionsBySubscriberID(subscriberID);
+
             if (serviceReports == null || serviceReports.isEmpty()) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No services found for subscriber with ID: " + subscriberID);
             }
+            
+            // Combine the service reports and interaction details in a response object
+            Map<String, Object> response = new HashMap<>();
+            response.put("services", serviceReports);
+            response.put("interactions", interactions); // This is a list, so no type mismatch
+
 
             // Return the list of service reports
-            return ResponseEntity.ok(serviceReports);
+            return ResponseEntity.ok(response);
             
         } catch (Exception e) {
             // Log the error and return a response with status 500
@@ -459,8 +469,6 @@ public class SubscriberController {
                 // Step 4: Create and add interaction when the service is completed
                 InteractionDTO interactionDTO = new InteractionDTO();
                 interactionDTO.setSubscriberID(subscriberID);
-                interactionDTO.setCreatedDate(LocalDateTime.now());
-                interactionDTO.setLastUpdatedDate(LocalDateTime.now());
                 interactionDTO.setDescription(description); // Get the description from the request payload
                 interactionDTO.setDocuments(filePath);  // Store the file path in the documents attribute
 

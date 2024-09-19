@@ -266,7 +266,7 @@ public class AdminUsersController {
     public ResponseEntity<?> getSubscribersServicesBySaathi(@PathVariable int saathiId) {
         try {
             // Fetch the list of subscribers for the given Saathi (AdminUser)
-            List<SubscriberDTO> subscribers = subscriberService.getSubscribersBySaathi(saathiId);
+            List<SubscriberDTO> subscribers = subscriberService.getSubscribersBySaathiID(saathiId);
 
             // Check if the list of subscribers is null or empty
             if (subscribers == null || subscribers.isEmpty()) {

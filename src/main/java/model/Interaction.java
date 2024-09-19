@@ -2,6 +2,7 @@ package model;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
+import java.util.Date;
 
 @Entity
 @Table(name = "Interactions")
@@ -15,6 +16,9 @@ public class Interaction {
     @Column(name = "SubscriberID")
     private Integer subscriberID;
 
+    @Column(name = "PackageID")
+    private Integer packageID;
+
     @Column(name = "SaathiID")
     private Integer saathiID;
 
@@ -25,10 +29,10 @@ public class Interaction {
     private String documents;
 
     @Column(name = "CreatedDate")
-    private LocalDateTime createdDate;
+    private Date createdDate;
 
     @Column(name = "LastUpdatedDate")
-    private LocalDateTime lastUpdatedDate;
+    private Date lastUpdatedDate;
 
     @Column(name = "CompletionStatus")
     private Integer completionStatus;
@@ -90,22 +94,21 @@ public class Interaction {
         this.documents = documents;
     }
 
-    public LocalDateTime getCreatedDate() {
-        return createdDate;
-    }
+    public Date getCreatedDate() {
+		return createdDate;
+	}
 
-    public void setCreatedDate(LocalDateTime createdDate) {
-        this.createdDate = createdDate;
-    }
+	public void setCreatedDate(Date createdDate) {
+		this.createdDate = createdDate;
+	}
 
-    public LocalDateTime getLastUpdatedDate() {
-        return lastUpdatedDate;
-    }
+	public Date getLastUpdatedDate() {
+		return lastUpdatedDate;
+	}
 
-    public void setLastUpdatedDate(LocalDateTime lastUpdatedDate) {
-        this.lastUpdatedDate = lastUpdatedDate;
-    }
-
+	public void setLastUpdatedDate(Date lastUpdatedDate) {
+		this.lastUpdatedDate = lastUpdatedDate;
+	}
    
     public Integer getCompletionStatus() {
 		return completionStatus;
@@ -147,5 +150,22 @@ public class Interaction {
 		this.subscriberAlaCarteServices = subscriberAlaCarteServices;
 	}
 
-   
+	public Integer getPackageID() {
+		return packageID;
+	}
+
+	public void setPackageID(Integer packageID) {
+		this.packageID = packageID;
+	}
+
+	 @PrePersist
+	    protected void onCreate() {
+	        createdDate = new Date();  // Set the current timestamp for createdDate
+	        
+	    }
+
+	 @PreUpdate
+	    protected void onUpdate() {
+	        lastUpdatedDate = new Date();  // Set the current timestamp for lastUpdatedDate
+	    }
 }

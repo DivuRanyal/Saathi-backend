@@ -1,6 +1,10 @@
 package model.dto;
 
+import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
+import java.util.Date;
+
+import com.fasterxml.jackson.annotation.JsonFormat;
 
 public class InteractionDTO {
 
@@ -9,16 +13,22 @@ public class InteractionDTO {
     private Integer saathiID;
     private String interactionType;
     private String documents;
-    private LocalDateTime createdDate;
-    private LocalDateTime lastUpdatedDate;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
+    private Date createdDate;
+
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
+    private Date lastUpdatedDate;
     private Integer completionStatus;
     private Integer packageServicesID;
     private String description;
-    
+    private Integer packageID;
     // Add this new field
     private Integer subscriberAlaCarteServicesID;
 
     // Getters and Setters for all fields including subscriberAlaCarteServicesID
+
+ // Date format to be used for date fields
+    private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
 
     public Integer getInteractionID() {
         return interactionID;
@@ -60,22 +70,22 @@ public class InteractionDTO {
         this.documents = documents;
     }
 
-    public LocalDateTime getCreatedDate() {
-        return createdDate;
+    public String getCreatedDate() {
+        return createdDate != null ? DATE_FORMAT.format(createdDate) : null;
     }
 
-    public void setCreatedDate(LocalDateTime createdDate) {
+    public void setCreatedDate(Date createdDate) {
         this.createdDate = createdDate;
     }
-
-    public LocalDateTime getLastUpdatedDate() {
-        return lastUpdatedDate;
+    public String getLastUpdatedDate() {
+    	return lastUpdatedDate != null ? DATE_FORMAT.format(lastUpdatedDate) : null;
+       
     }
 
-    public void setLastUpdatedDate(LocalDateTime lastUpdatedDate) {
+    public void setLastUpdatedDate(Date lastUpdatedDate) {
         this.lastUpdatedDate = lastUpdatedDate;
     }
-
+    
     
     public Integer getCompletionStatus() {
 		return completionStatus;
@@ -108,4 +118,14 @@ public class InteractionDTO {
     public void setSubscriberAlaCarteServicesID(Integer subscriberAlaCarteServicesID) {
         this.subscriberAlaCarteServicesID = subscriberAlaCarteServicesID;
     }
+
+	public Integer getPackageID() {
+		return packageID;
+	}
+
+	public void setPackageID(Integer packageID) {
+		this.packageID = packageID;
+	}
+    
+    
 }
