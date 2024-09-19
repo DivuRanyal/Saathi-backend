@@ -245,6 +245,7 @@ public class AdminUsersController {
         return ResponseEntity.ok(activeUsers);
     }
     
+    
     @GetMapping("/{saathiId}/subscribers")
     public ResponseEntity<List<SubscriberDTO>> getSubscribersBySaathi(@PathVariable int saathiId) {
         List<SubscriberDTO> subscribers = subscriberService.getSubscribersBySaathi(saathiId);
@@ -267,25 +268,20 @@ public class AdminUsersController {
         try {
             // Fetch the list of subscribers for the given Saathi (AdminUser)
             List<SubscriberDTO> subscribers = subscriberService.getSubscribersBySaathiID(saathiId);
-
             // Check if the list of subscribers is null or empty
             if (subscribers == null || subscribers.isEmpty()) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND)
                         .body("No subscribers found for Saathi with ID: " + saathiId);
             }
-
             // Create a list to hold each subscriber's services DTO
             List<SubscriberServicesDTO> subscriberServicesDTOList = new ArrayList<>();
-
             // Loop through each subscriber and fetch their services
             for (SubscriberDTO subscriber : subscribers) {
                 // Fetch the services for each subscriber
                 Map<String, List<ServiceReport>> services = serviceCompletionService.getSubscriberServices(subscriber.getSubscriberID());
-
                 // Check if the services exist and are valid
                 if (services != null && services.containsKey("allServices")) {
                     List<ServiceReport> serviceReports = services.get("allServices");
-
                     if (serviceReports != null && !serviceReports.isEmpty()) {
                         // Create and add the DTO to the list
                         SubscriberServicesDTO dto = new SubscriberServicesDTO(
@@ -297,16 +293,13 @@ public class AdminUsersController {
                     }
                 }
             }
-
             // If no services were found for any subscribers
             if (subscriberServicesDTOList.isEmpty()) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND)
                         .body("No services found for any subscribers under Saathi with ID: " + saathiId);
             }
-
             // Return the list containing subscriber services DTO
             return ResponseEntity.ok(subscriberServicesDTOList);
-
         } catch (Exception e) {
             // Log the error and return a response with status 500
             e.printStackTrace();
@@ -314,6 +307,5 @@ public class AdminUsersController {
                     .body("An error occurred while retrieving services for Saathi ID: " + saathiId);
         }
     }
-
 
 }

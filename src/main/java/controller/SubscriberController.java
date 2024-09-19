@@ -38,10 +38,13 @@ import javax.mail.MessagingException;
 import java.io.File;
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/subscribers")
@@ -348,34 +351,62 @@ public class SubscriberController {
             // Fetch the services for the subscriber
             Map<String, List<ServiceReport>> services = serviceCompletionService.getSubscriberServices(subscriberID);
 
-            
             // Check if the list of services is null or empty
             if (services == null || services.isEmpty() || !services.containsKey("allServices")) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No services found for subscriber with ID: " + subscriberID);
             }
 
             List<ServiceReport> serviceReports = services.get("allServices");
-            
-         // Fetch interactions related to the subscriber
-            List<InteractionDTO> interactions = interactionService.getInteractionsBySubscriberID(subscriberID);
 
             if (serviceReports == null || serviceReports.isEmpty()) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No services found for subscriber with ID: " + subscriberID);
             }
-            
-            // Combine the service reports and interaction details in a response object
-            Map<String, Object> response = new HashMap<>();
-            response.put("services", serviceReports);
-            response.put("interactions", interactions); // This is a list, so no type mismatch
 
+            // Fetch interactions related to the subscriber
+            List<InteractionDTO> interactions = interactionService.getInteractionsBySubscriberID(subscriberID);
 
-            // Return the list of service reports
-            return ResponseEntity.ok(response);
-            
+            // Create the final response list of services, each with its associated interactions
+            List<Map<String, Object>> servicesWithInteractions = new ArrayList<>();
+
+            for (ServiceReport serviceReport : serviceReports) {
+                Map<String, Object> serviceWithInteraction = new HashMap<>();
+
+                // Add the service details to the map
+                serviceWithInteraction.put("serviceID", serviceReport.getServiceID());
+                serviceWithInteraction.put("serviceName", serviceReport.getServiceName());
+                serviceWithInteraction.put("packageName", serviceReport.getPackageName());
+                serviceWithInteraction.put("packageServiceID", serviceReport.getPackageServiceID());
+                serviceWithInteraction.put("frequency", serviceReport.getFrequency());
+                serviceWithInteraction.put("frequencyUnit", serviceReport.getFrequencyUnit());
+                serviceWithInteraction.put("completions", serviceReport.getCompletions());
+                serviceWithInteraction.put("completionStatus", serviceReport.getCompletionStatus());
+                serviceWithInteraction.put("completionDate", serviceReport.getCompletionDate());
+                serviceWithInteraction.put("requestedDate", serviceReport.getRequestedDate());
+                serviceWithInteraction.put("requestedTime", serviceReport.getRequestedTime());
+                serviceWithInteraction.put("frequencyCount", serviceReport.getFrequencyCount());
+                serviceWithInteraction.put("pending", serviceReport.getPending());
+                serviceWithInteraction.put("alaCarte", serviceReport.isAlaCarte());
+
+                // Filter interactions related to the current service by packageServiceID
+                List<InteractionDTO> relatedInteractions = interactions.stream()
+                        .filter(interaction -> interaction.getPackageServicesID().equals(serviceReport.getPackageServiceID()))
+                        .collect(Collectors.toList());
+
+                // Add the interactions to the service
+                serviceWithInteraction.put("interactions", relatedInteractions);
+
+                // Add the service with its interactions to the list
+                servicesWithInteractions.add(serviceWithInteraction);
+            }
+
+            // Return the response containing services with interactions
+            return ResponseEntity.ok(servicesWithInteractions);
+
         } catch (Exception e) {
             // Log the error and return a response with status 500
             e.printStackTrace();
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occurred while retrieving services for subscriber ID: " + subscriberID);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                                 .body("An error occurred while retrieving services for subscriber ID: " + subscriberID);
         }
     }
 
@@ -506,4 +537,6 @@ public class SubscriberController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Service not found for the subscriber.");
         }
     }
+    
+    
 }
