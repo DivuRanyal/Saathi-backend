@@ -10,6 +10,7 @@ import model.dto.InteractionDTO;
 import model.dto.PatronDTO;
 import model.dto.PatronServiceDTO;
 import model.dto.SubscriberDTO;
+import model.dto.SubscriberSaathiDTO;
 import repository.AlaCarteServiceRepository;
 import repository.SubscriberAlaCarteServicesRepository;
 import service.AdminUsersService;
@@ -335,10 +336,11 @@ public class SubscriberController {
     }
     
     @GetMapping("/with-saathi")
-    public ResponseEntity<List<Subscriber>> getSubscribersWithSaathi() {
-        List<Subscriber> subscribers = subscriberService.getSubscribersWithSaathi();
+    public ResponseEntity<List<SubscriberSaathiDTO>> getSubscribersWithSaathi() {
+        List<SubscriberSaathiDTO> subscribers = subscriberService.getSubscribersWithSaathi();
         return ResponseEntity.ok(subscribers);
     }
+    
  // Define an endpoint to get the services for a subscriber
     @GetMapping("/{subscriberID}/services")
     public ResponseEntity<?> getSubscriberServices(@PathVariable Integer subscriberID) {

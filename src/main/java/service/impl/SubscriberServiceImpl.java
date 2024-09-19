@@ -4,6 +4,7 @@ import model.dto.CreditCardDTO;
 import model.dto.PackageServiceDTO;
 import model.dto.PatronDTO;
 import model.dto.SubscriberDTO;
+import model.dto.SubscriberSaathiDTO;
 import model.AdminUser;
 import model.CreditCard;
 import model.PackageServices;
@@ -405,9 +406,25 @@ public class SubscriberServiceImpl implements SubscriberService {
     }
 
     @Override
-    public List<Subscriber> getSubscribersWithSaathi() {
- //       return subscriberRepository.findSubscribersWithoutSaathiNative();
-    	return subscriberRepository.findBySaathiIsNotNull();
+    public List<SubscriberSaathiDTO> getSubscribersWithSaathi() {
+        List<Subscriber> subscribers = subscriberRepository.findBySaathiIsNotNull();
+
+        List<SubscriberSaathiDTO> subscriberSaathiDTOs = subscribers.stream().map(subscriber -> {
+            // Create a new DTO
+            SubscriberSaathiDTO dto = new SubscriberSaathiDTO(subscriber, null);
+            
+            // Set Subscriber details
+           
+            // Set AdminUser (Saathi) details
+            AdminUser saathi = subscriber.getSaathi();
+            if (saathi != null) {
+                dto.setSaathi(saathi);  // Set the full AdminUser object in the DTO
+            }
+
+            return dto;  // Return the DTO for each subscriber
+        }).collect(Collectors.toList());
+
+        return subscriberSaathiDTOs;  // Return the list of DTOs
     }
 
     @Override

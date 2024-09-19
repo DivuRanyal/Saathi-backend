@@ -1,6 +1,7 @@
 package service;
 
 import model.dto.SubscriberDTO;
+import model.dto.SubscriberSaathiDTO;
 import model.AdminUser;
 import model.Subscriber;
 
@@ -45,7 +46,7 @@ public interface SubscriberService {
     List<Subscriber> getSubscribersWithoutSaathi();
 
     // Get subscribers who  have a Saathi assigned
-    List<Subscriber> getSubscribersWithSaathi();
+    List<SubscriberSaathiDTO> getSubscribersWithSaathi();
 
     // Convert a DTO to a subscriber entity
     Subscriber convertToEntity(SubscriberDTO subscriberDTO, boolean isPasswordRequired);

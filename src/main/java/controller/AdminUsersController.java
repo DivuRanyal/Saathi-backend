@@ -1,10 +1,12 @@
 package controller;
 
 import model.AdminUser;
+import model.ServiceReport;
 import model.dto.AdminUsersDTO;
 import model.dto.SubscriberDTO;
 import service.AdminUsersService;
 import service.EmailService;
+import service.ServiceCompletionServiceNew;
 import service.SubscriberService;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,7 +24,9 @@ import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import javax.mail.MessagingException;
@@ -41,6 +45,10 @@ public class AdminUsersController {
     @Autowired
     private EmailService emailService;
 
+    @Autowired
+    private ServiceCompletionServiceNew serviceCompletionService;
+
+ 
 
     @Autowired
     public AdminUsersController(AdminUsersService adminUsersService, SubscriberService subscriberService) {
@@ -251,4 +259,50 @@ public class AdminUsersController {
         List<AdminUsersDTO> adminUsers = adminUsersService.getAllAdminUsersWithSubscribersByUserType();
         return ResponseEntity.ok(adminUsers);
     }
+    
+    @GetMapping("/{saathiId}/subscribers/services")
+    public ResponseEntity<?> getSubscribersServicesBySaathi(@PathVariable int saathiId) {
+        try {
+            // Fetch the list of subscribers for the given Saathi (AdminUser)
+            List<SubscriberDTO> subscribers = subscriberService.getSubscribersBySaathi(saathiId);
+
+            // Check if the list of subscribers is null or empty
+            if (subscribers == null || subscribers.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No subscribers found for Saathi with ID: " + saathiId);
+            }
+
+            // Create a map to hold each subscriber's services
+            Map<String, List<ServiceReport>> subscriberServicesMap = new HashMap<>();
+
+            // Loop through each subscriber and fetch their services
+            for (SubscriberDTO subscriber : subscribers) {
+                // Fetch the services for each subscriber
+                Map<String, List<ServiceReport>> services = serviceCompletionService.getSubscriberServices(subscriber.getSubscriberID());
+
+                // Check if the services exist and are valid
+                if (services != null && services.containsKey("allServices")) {
+                    List<ServiceReport> serviceReports = services.get("allServices");
+
+                    if (serviceReports != null && !serviceReports.isEmpty()) {
+                        // Add the subscriber's services to the map
+                        subscriberServicesMap.put(subscriber.getFirstName(), serviceReports);
+                    }
+                }
+            }
+
+            // If no services were found for any subscribers
+            if (subscriberServicesMap.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No services found for any subscribers under Saathi with ID: " + saathiId);
+            }
+
+            // Return the map containing subscriber names and their respective services
+            return ResponseEntity.ok(subscriberServicesMap);
+
+        } catch (Exception e) {
+            // Log the error and return a response with status 500
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occurred while retrieving services for Saathi ID: " + saathiId);
+        }
+    }
+
 }
