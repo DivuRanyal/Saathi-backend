@@ -451,7 +451,7 @@ public class ServiceCompletionServiceNew {
             }
             
             // Set the completion status based on interaction
-            serviceReport.setCompletionStatus(interaction.getCompletionStatus() == 1 ? "Completed" : "In Progress");
+  //          serviceReport.setCompletionStatus(interaction.getCompletionStatus() == 1 ? "Completed" : "In Progress");
   //          serviceReport.setCompletionDate(interaction.getLastUpdatedDate());
 
             // Add the constructed ServiceReport to the list

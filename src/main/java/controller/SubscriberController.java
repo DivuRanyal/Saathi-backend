@@ -551,7 +551,6 @@ public class SubscriberController {
                 interactionService.createInteraction(interactionDTO);
                 // Return a success message
                 return ResponseEntity.ok("Service completion updated successfully and interaction with file added.");
-
             } catch (IOException e) {
                 e.printStackTrace();
                 // If file upload fails, return an internal server error response

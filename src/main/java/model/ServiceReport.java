@@ -17,7 +17,7 @@ public class ServiceReport implements Serializable {
     private int completions; // How many times the service has been completed
     private String completionStatus; // Could be "In Progress", "Completed", etc.
     private boolean isAlaCarte;
-
+    private String color;
     private Integer subscriberAlaCarteServicesID;  // New field
     
     // Other fields and methods...
@@ -232,4 +232,14 @@ public class ServiceReport implements Serializable {
     public void setSubscriberAlaCarteServicesID(Integer subscriberAlaCarteServicesID) {
         this.subscriberAlaCarteServicesID = subscriberAlaCarteServicesID;
     }
+
+	public String getColor() {
+		return color;
+	}
+
+	public void setColor(String color) {
+		this.color = color;
+	}
+    
+    
 }

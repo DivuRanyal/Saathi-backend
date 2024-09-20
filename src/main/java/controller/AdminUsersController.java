@@ -24,6 +24,11 @@ import freemarker.template.TemplateException;
 import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
+import java.time.Duration;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -268,36 +273,81 @@ public class AdminUsersController {
         try {
             // Fetch the list of subscribers for the given Saathi (AdminUser)
             List<SubscriberDTO> subscribers = subscriberService.getSubscribersBySaathiID(saathiId);
+
             // Check if the list of subscribers is null or empty
             if (subscribers == null || subscribers.isEmpty()) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND)
                         .body("No subscribers found for Saathi with ID: " + saathiId);
             }
+
             // Create a list to hold each subscriber's services DTO
             List<SubscriberServicesDTO> subscriberServicesDTOList = new ArrayList<>();
+
             // Loop through each subscriber and fetch their services
             for (SubscriberDTO subscriber : subscribers) {
                 // Fetch the services for each subscriber
                 Map<String, List<ServiceReport>> services = serviceCompletionService.getSubscriberServices(subscriber.getSubscriberID());
+
                 // Check if the services exist and are valid
                 if (services != null && services.containsKey("allServices")) {
                     List<ServiceReport> serviceReports = services.get("allServices");
-                    if (serviceReports != null && !serviceReports.isEmpty()) {
+
+                    // Filter out services where packageServiceID is not null
+                    List<ServiceReport> filteredServices = new ArrayList<>();
+                    for (ServiceReport serviceReport : serviceReports) {
+                        if (serviceReport.getPackageServiceID() == null) { // Only process services where packageServiceID is null
+                            
+                            // Add color attribute based on requestedDate and requestedTime
+                            if (serviceReport.getRequestedDate() != null && serviceReport.getRequestedTime() != null) {
+                                // Combine requested date and time into a LocalDateTime
+                                LocalDateTime requestedDateTime = LocalDateTime.of(
+                                        LocalDate.parse(serviceReport.getRequestedDate().toString()), // Parse the requested date
+                                        LocalTime.parse(serviceReport.getRequestedTime().toString())  // Parse the requested time
+                                );
+
+                                // Get the current time
+                                LocalDateTime currentTime = LocalDateTime.now(ZoneId.systemDefault());
+
+                                // Calculate the duration between the current time and the requested time
+                                Duration duration = Duration.between(currentTime, requestedDateTime);
+                                long hours = duration.toHours();
+
+                                if (hours >= 0 && hours <= 24) {
+                                    // Requested date/time is within the next 24 hours
+                                    serviceReport.setColor("green");
+                                } else if (hours > 24) {
+                                    // Requested date/time is more than 24 hours in the future
+                                    serviceReport.setColor("amber");
+                                } else {
+                                    // Requested date/time is in the past
+                                    serviceReport.setColor("red");
+                                }
+                            } else {
+                                serviceReport.setColor("no color"); // Handle case where requestedDate or requestedTime is missing
+                            }
+
+                            filteredServices.add(serviceReport); // Add the service to the filtered list
+                        }
+                    }
+
+                    if (!filteredServices.isEmpty()) {
                         // Create and add the DTO to the list
                         SubscriberServicesDTO dto = new SubscriberServicesDTO(
-                                subscriber.getSubscriberID(), 
-                                subscriber.getFirstName(),  // Assuming getSubscriberName() exists in SubscriberDTO
-                                serviceReports
+                                subscriber.getSubscriberID(),
+                                subscriber.getFirstName(),
+                                filteredServices
                         );
                         subscriberServicesDTOList.add(dto);
                     }
                 }
             }
+
             // If no services were found for any subscribers
             if (subscriberServicesDTOList.isEmpty()) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND)
                         .body("No services found for any subscribers under Saathi with ID: " + saathiId);
             }
+
             // Return the list containing subscriber services DTO
             return ResponseEntity.ok(subscriberServicesDTOList);
         } catch (Exception e) {
