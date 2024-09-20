@@ -292,10 +292,10 @@ public class AdminUsersController {
                 if (services != null && services.containsKey("allServices")) {
                     List<ServiceReport> serviceReports = services.get("allServices");
 
-                    // Filter out services where packageServiceID is not null
+                    // Filter out services where packageServiceID is not null and only include valid services
                     List<ServiceReport> filteredServices = new ArrayList<>();
                     for (ServiceReport serviceReport : serviceReports) {
-                        if (serviceReport.getPackageServiceID() == null) { // Only process services where packageServiceID is null
+                        if (serviceReport.getPackageServiceID() == null && serviceReport.getServiceName() != null) { // Check for valid services
                             
                             // Add color attribute based on requestedDate and requestedTime
                             if (serviceReport.getRequestedDate() != null && serviceReport.getRequestedTime() != null) {
@@ -326,10 +326,11 @@ public class AdminUsersController {
                                 serviceReport.setColor("no color"); // Handle case where requestedDate or requestedTime is missing
                             }
 
-                            filteredServices.add(serviceReport); // Add the service to the filtered list
+                            filteredServices.add(serviceReport); // Add the valid service to the filtered list
                         }
                     }
 
+                    // Only add the subscriber if they have valid filtered services
                     if (!filteredServices.isEmpty()) {
                         // Create and add the DTO to the list
                         SubscriberServicesDTO dto = new SubscriberServicesDTO(
@@ -357,5 +358,6 @@ public class AdminUsersController {
                     .body("An error occurred while retrieving services for Saathi ID: " + saathiId);
         }
     }
+
 
 }
