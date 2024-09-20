@@ -201,7 +201,7 @@ public class ServiceReport implements Serializable {
                 ", completionDate=" + getCompletionDate() +
                 ", requestedDate=" + requestedDate +
                 ", requestedTime=" + requestedTime +
-                ", frequencyCount=" + frequencyCount +
+                ", frequencyCount=" + frequency +
                 ", pending=" + pending +
                 ", isAlaCarte=" + isAlaCarte +
                 '}';
