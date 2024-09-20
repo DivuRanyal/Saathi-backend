@@ -187,6 +187,7 @@ public class ServiceCompletionServiceNew {
                 for (PackageServices packageService : packageServices) {
    //             	int calculatedFrequency = packageService.getService().getFrequency() * packageService.getFrequency();
                 	int calculatedFrequency =  packageService.getFrequency();
+                	System.out.println("calculatedFrequency"+calculatedFrequency);
                 	LocalDate dummyRequestedDate = LocalDate.of(2024, 9, 20); // Example date: September 20, 2024
                     LocalTime dummyRequestedTime = LocalTime.of(13, 53, 52);  // Example time: 13:53:52
                     System.out.println(dummyRequestedDate);
