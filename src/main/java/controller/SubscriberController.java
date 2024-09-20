@@ -37,7 +37,10 @@ import javax.mail.MessagingException;
 
 import java.io.File;
 import java.io.IOException;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -538,5 +541,34 @@ public class SubscriberController {
         }
     }
     
+    @PutMapping("/{subscriberID}/service/{serviceID}/updateRequest")
+    public ResponseEntity<?> updateServiceRequest(
+            @PathVariable Integer subscriberID, 
+            @PathVariable int serviceID,
+            @RequestParam String requestedDate, 
+            @RequestParam String requestedTime) {
+
+        try {
+            // Parse the requestedDate and requestedTime from the input strings
+            DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+            DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm:ss");
+            
+            LocalDate parsedRequestedDate = LocalDate.parse(requestedDate, dateFormatter);
+            LocalTime parsedRequestedTime = LocalTime.parse(requestedTime, timeFormatter);
+
+            // Call the service layer to update the service request
+            ServiceReport updatedServiceReport = serviceCompletionService.updateServiceRequest(
+                    subscriberID, serviceID, parsedRequestedDate, parsedRequestedTime);
+
+            // Return the updated ServiceReport in the response
+            return ResponseEntity.ok(updatedServiceReport);
+            
+        } catch (Exception e) {
+            // Handle exceptions and return error message with HTTP status
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("An error occurred while updating the service request.");
+        }
+    }
     
 }

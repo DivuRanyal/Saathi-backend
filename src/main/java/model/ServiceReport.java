@@ -20,14 +20,15 @@ public class ServiceReport implements Serializable {
 
     // Define the JSON format to return only the date part of the LocalDateTime
     @JsonFormat(pattern = "yyyy-MM-dd")
-    private LocalDateTime completionDate;
+    private LocalDateTime completionDate;    
+    @JsonFormat(pattern = "yyyy-MM-dd") // Format LocalDate as "yyyy-MM-dd"
+    private LocalDate requestedDate;
 
-    private LocalDate requestedDate; // Date requested by the subscriber
-    private LocalTime requestedTime; // Time requested by the subscriber
+    @JsonFormat(pattern = "HH:mm:ss") // Format LocalTime as "HH:mm:ss"
+    private LocalTime requestedTime;// Time requested by the subscriber
 
     private int frequencyCount; // Calculated based on frequency and frequencyUnit
     private int pending; // Calculated as frequencyCount - completions
-
     // Constructor
     public ServiceReport(int serviceID, String serviceName, String packageName, int frequency, 
                          String frequencyUnit, int completions, String completionStatus, LocalDateTime completionDate, 
@@ -213,6 +214,5 @@ public class ServiceReport implements Serializable {
 	public void setPending(int pending) {
 		this.pending = pending;
 	}
-    
-    
+        
 }

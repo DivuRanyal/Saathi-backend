@@ -1,9 +1,12 @@
 package service;
 
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -172,20 +175,22 @@ public class ServiceCompletionServiceNew {
     @CachePut(value = "subscriberServicesCache", key = "#subscriberID")
     public Map<String, List<ServiceReport>> trackSubscriberServices(Integer subscriberID, int packageID, int alaCarteServiceID) {
         System.out.println("Tracking services for subscriber ID: " + subscriberID); 
-        
  //       List<ServiceReport> serviceReports = new ArrayList<>();
         // Fetch existing services from in-memory map (if any)
         List<ServiceReport> serviceReports = subscriberServiceMap.getOrDefault(subscriberID, new ArrayList<>());
-        
-        // Handle package services
+       // Handle package services
         if (packageID != 0) {
             List<PackageServices> packageServices = packageServiceRepository.findServicesByPackageId(packageID);
             if (packageServices == null || packageServices.isEmpty()) {
                 System.out.println("No package services found for packageId: " + packageID);
             } else {
                 for (PackageServices packageService : packageServices) {
-                	int calculatedFrequency = packageService.getService().getFrequency() * packageService.getFrequency();
-
+   //             	int calculatedFrequency = packageService.getService().getFrequency() * packageService.getFrequency();
+                	int calculatedFrequency =  packageService.getFrequency();
+                	LocalDate dummyRequestedDate = LocalDate.of(2024, 9, 20); // Example date: September 20, 2024
+                    LocalTime dummyRequestedTime = LocalTime.of(13, 53, 52);  // Example time: 13:53:52
+                    System.out.println(dummyRequestedDate);
+                    System.out.println(dummyRequestedTime);
                     ServiceReport report = new ServiceReport(
                         packageService.getService().getServiceID(),
                         packageService.getService().getServiceName(),
@@ -194,7 +199,7 @@ public class ServiceCompletionServiceNew {
                         packageService.getService().getFrequencyUnit(),
                         0,
                         "Not Completed",
-                        null,false,packageService.getPackageServicesID(),null,null
+                        null,false,packageService.getPackageServicesID(),dummyRequestedDate,dummyRequestedTime
                     );
                  // Avoid adding duplicate services to the list
                     if (!serviceReports.contains(report)) {
@@ -202,13 +207,20 @@ public class ServiceCompletionServiceNew {
                     }
                 }
             }
-        }
-       
+        } 
         // Handle ala-carte services
         if (alaCarteServiceID != 0) {
             SubscriberAlaCarteServices alaCarteService = alaCarteServicesRepository.findById(alaCarteServiceID)
                     .orElseThrow(() -> new RuntimeException("Ala-carte service not found"));
-            System.out.println(alaCarteService.getService().getServiceID() + alaCarteService.getService().getServiceName());
+            LocalDate dummyRequestedDate = LocalDate.of(2024, 9, 20); // Example date: September 20, 2024
+            LocalTime dummyRequestedTime = LocalTime.of(13, 53, 52);  // Example time: 13:53:52
+  //          System.out.println(dummyRequestedDate);
+ //           System.out.println(dummyRequestedTime);
+            LocalDate date=convertToLocalDate(alaCarteService.getServiceDate());
+            LocalTime time=convertToLocalTime(alaCarteService.getServiceTime());
+            System.out.println(alaCarteService.getServiceDate());
+            System.out.println(alaCarteService.getServiceTime());
+ //           System.out.println(alaCarteService.getService().getServiceID() + alaCarteService.getService().getServiceName());
             ServiceReport alaCarteServiceReport = new ServiceReport(
                 alaCarteService.getService().getServiceID(),
                 alaCarteService.getService().getServiceName(),
@@ -217,18 +229,18 @@ public class ServiceCompletionServiceNew {
                 "Single",
                 0,
                 "Not Completed",
-                null,true,0,null,null
+                null,true,0,date,time
             );
+            
+            System.out.println();
             // Avoid adding duplicate ala-carte service
             if (!serviceReports.contains(alaCarteServiceReport)) {
                 serviceReports.add(alaCarteServiceReport);
             }
         }
-
         // Store the service reports in cache and in-memory
         subscriberServiceMap.put(subscriberID, serviceReports);
         inMemoryServiceTracker.startTracking(subscriberID, serviceReports);
-
         Map<String, List<ServiceReport>> services = new HashMap<>();
         services.put("allServices", serviceReports);
         return services;
@@ -503,4 +515,15 @@ public class ServiceCompletionServiceNew {
         return allServicesMap;
     }
 
+    public static LocalDate convertToLocalDate(Date date) {
+        return date.toInstant()
+                   .atZone(ZoneId.systemDefault())  // Use the system's default time zone
+                   .toLocalDate();                  // Convert to LocalDate
+    }
+    
+    public static LocalTime convertToLocalTime(Date date) {
+        return Instant.ofEpochMilli(date.getTime())  // Convert to Instant from Date
+                      .atZone(ZoneId.systemDefault()) // Adjust to the system's default time zone
+                      .toLocalTime();                 // Extract the time part as LocalTime
+    }
 }
