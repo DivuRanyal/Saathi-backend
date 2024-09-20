@@ -384,17 +384,28 @@ public class SubscriberController {
                 serviceWithInteraction.put("completions", serviceReport.getCompletions());
                 serviceWithInteraction.put("completionStatus", serviceReport.getCompletionStatus());
                 serviceWithInteraction.put("completionDate", serviceReport.getCompletionDate());
-                serviceWithInteraction.put("requestedDate", serviceReport.getRequestedDate());
-                serviceWithInteraction.put("requestedTime", serviceReport.getRequestedTime());
+                serviceWithInteraction.put("requestedDate", serviceReport.getRequestedDate().toString());
+                serviceWithInteraction.put("requestedTime", serviceReport.getRequestedTime().toString());
                 serviceWithInteraction.put("frequencyCount", serviceReport.getFrequencyCount());
                 serviceWithInteraction.put("pending", serviceReport.getPending());
                 serviceWithInteraction.put("alaCarte", serviceReport.isAlaCarte());
 
-                // Filter interactions related to the current service by packageServiceID
                 List<InteractionDTO> relatedInteractions = interactions.stream()
-                        .filter(interaction -> interaction.getPackageServicesID().equals(serviceReport.getPackageServiceID()))
-                        .collect(Collectors.toList());
+                	    .filter(interaction -> {
+                	        if (serviceReport.isAlaCarte()) {
+                	            // Only check against SubscriberAlaCarteServicesID for ala-carte services
+                	            return interaction.getSubscriberAlaCarteServicesID() != null &&
+                	                   interaction.getSubscriberAlaCarteServicesID().equals(serviceReport.getSubscriberAlaCarteServicesID());
+                	        } else if (serviceReport.getPackageServiceID() != 0 && interaction.getPackageServicesID() != null) {
+                	            // Only check against PackageServicesID for package services
+                	            return interaction.getPackageServicesID().equals(serviceReport.getPackageServiceID());
+                	        } else {
+                	            return false; // No matching service
+                	        }
+                	    })
+                	    .collect(Collectors.toList());
 
+                System.out.println("relatedInteractions"+relatedInteractions);
                 // Add the interactions to the service
                 serviceWithInteraction.put("interactions", relatedInteractions);
 
@@ -506,25 +517,36 @@ public class SubscriberController {
                 interactionDTO.setDescription(description); // Get the description from the request payload
                 interactionDTO.setDocuments(filePath);  // Store the file path in the documents attribute
 
-                // Step 5: Check service completion status and differentiate between package and ala-carte services
                 List<ServiceReport> services = updatedServices.get("allServices");
                 if (services != null) {
                     for (ServiceReport service : services) {
+                        // Check both serviceID and the type (Ala-carte or Package) to make sure it's the correct service
                         if (service.getServiceID() == serviceID) {
-                            // Set the interaction type based on whether it's an ala-carte service or a package service
-                            if (service.isAlaCarte()) {
-                                // Use the ala-carte service ID retrieved based on the subscriber
-                                interactionDTO.setSubscriberAlaCarteServicesID(subscriberAlaCarteServicesID);
-                            } else {
-                                // Use the packageServiceID retrieved based on the subscriber 
-                                interactionDTO.setPackageServicesID(service.getPackageServiceID()); // Set the packageServiceID
+                            // Check if the request indicates it's an Ala-carte service and match it with the existing service report
+                            if (isAlaCarte && service.getSubscriberAlaCarteServicesID() != null) {
+                                // This is the matching ala-carte service
+                                System.out.println("Processing ala-carte service...");
+                                interactionDTO.setSubscriberAlaCarteServicesID(service.getSubscriberAlaCarteServicesID());
+                                interactionDTO.setPackageServicesID(null); 
+                                break;// Clear packageServiceID for ala-carte service
                             }
+                            // Check if it's a package service by ensuring isAlaCarte is false and there's a valid packageServiceID
+                            else if (!isAlaCarte && service.getPackageServiceID() != null && service.getPackageServiceID() != 0) {
+                                // This is the matching package service
+                                System.out.println("Processing package service...");
+                                interactionDTO.setPackageServicesID(service.getPackageServiceID()); // Set the packageServiceID
+                                interactionDTO.setSubscriberAlaCarteServicesID(null); 
+                                break;// Clear ala-carte ID for package service
+                            }
+
                             // Set the completion status only if the service is fully completed
                             interactionDTO.setCompletionStatus("Completed".equals(service.getCompletionStatus()) ? 1 : 0);
+
+                            // Since the matching service is found, break the loop
+                           
                         }
                     }
                 }
-
                 // Step 6: Save the interaction to the database
                 interactionService.createInteraction(interactionDTO);
                 // Return a success message

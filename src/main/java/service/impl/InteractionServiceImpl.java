@@ -45,7 +45,8 @@ public class InteractionServiceImpl implements InteractionService {
     @Override
     public InteractionDTO createInteraction(InteractionDTO interactionDTO) {
         Interaction interaction = convertToEntity(interactionDTO);
-       
+       System.out.println(interactionDTO.getPackageServicesID());
+//       System.out.println(interaction.getPackageServices().getPackageServicesID());
         interactionRepository.save(interaction);
         return convertToDTO(interaction);
     }
@@ -112,14 +113,18 @@ public class InteractionServiceImpl implements InteractionService {
 
     		// Set the fetched PackageServices entity in the Interaction object
     	// Check if PackageServicesID is not null before fetching from repository
-        if (dto.getPackageServicesID() != null) {
-            PackageServices packageServices = packageServiceRepository.findById(dto.getPackageServicesID())
-                    .orElseThrow(() -> new EntityNotFoundException("PackageServices not found for ID: " + dto.getPackageServicesID()));
-            interaction.setPackageServices(packageServices); // Set the PackageServices entity in Interaction
-        } else {
-            interaction.setPackageServices(null); // Set to null if no PackageServicesID is provided
-        }
-       
+    	 if (dto.getPackageServicesID() != null && dto.getPackageServicesID() != 0) {
+    		 System.out.println("check");
+    		    // Only try to fetch PackageServices if the ID is valid (non-null and non-zero)
+    		    PackageServices packageServices = packageServiceRepository.findById(dto.getPackageServicesID())
+    		            .orElseThrow(() -> new EntityNotFoundException("PackageServices not found for ID: " + dto.getPackageServicesID()));
+    		    interaction.setPackageServices(packageServices); // Set the PackageServices entity in Interaction
+    		} else {
+    			System.out.println("chk");
+    		    // Set PackageServices to null if it's an ala-carte service or no valid PackageServicesID is provided
+    		    interaction.setPackageServices(null);
+    		}
+
         interaction.setSubscriberID(dto.getSubscriberID());
         interaction.setSaathiID(dto.getSaathiID());
         interaction.setInteractionType(dto.getInteractionType());

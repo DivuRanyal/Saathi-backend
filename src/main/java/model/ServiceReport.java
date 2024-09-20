@@ -11,28 +11,32 @@ public class ServiceReport implements Serializable {
     private int serviceID;
     private String serviceName;
     private String packageName;
-    private int packageServiceID;
+    private Integer packageServiceID;
     private int frequency; // How many times the service should be completed
     private String frequencyUnit; // e.g., "monthly", "weekly", etc.
     private int completions; // How many times the service has been completed
     private String completionStatus; // Could be "In Progress", "Completed", etc.
     private boolean isAlaCarte;
 
+    private Integer subscriberAlaCarteServicesID;  // New field
+    
+    // Other fields and methods...
+    
+   
     // Define the JSON format to return only the date part of the LocalDateTime
     @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDateTime completionDate;    
-    @JsonFormat(pattern = "yyyy-MM-dd") // Format LocalDate as "yyyy-MM-dd"
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private LocalDate requestedDate;
 
-    @JsonFormat(pattern = "HH:mm:ss") // Format LocalTime as "HH:mm:ss"
-    private LocalTime requestedTime;// Time requested by the subscriber
-
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "HH:mm")
+    private LocalTime requestedTime;
     private int frequencyCount; // Calculated based on frequency and frequencyUnit
     private int pending; // Calculated as frequencyCount - completions
     // Constructor
     public ServiceReport(int serviceID, String serviceName, String packageName, int frequency, 
                          String frequencyUnit, int completions, String completionStatus, LocalDateTime completionDate, 
-                         boolean isAlaCarte, int packageServiceID, LocalDate requestedDate, LocalTime requestedTime) {
+                         boolean isAlaCarte, Integer packageServiceID, LocalDate requestedDate, LocalTime requestedTime,Integer subscriberAlaCarteServicesID) {
         this.serviceID = serviceID;
         this.serviceName = serviceName;
         this.packageName = packageName;
@@ -48,6 +52,7 @@ public class ServiceReport implements Serializable {
         this.frequencyCount=frequency;
  //       this.frequencyCount = calculateFrequencyCount(); // Initialize frequencyCount
         this.pending = calculatePending(); // Initialize pending count
+        this.subscriberAlaCarteServicesID=subscriberAlaCarteServicesID;
     }
 
     // Default constructor
@@ -157,11 +162,11 @@ public class ServiceReport implements Serializable {
         this.isAlaCarte = isAlaCarte;
     }
 
-    public int getPackageServiceID() {
+    public Integer getPackageServiceID() {
         return packageServiceID;
     }
 
-    public void setPackageServiceID(int packageServiceID) {
+    public void setPackageServiceID(Integer packageServiceID) {
         this.packageServiceID = packageServiceID;
     }
 
@@ -207,6 +212,7 @@ public class ServiceReport implements Serializable {
                 ", frequencyCount=" + frequency +
                 ", pending=" + pending +
                 ", isAlaCarte=" + isAlaCarte +
+                ", subscriberAlaCarteServicesID=" + subscriberAlaCarteServicesID +
                 '}';
     }
 
@@ -217,5 +223,13 @@ public class ServiceReport implements Serializable {
 	public void setPending(int pending) {
 		this.pending = pending;
 	}
-        
+      
+	 // Getter and Setter for subscriberAlaCarteServicesID
+    public Integer getSubscriberAlaCarteServicesID() {
+        return subscriberAlaCarteServicesID;
+    }
+
+    public void setSubscriberAlaCarteServicesID(Integer subscriberAlaCarteServicesID) {
+        this.subscriberAlaCarteServicesID = subscriberAlaCarteServicesID;
+    }
 }

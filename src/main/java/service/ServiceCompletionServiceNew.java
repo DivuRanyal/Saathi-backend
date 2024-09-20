@@ -200,7 +200,7 @@ public class ServiceCompletionServiceNew {
                         packageService.getService().getFrequencyUnit(),
                         0,
                         "Not Completed",
-                        null,false,packageService.getPackageServicesID(),dummyRequestedDate,dummyRequestedTime
+                        null,false,packageService.getPackageServicesID(),dummyRequestedDate,dummyRequestedTime,null
                     );
                  // Avoid adding duplicate services to the list
                     if (!serviceReports.contains(report)) {
@@ -225,12 +225,12 @@ public class ServiceCompletionServiceNew {
             ServiceReport alaCarteServiceReport = new ServiceReport(
                 alaCarteService.getService().getServiceID(),
                 alaCarteService.getService().getServiceName(),
-                "Ala-carte",
+                null,
                 1,
                 "Single",
                 0,
                 "Not Completed",
-                null,true,0,date,time
+                null,true,null,date,time,alaCarteService.getSubscriberAlaCarteServicesID()
             );
             
             System.out.println();
@@ -349,7 +349,6 @@ public class ServiceCompletionServiceNew {
                             System.out.println("Package Service: " + service.getServiceName() + " is already completed.");
                             return null; // Prevent further updates if the service is already completed
                         }
-
                         // Increment completions for package service
                         int newCompletions = service.getCompletions() + 1;
                         service.setCompletions(newCompletions);
@@ -515,12 +514,15 @@ public class ServiceCompletionServiceNew {
         // Return the rebuilt data
         return allServicesMap;
     }
-
     public static LocalDate convertToLocalDate(Date date) {
+        if (date instanceof java.sql.Date) {
+            date = new java.util.Date(date.getTime());  // Convert java.sql.Date to java.util.Date
+        }
         return date.toInstant()
-                   .atZone(ZoneId.systemDefault())  // Use the system's default time zone
-                   .toLocalDate();                  // Convert to LocalDate
+                   .atZone(ZoneId.systemDefault())
+                   .toLocalDate();
     }
+
     
     public static LocalTime convertToLocalTime(Date date) {
         return Instant.ofEpochMilli(date.getTime())  // Convert to Instant from Date
