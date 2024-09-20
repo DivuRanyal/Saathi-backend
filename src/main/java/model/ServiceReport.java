@@ -45,7 +45,8 @@ public class ServiceReport implements Serializable {
         this.packageServiceID = packageServiceID;
         this.requestedDate = requestedDate;
         this.requestedTime = requestedTime;
-        this.frequencyCount = calculateFrequencyCount(); // Initialize frequencyCount
+        this.frequencyCount=frequency;
+ //       this.frequencyCount = calculateFrequencyCount(); // Initialize frequencyCount
         this.pending = calculatePending(); // Initialize pending count
     }
 
@@ -55,7 +56,7 @@ public class ServiceReport implements Serializable {
     }
 
     // Method to calculate frequencyCount based on frequency and frequencyUnit
-    private int calculateFrequencyCount() {
+/*    private int calculateFrequencyCount() {
         switch (frequencyUnit.toLowerCase()) {
             case "weekly":
                 return frequency * 4; // Assuming 4 weeks in a month
@@ -67,7 +68,7 @@ public class ServiceReport implements Serializable {
                 return frequency; // Default to raw frequency
         }
     }
-
+*/
     // Method to calculate pending services as frequencyCount - completions
     private int calculatePending() {
         return frequencyCount - completions;
@@ -104,7 +105,8 @@ public class ServiceReport implements Serializable {
 
     public void setFrequency(int frequency) {
         this.frequency = frequency;
-        this.frequencyCount = calculateFrequencyCount(); // Recalculate frequencyCount
+  //      this.frequencyCount = calculateFrequencyCount(); // Recalculate frequencyCount
+        this.frequencyCount=frequency;
         this.pending = calculatePending(); // Recalculate pending
     }
 
@@ -114,7 +116,8 @@ public class ServiceReport implements Serializable {
 
     public void setFrequencyUnit(String frequencyUnit) {
         this.frequencyUnit = frequencyUnit;
-        this.frequencyCount = calculateFrequencyCount(); // Recalculate frequencyCount
+//        this.frequencyCount = calculateFrequencyCount(); // Recalculate frequencyCount
+        this.frequencyCount=frequency;
         this.pending = calculatePending(); // Recalculate pending
     }
 
