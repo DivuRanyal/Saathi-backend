@@ -221,7 +221,7 @@ public class SubscriberServiceImpl implements SubscriberService {
 
     private SubscriberDTO convertToDTO(Subscriber subscriber) {
         SubscriberDTO subscriberDTO = new SubscriberDTO();
-        subscriberDTO.setSubscriberID(subscriber.getSubscriberId());
+        subscriberDTO.setSubscriberID(subscriber.getSubscriberID());
         subscriberDTO.setFirstName(subscriber.getFirstName());
         subscriberDTO.setLastName(subscriber.getLastName());
         subscriberDTO.setEmail(subscriber.getEmail());
@@ -269,8 +269,8 @@ public class SubscriberServiceImpl implements SubscriberService {
 
         List<PatronDTO> patronDTOs = new ArrayList<>();
 
-        if (subscriber != null && subscriber.getSubscriberId() != 0) {
-            List<Patron> patrons = patronRepository.findBySubscriber_SubscriberID(subscriber.getSubscriberId());
+        if (subscriber != null && subscriber.getSubscriberID() != 0) {
+            List<Patron> patrons = patronRepository.findBySubscriber_SubscriberID(subscriber.getSubscriberID());
             
             if (patrons != null && !patrons.isEmpty()) {
                 patronDTOs = patrons.stream()
@@ -351,7 +351,7 @@ public class SubscriberServiceImpl implements SubscriberService {
         return subscribers.stream().map(subscriber -> {
             SubscriberDTO subscriberDTO = mapToSubscriberDTO(subscriber);
 
-            List<Patron> patrons = patronRepository.findBySubscriber_SubscriberID(subscriber.getSubscriberId());
+            List<Patron> patrons = patronRepository.findBySubscriber_SubscriberID(subscriber.getSubscriberID());
             List<PatronDTO> patronDTOs = patrons.stream()
                 .map(this::mapToPatronDTO)
                 .collect(Collectors.toList());
@@ -436,7 +436,7 @@ public class SubscriberServiceImpl implements SubscriberService {
 
     public SubscriberDTO mapToSubscriberDTO(Subscriber subscriber) {
         SubscriberDTO dto = new SubscriberDTO();
-        dto.setSubscriberID(subscriber.getSubscriberId());
+        dto.setSubscriberID(subscriber.getSubscriberID());
         dto.setFirstName(subscriber.getFirstName());
         dto.setLastName(subscriber.getLastName());
         dto.setEmail(subscriber.getEmail());
@@ -490,7 +490,7 @@ public class SubscriberServiceImpl implements SubscriberService {
         // Convert to DTOs
         return subscribers.stream()
                 .map(subscriber -> new SubscriberDTO(
-                    subscriber.getSubscriberId(), 
+                    subscriber.getSubscriberID(), 
                     subscriber.getFirstName(), 
                     subscriber.getLastName(), 
                     subscriber.getEmail(), 

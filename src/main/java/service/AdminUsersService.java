@@ -21,11 +21,11 @@ public interface AdminUsersService {
     
     AdminUser findByEmailAndPassword(String email, String password);
     
-    public List<AdminUser> getAllSaathiUsers();
+     List<AdminUser> getAllSaathiUsers();
     
     boolean isEmailAlreadyRegistered(String email);
     boolean saathiExists(int saathiID) ;
-    
+   
     List<AdminUsersDTO> getAllAdminUsersWithSubscribersByUserType();
     
 }

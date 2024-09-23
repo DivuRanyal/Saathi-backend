@@ -95,7 +95,7 @@ public class PatronServiceImpl implements PatronService {
         dto.setComments(patron.getComments());
         // Safely handle the case where the Subscriber might be null
         if (patron.getSubscriber() != null) {
-            dto.setSubscriberID(patron.getSubscriber().getSubscriberId());
+            dto.setSubscriberID(patron.getSubscriber().getSubscriberID());
         } else {
             dto.setSubscriberID(null);
         }

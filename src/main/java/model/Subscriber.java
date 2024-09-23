@@ -3,6 +3,7 @@ package model;
 import javax.persistence.*;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotNull;
@@ -17,11 +18,12 @@ import java.util.List;
 @Table(name = "Subscribers")
 public class Subscriber {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "SubscriberID")
-    private int subscriberID;
-
+	 @Id
+	    @GeneratedValue(strategy = GenerationType.IDENTITY)
+	    @Column(name = "SubscriberID")
+	    @JsonProperty("subscriberID")  // Explicitly control the JSON property name
+	    private int subscriberID;
+	 
     @NotNull(message = "First name is required")
     @Column(name = "FirstName")
     private String firstName;
@@ -43,6 +45,7 @@ public class Subscriber {
 
     @NotNull(message = "Password is required")
     @Column(name = "Password")
+    @JsonIgnore
     private String password;
 
     @Column(name = "LastLoginTime")
@@ -102,11 +105,12 @@ public class Subscriber {
  // Date format to be used for date fields
     private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
 
-	public int getSubscriberId() {
+	
+	public int getSubscriberID() {
 		return subscriberID;
 	}
 
-	public void setSubscriberId(int subscriberID) {
+	public void setSubscriberID(int subscriberID) {
 		this.subscriberID = subscriberID;
 	}
 

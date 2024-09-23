@@ -167,7 +167,7 @@ public class AdminUsersServiceImpl implements AdminUsersService {
     
     private SubscriberDTO mapSubscriberToDTO(Subscriber subscriber) {
         SubscriberDTO subscriberDTO = new SubscriberDTO();
-        subscriberDTO.setSubscriberID(subscriber.getSubscriberId());
+        subscriberDTO.setSubscriberID(subscriber.getSubscriberID());
         subscriberDTO.setFirstName(subscriber.getFirstName());
         subscriberDTO.setLastName(subscriber.getLastName());
         subscriberDTO.setEmail(subscriber.getEmail());
@@ -175,4 +175,6 @@ public class AdminUsersServiceImpl implements AdminUsersService {
         subscriberDTO.setStatus(subscriber.getStatus());
         return subscriberDTO;
     }
+    
+    
 }
