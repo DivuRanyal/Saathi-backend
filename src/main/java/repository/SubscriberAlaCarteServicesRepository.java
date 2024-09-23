@@ -33,5 +33,8 @@ public interface SubscriberAlaCarteServicesRepository extends JpaRepository<Subs
 	 // Query using the 'subscriber' field
 	    List<SubscriberAlaCarteServices> findBySubscriber(Subscriber subscriber);
 	    Optional<SubscriberAlaCarteServices> findBySubscriberIDAndServiceID(Integer subscriberId,  Integer serviceId);
+	    
+	    // Method to fetch all ala-carte services for a specific subscriber
+	    List<SubscriberAlaCarteServices> findBySubscriberID(int subscriberID);
 	    }
 

@@ -8,8 +8,12 @@ import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+
+import javax.transaction.Transactional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CachePut;
@@ -19,6 +23,7 @@ import org.springframework.stereotype.Service;
 import model.Interaction;
 import model.PackageServices;
 import model.ServiceReport;
+import model.Subscriber;
 import model.SubscriberAlaCarteServices;
 import repository.InteractionRepository;
 import repository.PackageServiceRepository;
@@ -301,9 +306,7 @@ public class ServiceCompletionServiceNew {
             System.out.println("No services found for subscriber ID: " + subscriberID);
             return null;
         }
-
         boolean serviceUpdated = false;
-
         // Iterate over the services (both package and ala-carte)
         for (ServiceReport service : services) {
             // Check if the serviceID matches first
@@ -457,63 +460,176 @@ public class ServiceCompletionServiceNew {
             // Add the constructed ServiceReport to the list
             serviceReports.add(serviceReport);
         }
-
         return serviceReports; // Returns list of service reports representing all services availed by the subscriber
     }
 
+    @Transactional
     public Map<String, List<ServiceReport>> rebuildAllServices(int subscriberID) {
         // Fetch all relevant interactions for the subscriber
         List<Interaction> interactions = interactionRepository.findBySubscriberID(subscriberID);
 
+     // Fetch all ala-carte services the subscriber has purchased
+        List<SubscriberAlaCarteServices> alaCarteServices = alaCarteServicesRepository.findBySubscriberID(subscriberID);
+
         // Initialize a list to hold ServiceReports
         List<ServiceReport> serviceReports = new ArrayList<>();
+
+        // Track completed services by their service ID
+        Set<Integer> completedServiceIds = new HashSet<>();
 
         // Loop through interactions and build ServiceReports
         for (Interaction interaction : interactions) {
             ServiceReport serviceReport = new ServiceReport();
 
-            // Check if it's an Ala-carte service or a package service
             if (interaction.getSubscriberAlaCarteServices() != null) {
                 // Handle Ala-carte services
                 SubscriberAlaCarteServices alaCarteService = interaction.getSubscriberAlaCarteServices();
                 serviceReport.setServiceID(alaCarteService.getService().getServiceID());
                 serviceReport.setServiceName(alaCarteService.getService().getServiceName());
                 serviceReport.setPackageName("Ala-carte");
-                serviceReport.setAlaCarte(true); // It's an Ala-carte service
+                serviceReport.setAlaCarte(true);
+                serviceReport.setSubscriberAlaCarteServicesID(alaCarteService.getSubscriberAlaCarteServicesID());
+
+                // Set requested date and time
+                serviceReport.setRequestedDate(convertToLocalDate(alaCarteService.getServiceDate()));
+                serviceReport.setRequestedTime(convertToLocalTime(alaCarteService.getServiceTime()));
+
+                // For ala-carte services, completions are typically one-time
+                serviceReport.setCompletions(1); // Since each completion is a separate row
+                serviceReport.setCompletionStatus("Completed");
+                serviceReport.setCompletionDate(LocalDateTime.now()); // Set the completion date for Ala-carte services
+                serviceReport.setFrequencyCount(1); // Ala-carte services typically have a frequency of 1
+                serviceReport.setPending(0); // Completed means no pending
+
+                completedServiceIds.add(alaCarteService.getService().getServiceID());
+
             } else if (interaction.getPackageServices() != null) {
                 // Handle package services
                 PackageServices packageService = interaction.getPackageServices();
                 serviceReport.setServiceID(packageService.getService().getServiceID());
                 serviceReport.setServiceName(packageService.getService().getServiceName());
                 serviceReport.setPackageName(packageService.getSubscriptionPackage().getPackageName());
-                serviceReport.setAlaCarte(false); // It's a package service
-            } else {
-                // If neither ala-carte nor package is present, skip this interaction or handle appropriately
-                continue;
-            }
+                serviceReport.setAlaCarte(false);
+                serviceReport.setPackageServiceID(packageService.getPackageServicesID());
+                serviceReport.setFrequency(packageService.getFrequency());
+                serviceReport.setFrequencyUnit(packageService.getFrequencyUnit());
+                // Set requested date and time (if available)
+                serviceReport.setRequestedDate(LocalDate.now());  // Use real data if available
+                serviceReport.setRequestedTime(LocalTime.now());
 
-            // Set completion status and date from Interaction data
-            serviceReport.setCompletionStatus(interaction.getCompletionStatus() == 1 ? "Completed" : "In Progress");
-  //          serviceReport.setCompletionDate(interaction.getLastUpdatedDate());
-            
-            // Set the requested date and time from Interaction
-  //          serviceReport.setRequestedDate(interaction.getCreatedDate().toLocalDate());
-  //          serviceReport.setRequestedTime(interaction.getCreatedDate().toLocalTime());
+                // Set completions and status
+                int completions = countCompletionsForService(packageService.getPackageServicesID(), false);
+                serviceReport.setCompletions(completions);
+
+                // Set the frequency count from the package service
+                int frequencyCount = packageService.getFrequency();
+                serviceReport.setFrequencyCount(frequencyCount);
+
+                // Calculate pending completions
+                int pending = frequencyCount - completions;
+                serviceReport.setPending(Math.max(pending, 0)); // Ensure no negative pending value
+
+                // Set completion status and completion date
+                if (completions >= frequencyCount) {
+                    serviceReport.setCompletionStatus("Completed");
+                    serviceReport.setCompletionDate(LocalDateTime.now()); // Set completion date as today if status is "Completed"
+                } else {
+                    serviceReport.setCompletionStatus("In Progress");
+                    serviceReport.setCompletionDate(null); // No completion date if still in progress
+                }
+
+                completedServiceIds.add(packageService.getService().getServiceID());
+            }
 
             // Add the constructed ServiceReport to the list
             serviceReports.add(serviceReport);
         }
 
+        // Handle Subscriber Ala-carte Services (if they haven't been completed)
+        for (SubscriberAlaCarteServices alaCarteService : alaCarteServices) {
+            if (!completedServiceIds.contains(alaCarteService.getService().getServiceID())) {
+                // Service has not been completed, so we need to add it to the service report
+                ServiceReport serviceReport = new ServiceReport();
+                serviceReport.setServiceID(alaCarteService.getService().getServiceID());
+                serviceReport.setServiceName(alaCarteService.getService().getServiceName());
+                serviceReport.setPackageName("Ala-carte");
+                serviceReport.setAlaCarte(true);
+                serviceReport.setSubscriberAlaCarteServicesID(alaCarteService.getSubscriberAlaCarteServicesID());
+
+                // Set requested date and time
+                serviceReport.setRequestedDate(convertToLocalDate(alaCarteService.getServiceDate()));
+                serviceReport.setRequestedTime(convertToLocalTime(alaCarteService.getServiceTime()));
+
+                // For ala-carte services that haven't been completed yet
+                serviceReport.setCompletions(0); // No completions yet
+                serviceReport.setCompletionStatus("Not Started");
+                serviceReport.setCompletionDate(null); // No completion date since it's not started
+                serviceReport.setFrequencyCount(1); // Frequency for ala-carte services is typically 1
+                serviceReport.setPending(1); // One pending completion
+
+                // Add this service to the serviceReports list
+                serviceReports.add(serviceReport);
+            }
+        }
+
+        // Add remaining services from the package that haven't been completed
+        addRemainingServices(subscriberID, completedServiceIds, serviceReports);
+
         // Create a map structure similar to what is stored in Memcached
         Map<String, List<ServiceReport>> allServicesMap = new HashMap<>();
         allServicesMap.put("allServices", serviceReports);
 
-        // Store the rebuilt data in Memcached (if applicable)
-        // memcachedClient.set("allServices_" + subscriberID, allServicesMap);
-
         // Return the rebuilt data
         return allServicesMap;
     }
+
+    public int countCompletionsForService(int serviceID, boolean isAlaCarte) {
+        if (isAlaCarte) {
+            return interactionRepository.countAlaCarteCompletions(serviceID);
+        } else {
+            return interactionRepository.countPackageCompletions(serviceID);
+        }
+    }
+
+    public void addRemainingServices(int subscriberID, Set<Integer> completedServiceIds, List<ServiceReport> serviceReports) {
+        // Fetch the subscriber and retrieve the packageID
+        Subscriber subscriber = subscriberRepository.findById(subscriberID)
+                .orElseThrow(() -> new RuntimeException("Subscriber not found with ID: " + subscriberID));
+        
+        Integer packageID = subscriber.getSubscriptionPackage().getPackageID();  // Assuming subscriber has a field for packageID
+
+        // Fetch all services associated with the packageID
+        List<PackageServices> packageServices = packageServiceRepository.findServicesByPackageId(packageID);
+
+        for (PackageServices packageService : packageServices) {
+            // Check if this service has already been completed
+            if (!completedServiceIds.contains(packageService.getService().getServiceID())) {
+                // Service has not been completed, so we need to add it to the service report
+                ServiceReport serviceReport = new ServiceReport();
+                serviceReport.setServiceID(packageService.getService().getServiceID());
+                serviceReport.setServiceName(packageService.getService().getServiceName());
+                serviceReport.setPackageName(packageService.getSubscriptionPackage().getPackageName());
+                serviceReport.setAlaCarte(false);
+                serviceReport.setPackageServiceID(packageService.getPackageServicesID());
+
+                // Set default completion status and values for remaining services
+                serviceReport.setCompletions(0);
+                serviceReport.setCompletionStatus("Not Started");
+
+                // Set frequency and pending values for services that haven't been started yet
+                int frequencyCount = packageService.getFrequency();
+                serviceReport.setFrequencyCount(frequencyCount);
+                serviceReport.setPending(frequencyCount); // Since none of the completions have started, pending = frequencyCount
+
+                serviceReport.setRequestedDate(LocalDate.now());  // You can use real data if available
+                serviceReport.setRequestedTime(LocalTime.now());
+
+                // Add this service to the serviceReports list
+                serviceReports.add(serviceReport);
+            }
+        }
+    }
+
     public static LocalDate convertToLocalDate(Date date) {
         if (date instanceof java.sql.Date) {
             date = new java.util.Date(date.getTime());  // Convert java.sql.Date to java.util.Date
@@ -522,11 +638,11 @@ public class ServiceCompletionServiceNew {
                    .atZone(ZoneId.systemDefault())
                    .toLocalDate();
     }
-
     
     public static LocalTime convertToLocalTime(Date date) {
         return Instant.ofEpochMilli(date.getTime())  // Convert to Instant from Date
                       .atZone(ZoneId.systemDefault()) // Adjust to the system's default time zone
                       .toLocalTime();                 // Extract the time part as LocalTime
     }
+        
 }

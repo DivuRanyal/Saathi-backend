@@ -25,4 +25,13 @@ public interface InteractionRepository extends JpaRepository<Interaction, Intege
 
 	// Define a method to fetch all interactions by the subscriber ID
     List<Interaction> findBySubscriberID(Integer subscriberId);
+    
+    // Custom query to count completions for Ala-carte services
+    @Query("SELECT COUNT(i) FROM Interaction i WHERE i.subscriberAlaCarteServices.service.serviceID = :serviceID")
+    int countAlaCarteCompletions(@Param("serviceID") int serviceID);
+
+    // Custom query to count completions for Package services
+    @Query("SELECT COUNT(i) FROM Interaction i WHERE i.packageServices.service.serviceID = :serviceID")
+    int countPackageCompletions(@Param("serviceID") int serviceID);
+
 }

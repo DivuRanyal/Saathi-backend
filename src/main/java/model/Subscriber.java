@@ -9,6 +9,7 @@ import jakarta.validation.constraints.NotNull;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -57,6 +58,10 @@ public class Subscriber {
     @OneToMany(mappedBy = "subscriptionPackage", cascade = CascadeType.ALL)
     @JsonIgnore
     private List<PackageServices> packageServices;
+
+    @OneToMany(mappedBy = "subscriber", cascade = CascadeType.ALL)
+    @JsonIgnore
+    private List<SaathiAssignmentHistory> saathiAssignmentHistoryList = new ArrayList<>();
 
     @Column(name = "StartDate")
     @Temporal(TemporalType.DATE)
@@ -198,11 +203,7 @@ public class Subscriber {
 	public AdminUser getSaathi() {
 		return saathi;
 	}
-
-	public void setSaathi(AdminUser saathi) {
-		this.saathi = saathi;
-	}
-
+	
 	public Date getCreatedDate() {
 		return createdDate;
 	}
@@ -278,7 +279,32 @@ public class Subscriber {
 			this.packageServices = packageServices;
 	}
 	
-    
+	// Modify the setter for Saathi to track Saathi changes
+	public void setSaathi(AdminUser newSaathi) {
+	    // Check if the list is not empty before trying to access the last element
+	    if (!this.saathiAssignmentHistoryList.isEmpty() && this.saathi != null && !this.saathi.equals(newSaathi)) {
+	        // Update the EndDate for the previous Saathi assignment
+	        SaathiAssignmentHistory lastAssignment = this.saathiAssignmentHistoryList.get(this.saathiAssignmentHistoryList.size() - 1);
+	        lastAssignment.setEndDate(new Date());  // Set the current date as the EndDate for the previous Saathi
+	    }
+
+	    // Assign the new Saathi
+	    if (this.saathi != newSaathi) {
+	        this.saathi = newSaathi;
+	        // Create a new SaathiAssignmentHistory record for the new Saathi
+	        SaathiAssignmentHistory newAssignment = new SaathiAssignmentHistory(this, newSaathi);
+	        this.saathiAssignmentHistoryList.add(newAssignment);  // Add to the history list
+	    }
+	}
+
+
+    public List<SaathiAssignmentHistory> getSaathiAssignmentHistoryList() {
+        return saathiAssignmentHistoryList;
+    }
+
+    public void setSaathiAssignmentHistoryList(List<SaathiAssignmentHistory> saathiAssignmentHistoryList) {
+        this.saathiAssignmentHistoryList = saathiAssignmentHistoryList;
+    }
     // Getters and Setters
    
 }

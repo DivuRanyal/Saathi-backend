@@ -3,12 +3,13 @@ package config;
 import net.spy.memcached.MemcachedClient;
 import org.springframework.cache.Cache;
 
+import java.net.InetSocketAddress;
 import java.util.concurrent.Callable;
 
 public class MemcachedCache implements Cache {
 
     private final String name;
-    private final MemcachedClient memcachedClient;
+    private MemcachedClient memcachedClient;
 
     public MemcachedCache(String name, MemcachedClient memcachedClient) {
         this.name = name;
@@ -36,15 +37,27 @@ public class MemcachedCache implements Cache {
         return null;
     }
 
-    @Override
     public void put(Object key, Object value) {
         if (value == null) {
             System.out.println("Skipping caching for key: " + key + " because the value is null.");
             return;
         }
-        // Set the cache value with an expiration time (e.g., 1 hour)
-        System.out.println("Storing key: " + key + " in Memcached with value: " + value);
-        memcachedClient.set(key.toString(), 360000, value);  // 3600 seconds = 1 hour expiration
+
+        try {
+            // Check if MemcachedClient is connected
+            if (memcachedClient.getAvailableServers().isEmpty()) {
+                System.out.println("No available Memcached servers. Attempting to reconnect...");
+                // Optionally, reconnect to Memcached
+                memcachedClient = new MemcachedClient(new InetSocketAddress("localhost", 11211));
+            }
+
+            // Set the cache value with an expiration time (e.g., 1 hour)
+            System.out.println("Storing key: " + key + " in Memcached with value: " + value);
+            memcachedClient.set(key.toString(), 3600, value);  // 3600 seconds = 1 hour expiration
+        } catch (Exception e) {
+            System.out.println("Failed to store key: " + key + " in Memcached. Error: " + e.getMessage());
+            e.printStackTrace();
+        }
     }
 
     @Override
@@ -92,4 +105,5 @@ public class MemcachedCache implements Cache {
             throw new IllegalStateException("Cached value is not of the expected type: " + type.getName(), e);
         }
     }
+        
 }

@@ -510,13 +510,11 @@ public class SubscriberController {
                     File dest = new File(filePath);
                     file.transferTo(dest);
                 }
-
                 // Step 4: Create and add interaction when the service is completed
                 InteractionDTO interactionDTO = new InteractionDTO();
                 interactionDTO.setSubscriberID(subscriberID);
                 interactionDTO.setDescription(description); // Get the description from the request payload
                 interactionDTO.setDocuments(filePath);  // Store the file path in the documents attribute
-
                 List<ServiceReport> services = updatedServices.get("allServices");
                 if (services != null) {
                     for (ServiceReport service : services) {
@@ -538,10 +536,8 @@ public class SubscriberController {
                                 interactionDTO.setSubscriberAlaCarteServicesID(null); 
                                 break;// Clear ala-carte ID for package service
                             }
-
                             // Set the completion status only if the service is fully completed
                             interactionDTO.setCompletionStatus("Completed".equals(service.getCompletionStatus()) ? 1 : 0);
-
                             // Since the matching service is found, break the loop
                            
                         }
@@ -592,4 +588,28 @@ public class SubscriberController {
         }
     }
     
+ // Endpoint to rebuild all services for a given subscriber
+    @GetMapping("/rebuild/{subscriberID}")
+    public ResponseEntity<Map<String, List<ServiceReport>>> rebuildAllServices(
+            @PathVariable("subscriberID") int subscriberID) {
+        try {
+            // Call the service method to rebuild all services for the subscriber
+            Map<String, List<ServiceReport>> allServicesMap = serviceCompletionService.rebuildAllServices(subscriberID);
+
+            if (allServicesMap == null || allServicesMap.isEmpty()) {
+                return new ResponseEntity<>(HttpStatus.NO_CONTENT);  // 204 No Content if no services found
+            }
+
+            // Return the result in the ResponseEntity with HTTP 200 OK
+            return ResponseEntity.ok(allServicesMap);
+
+        } catch (Exception e) {
+            // Log the error (optional)
+            e.printStackTrace();
+
+            // Return an internal server error with message
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+        
 }

@@ -26,4 +26,6 @@ public class MemcachedConfig {
         cacheManager.setCaches(Collections.singletonList(new MemcachedCache("subscriberServicesCache", memcachedClient)));
         return cacheManager;
     }
+    
+    
 }

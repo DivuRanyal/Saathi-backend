@@ -32,6 +32,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import javax.mail.MessagingException;
+import javax.transaction.Transactional;
 
 @Service
 public class SubscriberServiceImpl implements SubscriberService {
@@ -387,6 +388,7 @@ public class SubscriberServiceImpl implements SubscriberService {
         return subscriber.getSaathi();
     }
 
+    @Transactional
     @Override
     public SubscriberDTO assignSaathiToSubscriber(int subscriberId, int saathiId,String reasonForChange) {
         Subscriber subscriber = subscriberRepository.findById(subscriberId)
