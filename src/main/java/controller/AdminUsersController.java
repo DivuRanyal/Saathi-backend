@@ -289,16 +289,16 @@ public class AdminUsersController {
             for (SubscriberDTO subscriber : subscribers) {
                 // Fetch the services for each subscriber
                 Map<String, List<ServiceReport>> services = serviceCompletionService.getSubscriberServices(subscriber.getSubscriberID());
-
+                
                 // Check if the services exist and are valid
                 if (services != null && services.containsKey("allServices")) {
                     List<ServiceReport> serviceReports = services.get("allServices");
-
+                    
                     // Filter out services where packageServiceID is not null and only include valid services
                     List<ServiceReport> filteredServices = new ArrayList<>();
                     for (ServiceReport serviceReport : serviceReports) {
                         if (serviceReport.getPackageServiceID() == null && serviceReport.getServiceName() != null) { // Check for valid services
-                            
+                            System.out.println(serviceReport.getPackageName());
                             // Add color attribute based on requestedDate and requestedTime
                             if (serviceReport.getRequestedDate() != null && serviceReport.getRequestedTime() != null) {
                                 // Combine requested date and time into a LocalDateTime
@@ -327,11 +327,11 @@ public class AdminUsersController {
                             } else {
                                 serviceReport.setColor("no color"); // Handle case where requestedDate or requestedTime is missing
                             }
-
+                           
                             filteredServices.add(serviceReport); // Add the valid service to the filtered list
                         }
                     }
-
+                    System.out.println("filteredServices.size()"+filteredServices.size());
                     // Only add the subscriber if they have valid filtered services
                     if (!filteredServices.isEmpty()) {
                         // Create and add the DTO to the list
@@ -360,113 +360,104 @@ public class AdminUsersController {
                     .body("An error occurred while retrieving services for Saathi ID: " + saathiId);
         }
     }
-
     @GetMapping("/saathis/subscribers/services")
     public ResponseEntity<?> getSaathisWithSubscribersAndServices() {
         try {
             // Fetch the list of all Saathis (AdminUsers with userType "Saathi")
-            List<AdminUser> saathis = adminUsersService.getAllSaathiUsers(); // Assuming this method returns a list of AdminUser entities 
-            System.out.println("size:"+saathis.size());
+            List<AdminUser> saathis = adminUsersService.getAllSaathiUsers();
+
             // Check if there are any Saathis
             if (saathis == null || saathis.isEmpty()) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                        .body("No Saathi found.");
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No Saathi found.");
             }
 
-            // Create a list to hold each Saathi's subscribers and their services DTO
-            List<SubscriberSaathiDTO> saathiSubscribersDTOList = new ArrayList<>();
+            // Create a list to hold each Saathi with their subscribers and services
+            List<Map<String, Object>> saathiSubscribersList = new ArrayList<>();
 
             // Loop through each Saathi and fetch their subscribers and services
             for (AdminUser saathi : saathis) {
-                // Fetch the list of subscribers for the given Saathi (AdminUser) as SubscriberDTO
-            	System.out.println(saathi.getAdminUserID());
-                List<SubscriberDTO> subscribers = subscriberService.getSubscribersBySaathiID(saathi.getAdminUserID());
-                
-                // Check if the list of subscribers is null or empty
-                if (subscribers == null || subscribers.isEmpty()) {
-                    continue;  // Skip to the next Saathi if they have no subscribers
-                }
+                int saathiId = saathi.getAdminUserID();
+                List<SubscriberDTO> subscribers = subscriberService.getSubscribersBySaathiID(saathiId);
 
-                // Loop through each subscriber and fetch their services
+                // Create a map to hold Saathi and their subscribers
+                Map<String, Object> saathiData = new HashMap<>();
+                saathiData.put("AdminUserID", saathiId);
+                saathiData.put("saathiFirstName", saathi.getFirstName());
+                saathiData.put("saathiLastName", saathi.getLastName());
+                saathiData.put("email", saathi.getEmail());
+
+                List<Map<String, Object>> subscriberServicesList = new ArrayList<>(); // List to hold subscribers and their services
+
                 for (SubscriberDTO subscriberDTO : subscribers) {
-                    // Fetch the services for each subscriber
+                    // Fetch services for the subscriber
                     Map<String, List<ServiceReport>> services = serviceCompletionService.getSubscriberServices(subscriberDTO.getSubscriberID());
 
-                    // Check if the services exist and are valid
                     if (services != null && services.containsKey("allServices")) {
                         List<ServiceReport> serviceReports = services.get("allServices");
 
-                        // Filter out services where packageServiceID is not null and only include valid services
-                        List<ServiceReport> filteredServices = new ArrayList<>();
+                        List<Map<String, Object>> filteredServices = new ArrayList<>();
                         for (ServiceReport serviceReport : serviceReports) {
-                            if (serviceReport.getPackageServiceID() == null && serviceReport.getServiceName() != null) { // Check for valid services
-                                
-                                // Add color attribute based on requestedDate and requestedTime
-                                if (serviceReport.getRequestedDate() != null && serviceReport.getRequestedTime() != null) {
-                                    // Combine requested date and time into a LocalDateTime
-                                    LocalDateTime requestedDateTime = LocalDateTime.of(
-                                            LocalDate.parse(serviceReport.getRequestedDate().toString()), // Parse the requested date
-                                            LocalTime.parse(serviceReport.getRequestedTime().toString())  // Parse the requested time
-                                    );
+                            Map<String, Object> serviceData = new HashMap<>();
+                            serviceData.put("serviceID", serviceReport.getServiceID());
+                            serviceData.put("serviceName", serviceReport.getServiceName());
+                            serviceData.put("packageName", serviceReport.getPackageName());
+                            serviceData.put("packageServiceID", serviceReport.getPackageServiceID());
+                            serviceData.put("frequency", serviceReport.getFrequency());
+                            serviceData.put("frequencyUnit", serviceReport.getFrequencyUnit());
+                            serviceData.put("completionStatus", serviceReport.getCompletionStatus());
 
-                                    // Get the current time
-                                    LocalDateTime currentTime = LocalDateTime.now(ZoneId.systemDefault());
+                            // Add color attribute based on requested date/time
+                            if (serviceReport.getRequestedDate() != null && serviceReport.getRequestedTime() != null) {
+                                LocalDateTime requestedDateTime = LocalDateTime.of(
+                                        LocalDate.parse(serviceReport.getRequestedDate().toString()),
+                                        LocalTime.parse(serviceReport.getRequestedTime().toString())
+                                );
 
-                                    // Calculate the duration between the current time and the requested time
-                                    Duration duration = Duration.between(currentTime, requestedDateTime);
-                                    long hours = duration.toHours();
+                                LocalDateTime currentTime = LocalDateTime.now(ZoneId.systemDefault());
+                                Duration duration = Duration.between(currentTime, requestedDateTime);
+                                long hours = duration.toHours();
 
-                                    if (hours >= 0 && hours <= 24) {
-                                        // Requested date/time is within the next 24 hours
-                                        serviceReport.setColor("green");
-                                    } else if (hours > 24) {
-                                        // Requested date/time is more than 24 hours in the future
-                                        serviceReport.setColor("amber");
-                                    } else {
-                                        // Requested date/time is in the past
-                                        serviceReport.setColor("red");
-                                    }
+                                if (hours >= 0 && hours <= 24) {
+                                    serviceReport.setColor("green");
+                                } else if (hours > 24) {
+                                    serviceReport.setColor("amber");
                                 } else {
-                                    serviceReport.setColor("no color"); // Handle case where requestedDate or requestedTime is missing
+                                    serviceReport.setColor("red");
                                 }
-
-                                filteredServices.add(serviceReport); // Add the valid service to the filtered list
+                            } else {
+                                serviceReport.setColor("no color");
                             }
+
+                            serviceData.put("color", serviceReport.getColor());
+                            serviceData.put("requestedDate", serviceReport.getRequestedDate());
+                            serviceData.put("requestedTime", serviceReport.getRequestedTime());
+
+                            filteredServices.add(serviceData);
                         }
 
-                        // Only create a SubscriberSaathiDTO if they have valid filtered services
-                        if (!filteredServices.isEmpty()) {
-                            // Create a new Subscriber entity to match the DTO (optional)
-                            Subscriber subscriber = new Subscriber();
-                            subscriber.setSubscriberID(subscriberDTO.getSubscriberID());
-                            subscriber.setFirstName(subscriberDTO.getFirstName());
-                            
-                            // Create and add the DTO to the list
-                            SubscriberSaathiDTO saathiSubscribersDTO = new SubscriberSaathiDTO(
-                                    subscriber,  // Convert DTO to entity if needed, or you can use subscriberDTO directly
-                                    saathi
-                            );
-                            saathiSubscribersDTOList.add(saathiSubscribersDTO);
-                        }
+                        // Add subscriber and their services
+                        Map<String, Object> subscriberData = new HashMap<>();
+                        subscriberData.put("subscriberID", subscriberDTO.getSubscriberID());
+                        subscriberData.put("subscriberName", subscriberDTO.getFirstName());
+                        subscriberData.put("services", filteredServices);
+
+                        subscriberServicesList.add(subscriberData);
                     }
                 }
+
+                // Add the subscribers and services to the current Saathi
+                saathiData.put("subscribers", subscriberServicesList);
+                saathiSubscribersList.add(saathiData);
             }
 
-            // If no services were found for any Saathis or their subscribers
-            if (saathiSubscribersDTOList.isEmpty()) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                        .body("No services found for any Saathi.");
-            }
-
-            // Return the list containing Saathi with their subscribers and services DTO
-            return ResponseEntity.ok(saathiSubscribersDTOList);
+            return ResponseEntity.ok(saathiSubscribersList);
         } catch (Exception e) {
-            // Log the error and return a response with status 500
             e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("An error occurred while retrieving services for Saathis.");
         }
     }
+
 
 
 }

@@ -482,11 +482,12 @@ public class SubscriberServiceImpl implements SubscriberService {
         return packageServiceDTO;
     }
     
+    @Transactional
     @Override
-    public List<SubscriberDTO> getSubscribersBySaathiID(int adminUserID) {
+    public List<SubscriberDTO> getSubscribersBySaathiID(int saathiId) {
         // Fetch subscribers from repository
-        List<Subscriber> subscribers = subscriberRepository.findSubscribersBySaathiIDNative(adminUserID);
-
+    	List<Subscriber> subscribers = subscriberRepository.findSubscribersBySaathiID(saathiId);
+    	System.out.println("size::" + subscribers.size());
         // Convert to DTOs
         return subscribers.stream()
                 .map(subscriber -> new SubscriberDTO(
