@@ -605,8 +605,7 @@ public class ServiceCompletionServiceNew {
 
         for (PackageServices packageService : packageServices) {
             // Check if this service has already been completed
-        	
-        	
+        	        	
             if (!completedServiceIds.contains(packageService.getService().getServiceID())) {
                 // Service has not been completed, so we need to add it to the service report
                 ServiceReport serviceReport = new ServiceReport();
