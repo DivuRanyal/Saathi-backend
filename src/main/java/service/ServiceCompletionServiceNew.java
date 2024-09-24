@@ -314,7 +314,7 @@ public class ServiceCompletionServiceNew {
                 System.out.println("Found matching serviceID: " + serviceID);
 
                 // Now, handle the case based on whether it's ala-carte or package service
-                if (isAlaCarteService && service.isAlaCarte()) {
+                if (isAlaCarteService && service.isAlaCarte() ) {
                     System.out.println("Found matching service type for serviceID: " + serviceID);
                     // Check if the service has already reached the frequency limit
                     if (service.getCompletions() >= service.getFrequencyCount()) {
@@ -605,7 +605,8 @@ public class ServiceCompletionServiceNew {
 
         for (PackageServices packageService : packageServices) {
             // Check if this service has already been completed
-        	        	
+        	
+        	
             if (!completedServiceIds.contains(packageService.getService().getServiceID())) {
                 // Service has not been completed, so we need to add it to the service report
                 ServiceReport serviceReport = new ServiceReport();

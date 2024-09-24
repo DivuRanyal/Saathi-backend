@@ -53,7 +53,7 @@ public class MemcachedCache implements Cache {
 
             // Set the cache value with an expiration time (e.g., 1 hour)
             System.out.println("Storing key: " + key + " in Memcached with value: " + value);
-            memcachedClient.set(key.toString(), 3600, value);  // 3600 seconds = 1 hour expiration
+            memcachedClient.set(key.toString(), 360000, value);  // 3600 seconds = 1 hour expiration
         } catch (Exception e) {
             System.out.println("Failed to store key: " + key + " in Memcached. Error: " + e.getMessage());
             e.printStackTrace();
