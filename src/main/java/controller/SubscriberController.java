@@ -12,7 +12,10 @@ import model.dto.PatronServiceDTO;
 import model.dto.SubscriberDTO;
 import model.dto.SubscriberSaathiDTO;
 import repository.AlaCarteServiceRepository;
+import repository.InteractionRepository;
+import repository.PackageServiceRepository;
 import repository.SubscriberAlaCarteServicesRepository;
+import repository.SubscriberRepository;
 import service.AdminUsersService;
 import service.EmailService;
 import service.InteractionService;
@@ -43,10 +46,12 @@ import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @RestController
@@ -82,7 +87,14 @@ public class SubscriberController {
     @Autowired
     private SubscriberAlaCarteServicesRepository subscriberAlaCarteServicesRepository;
 
+    @Autowired
+    private SubscriberRepository subscriberRepository;
     
+    @Autowired
+    private InteractionRepository interactionRepository;
+    
+    @Autowired
+    private PackageServiceRepository packageServiceRepository;
     @PostMapping
     public ResponseEntity<?> createSubscriber(@RequestBody SubscriberDTO subscriberDTO) throws MessagingException, IOException, TemplateException {
         try {
@@ -384,8 +396,8 @@ public class SubscriberController {
                 serviceWithInteraction.put("completions", serviceReport.getCompletions());
                 serviceWithInteraction.put("completionStatus", serviceReport.getCompletionStatus());
                 serviceWithInteraction.put("completionDate", serviceReport.getCompletionDate());
-                serviceWithInteraction.put("requestedDate", serviceReport.getRequestedDate().toString());
-                serviceWithInteraction.put("requestedTime", serviceReport.getRequestedTime().toString());
+     //           serviceWithInteraction.put("requestedDate", serviceReport.getRequestedDate().toString());
+    //            serviceWithInteraction.put("requestedTime", serviceReport.getRequestedTime().toString());
                 serviceWithInteraction.put("frequencyCount", serviceReport.getFrequencyCount());
                 serviceWithInteraction.put("pending", serviceReport.getPending());
                 serviceWithInteraction.put("alaCarte", serviceReport.isAlaCarte());
@@ -611,5 +623,58 @@ public class SubscriberController {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
-        
+    
+    
+    @GetMapping("/rebuild-all-subscribers")
+    public ResponseEntity<Map<Integer, Map<String, List<ServiceReport>>>> rebuildForAllSubscribers() {
+        try {
+            // Step 1: Find all subscribers that purchased packages
+            List<Integer> packageSubscriberIDs = subscriberRepository.findSubscribersWithPurchasedPackages();
+            System.out.println(packageSubscriberIDs);
+
+            // Step 2: Find all subscribers that have ala-carte services but no interactions (untracked services)
+            List<Integer> alaCarteSubscriberIDs = subscriberAlaCarteServicesRepository.findSubscribersWithUntrackedAlaCarteServices();
+
+            // Combine the two lists of subscribers (using a Set to avoid duplicates)
+            Set<Integer> allSubscriberIDs = new HashSet<>();
+            allSubscriberIDs.addAll(packageSubscriberIDs);
+            allSubscriberIDs.addAll(alaCarteSubscriberIDs);
+
+            // Step 3: Filter subscribers with incomplete services by comparing with Interaction records
+            Set<Integer> subscribersWithIncompleteServices = new HashSet<>();
+            for (Integer subscriberID : allSubscriberIDs) {
+                // Step 3.1: Check package services completion status
+                int totalPackageServices = packageServiceRepository.countServicesBySubscriber(subscriberID);
+                int completedPackageServices = interactionRepository.countCompletedPackageServicesBySubscriber(subscriberID);
+
+                if (completedPackageServices < totalPackageServices) {
+                    subscribersWithIncompleteServices.add(subscriberID);
+                }
+
+                // Step 3.2: Check ala-carte services completion status
+                int totalAlaCarteServices = subscriberAlaCarteServicesRepository.countAlaCarteServicesBySubscriber(subscriberID);
+                int completedAlaCarteServices = interactionRepository.countCompletedAlaCarteServicesBySubscriber(subscriberID);
+
+                if (completedAlaCarteServices < totalAlaCarteServices) {
+                    subscribersWithIncompleteServices.add(subscriberID);
+                }
+            }
+
+            // Step 4: Call rebuildAllServices for subscribers with incomplete services
+            Map<Integer, Map<String, List<ServiceReport>>> allServicesMapForAllSubscribers = new HashMap<>();
+            for (Integer subscriberID : subscribersWithIncompleteServices) {
+                Map<String, List<ServiceReport>> allServicesMap = serviceCompletionService.rebuildAllServices(subscriberID);
+                allServicesMapForAllSubscribers.put(subscriberID, allServicesMap);
+            }
+
+            // Return the map with all subscribers' services
+            return ResponseEntity.ok(allServicesMapForAllSubscribers);
+
+        } catch (Exception e) {
+            // Handle errors
+            e.printStackTrace();
+            return ResponseEntity.status(500).body(null);
+        }
+    }
+
 }

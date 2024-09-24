@@ -29,5 +29,7 @@ public interface SubscriberRepository extends JpaRepository<Subscriber, Integer>
 	 @Query("SELECT s FROM Subscriber s WHERE s.saathi.adminUserID = :saathiId")
 	 List<Subscriber> findSubscribersBySaathiID(@Param("saathiId") int saathiId);
 
-	
+	 @Query("SELECT s.subscriberID FROM Subscriber s WHERE s.billingStatus = 1 AND s.subscriptionPackage IS NOT NULL")
+	 List<Integer> findSubscribersWithPurchasedPackages();
+
 }

@@ -23,9 +23,15 @@ public class MemcachedConfig {
     @Bean
     public CacheManager cacheManager(MemcachedClient memcachedClient) {
         SimpleCacheManager cacheManager = new SimpleCacheManager();
+
+        // Check if the Memcached client is available before creating the cache
+        if (memcachedClient.getAvailableServers().isEmpty()) {
+            throw new IllegalStateException("Memcached servers are not available. Cannot initialize CacheManager.");
+        }
+
+        // Use Memcached cache once the client is available
         cacheManager.setCaches(Collections.singletonList(new MemcachedCache("subscriberServicesCache", memcachedClient)));
         return cacheManager;
     }
-    
-    
+
 }

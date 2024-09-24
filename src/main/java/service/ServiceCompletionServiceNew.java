@@ -463,6 +463,7 @@ public class ServiceCompletionServiceNew {
         return serviceReports; // Returns list of service reports representing all services availed by the subscriber
     }
 
+    @CachePut(value = "subscriberServicesCache", key = "#subscriberID")
     @Transactional
     public Map<String, List<ServiceReport>> rebuildAllServices(int subscriberID) {
         // Fetch all relevant interactions for the subscriber
@@ -512,7 +513,8 @@ public class ServiceCompletionServiceNew {
                 serviceReport.setAlaCarte(false);
                 serviceReport.setPackageServiceID(packageService.getPackageServicesID());
                 serviceReport.setFrequency(packageService.getFrequency());
-                serviceReport.setFrequencyUnit(packageService.getFrequencyUnit());
+                System.out.println(packageService.getService().getFrequencyUnit());
+                serviceReport.setFrequencyUnit(packageService.getService().getFrequencyUnit());
                 // Set requested date and time (if available)
                 serviceReport.setRequestedDate(LocalDate.now());  // Use real data if available
                 serviceReport.setRequestedTime(LocalTime.now());
@@ -555,7 +557,7 @@ public class ServiceCompletionServiceNew {
                 serviceReport.setPackageName("Ala-carte");
                 serviceReport.setAlaCarte(true);
                 serviceReport.setSubscriberAlaCarteServicesID(alaCarteService.getSubscriberAlaCarteServicesID());
-
+                serviceReport.setFrequencyUnit(alaCarteService.getService().getFrequencyUnit());
                 // Set requested date and time
                 serviceReport.setRequestedDate(convertToLocalDate(alaCarteService.getServiceDate()));
                 serviceReport.setRequestedTime(convertToLocalTime(alaCarteService.getServiceTime()));
@@ -597,12 +599,14 @@ public class ServiceCompletionServiceNew {
                 .orElseThrow(() -> new RuntimeException("Subscriber not found with ID: " + subscriberID));
         
         Integer packageID = subscriber.getSubscriptionPackage().getPackageID();  // Assuming subscriber has a field for packageID
-
+        
         // Fetch all services associated with the packageID
         List<PackageServices> packageServices = packageServiceRepository.findServicesByPackageId(packageID);
 
         for (PackageServices packageService : packageServices) {
             // Check if this service has already been completed
+        	
+        	
             if (!completedServiceIds.contains(packageService.getService().getServiceID())) {
                 // Service has not been completed, so we need to add it to the service report
                 ServiceReport serviceReport = new ServiceReport();
@@ -620,7 +624,7 @@ public class ServiceCompletionServiceNew {
                 int frequencyCount = packageService.getFrequency();
                 serviceReport.setFrequencyCount(frequencyCount);
                 serviceReport.setPending(frequencyCount); // Since none of the completions have started, pending = frequencyCount
-
+                serviceReport.setFrequencyUnit(packageService.getService().getFrequencyUnit());
                 serviceReport.setRequestedDate(LocalDate.now());  // You can use real data if available
                 serviceReport.setRequestedTime(LocalTime.now());
 

@@ -36,5 +36,13 @@ public interface SubscriberAlaCarteServicesRepository extends JpaRepository<Subs
 	    
 	    // Method to fetch all ala-carte services for a specific subscriber
 	    List<SubscriberAlaCarteServices> findBySubscriberID(int subscriberID);
+	    
+	    @Query("SELECT s.subscriber.subscriberID FROM SubscriberAlaCarteServices s WHERE s.SubscriberAlaCarteServicesID NOT IN (SELECT i.subscriberAlaCarteServices.SubscriberAlaCarteServicesID FROM Interaction i)")
+	    List<Integer> findSubscribersWithUntrackedAlaCarteServices();
+
+	    // Method to count the total number of ala-carte services for a given subscriber
+	    @Query("SELECT COUNT(s) FROM SubscriberAlaCarteServices s WHERE s.subscriberID = :subscriberID")
+	    int countAlaCarteServicesBySubscriber(@Param("subscriberID") Integer subscriberID);
+
 	    }
 
