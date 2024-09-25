@@ -69,6 +69,7 @@ public class AdminUsersController {
     @GetMapping
     public ResponseEntity<List<AdminUser>> getAllAdminUsers() {
         List<AdminUser> adminUsers = adminUsersService.getAllAdminUsers();
+        
         return ResponseEntity.ok(adminUsers);
     }
 

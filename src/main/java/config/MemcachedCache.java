@@ -10,6 +10,7 @@ public class MemcachedCache implements Cache {
 
     private final String name;
     private MemcachedClient memcachedClient;
+    private static final int EXPIRATION_TIME_SECONDS = 36000; // 1 hour expiration
 
     public MemcachedCache(String name, MemcachedClient memcachedClient) {
         this.name = name;
@@ -37,6 +38,7 @@ public class MemcachedCache implements Cache {
         return null;
     }
 
+    @Override
     public void put(Object key, Object value) {
         if (value == null) {
             System.out.println("Skipping caching for key: " + key + " because the value is null.");
@@ -47,15 +49,32 @@ public class MemcachedCache implements Cache {
             // Check if MemcachedClient is connected
             if (memcachedClient.getAvailableServers().isEmpty()) {
                 System.out.println("No available Memcached servers. Attempting to reconnect...");
-                // Optionally, reconnect to Memcached
-                memcachedClient = new MemcachedClient(new InetSocketAddress("localhost", 11211));
+                reconnectToMemcached();
             }
 
-            // Set the cache value with an expiration time (e.g., 1 hour)
+            // Set the cache value with the expiration time
             System.out.println("Storing key: " + key + " in Memcached with value: " + value);
-            memcachedClient.set(key.toString(), 360000, value);  // 3600 seconds = 1 hour expiration
+            memcachedClient.set(key.toString(), EXPIRATION_TIME_SECONDS, value);
+
         } catch (Exception e) {
             System.out.println("Failed to store key: " + key + " in Memcached. Error: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+    // Separate method for handling reconnection logic
+    private void reconnectToMemcached() {
+        try {
+            if (memcachedClient != null) {
+                memcachedClient.shutdown(); // Close the existing client if necessary
+            }
+
+            // Reconnect to Memcached
+            memcachedClient = new MemcachedClient(new InetSocketAddress("localhost", 11211));
+            System.out.println("Reconnected to Memcached server successfully.");
+            
+        } catch (Exception e) {
+            System.out.println("Failed to reconnect to Memcached server. Error: " + e.getMessage());
             e.printStackTrace();
         }
     }
@@ -68,7 +87,6 @@ public class MemcachedCache implements Cache {
 
     @Override
     public void clear() {
-        // Memcached does not have a direct "clear all" command
         System.out.println("Clear operation not supported for Memcached");
     }
 
@@ -81,7 +99,7 @@ public class MemcachedCache implements Cache {
         } else {
             System.out.println("Cache miss for key: " + key);
             try {
-                // Call valueLoader to load the data and store it in the cache
+                // Load the value using valueLoader and store it in the cache
                 T newValue = valueLoader.call();
                 put(key, newValue);
                 return newValue;
@@ -105,5 +123,4 @@ public class MemcachedCache implements Cache {
             throw new IllegalStateException("Cached value is not of the expected type: " + type.getName(), e);
         }
     }
-        
 }

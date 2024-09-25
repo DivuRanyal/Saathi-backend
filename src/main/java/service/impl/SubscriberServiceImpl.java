@@ -17,6 +17,7 @@ import repository.PatronRepository;
 import repository.SubscriberRepository;
 import repository.SubscriptionPackageRepository;
 import service.EmailService;
+import service.ServiceCompletionServiceNew;
 import service.SubscriberService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -58,6 +59,8 @@ public class SubscriberServiceImpl implements SubscriberService {
     @Autowired
     private EmailService emailService;
 
+    @Autowired
+    private ServiceCompletionServiceNew serviceCompletionService;
 
     @Override
     public SubscriberDTO createSubscriber(SubscriberDTO subscriberDTO) {
@@ -172,6 +175,17 @@ public class SubscriberServiceImpl implements SubscriberService {
         }
 
         Subscriber updatedSubscriber = subscriberRepository.save(existingSubscriber);
+        
+     // Track services if billingStatus is 1
+        if (subscriberDTO.getBillingStatus() != null && subscriberDTO.getBillingStatus() == 1 && updatedSubscriber.getSubscriptionPackage().getPackageID() != 0) {
+        	System.out.println(updatedSubscriber.getSubscriptionPackage().getPackageID());
+        	serviceCompletionService.trackSubscriberServices(
+                updatedSubscriber.getSubscriberID(), 
+                 updatedSubscriber.getSubscriptionPackage().getPackageID(), 
+                0 // Assuming subscriberAlaCarteServicesID is not relevant here, or you can adjust this value
+            );
+        }
+
         return convertToDTO(updatedSubscriber);    
     }
     @Override

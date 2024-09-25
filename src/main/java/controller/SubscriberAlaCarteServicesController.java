@@ -1,6 +1,8 @@
 package controller;
 
+import model.ServiceReport;
 import model.SubscriberAlaCarteServices;
+import service.ServiceCompletionServiceNew;
 import service.SubscriberAlaCarteServicesService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -8,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/subscriber-services")
@@ -15,6 +18,9 @@ public class SubscriberAlaCarteServicesController {
 
     @Autowired
     private SubscriberAlaCarteServicesService service;
+
+    @Autowired
+    private ServiceCompletionServiceNew serviceCompletionService;
 
     @GetMapping
     public ResponseEntity<List<SubscriberAlaCarteServices>> getAllServices() {
@@ -34,11 +40,25 @@ public class SubscriberAlaCarteServicesController {
 
     @PostMapping
     public ResponseEntity<SubscriberAlaCarteServices> createService(@RequestBody SubscriberAlaCarteServices serviceRequest) {
-    	 System.out.println(serviceRequest);
+        // Create or update the service
+ //       System.out.println(serviceRequest.getSubscriberID());
         SubscriberAlaCarteServices createdService = service.createOrUpdateService(serviceRequest);
-        System.out.println(createdService);
+       
+        // Call the trackSubscriberServices method automatically after service creation
+        Map<String, List<ServiceReport>> trackedServices = serviceCompletionService.trackSubscriberServices(
+                createdService.getSubscriberID(), 
+                0, 
+                createdService.getSubscriberAlaCarteServicesID()
+        );
+        
+        if (trackedServices == null || trackedServices.isEmpty()) {
+            return new ResponseEntity<>(createdService, HttpStatus.CREATED);
+        }
+
+        // You can return tracked services in the response or handle as needed
         return new ResponseEntity<>(createdService, HttpStatus.CREATED);
     }
+
 
     @PutMapping("/{id}")
     public ResponseEntity<SubscriberAlaCarteServices> updateService(@PathVariable int id, @RequestBody SubscriberAlaCarteServices serviceRequest) {

@@ -365,7 +365,7 @@ public class SubscriberController {
         try {
             // Fetch the services for the subscriber
             Map<String, List<ServiceReport>> services = serviceCompletionService.getSubscriberServices(subscriberID);
-
+            System.out.println(services);
             // Check if the list of services is null or empty
             if (services == null || services.isEmpty() || !services.containsKey("allServices")) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No services found for subscriber with ID: " + subscriberID);
@@ -401,7 +401,7 @@ public class SubscriberController {
                 serviceWithInteraction.put("frequencyCount", serviceReport.getFrequencyCount());
                 serviceWithInteraction.put("pending", serviceReport.getPending());
                 serviceWithInteraction.put("alaCarte", serviceReport.isAlaCarte());
-
+                serviceWithInteraction.put("subscriberAlaCarteServicesID", serviceReport.getSubscriberAlaCarteServicesID());
                 List<InteractionDTO> relatedInteractions = interactions.stream()
                 	    .filter(interaction -> {
                 	        if (serviceReport.isAlaCarte()) {
@@ -414,6 +414,18 @@ public class SubscriberController {
                 	        } else {
                 	            return false; // No matching service
                 	        }
+                	    })
+                	    .map(interaction -> {
+                	        // Build the full URL for the documents
+                	        String baseUrl = "https://saathi.etheriumtech.com:444/saathi_images/interaction/";
+
+                	        // If document exists, prepend the base URL
+                	        if (interaction.getDocuments() != null && !interaction.getDocuments().isEmpty()) {
+                	            String documentUrl = baseUrl + new File(interaction.getDocuments()).getName();
+                	            interaction.setDocuments(documentUrl); // Set the full document URL in the response
+                	        }
+
+                	        return interaction;
                 	    })
                 	    .collect(Collectors.toList());
 
@@ -461,10 +473,10 @@ public class SubscriberController {
     public ResponseEntity<Map<String, List<ServiceReport>>> trackSubscriberServices(
             @RequestParam Integer subscriberID,
             @RequestParam(required = false, defaultValue = "0") int packageID,
-            @RequestParam(required = false, defaultValue = "0") int subscriberAlaCarteServiceID
+            @RequestParam(required = false, defaultValue = "0") int subscriberAlaCarteServicesID
     		) {
         // Call the service method to track services
-        Map<String, List<ServiceReport>> trackedServices = serviceCompletionService.trackSubscriberServices(subscriberID, packageID, subscriberAlaCarteServiceID);
+        Map<String, List<ServiceReport>> trackedServices = serviceCompletionService.trackSubscriberServices(subscriberID, packageID, subscriberAlaCarteServicesID);
         // Check if any services were tracked
         if (trackedServices == null || trackedServices.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
@@ -474,25 +486,27 @@ public class SubscriberController {
         return ResponseEntity.ok(trackedServices);
    //     return null;
     }
-       
-    
+           
     @PostMapping("/{subscriberID}/services/{serviceID}/complete")
     public ResponseEntity<String> updateServiceCompletion(
             @PathVariable Integer subscriberID,
             @PathVariable Integer serviceID,
             @RequestParam(value = "file", required = false) MultipartFile file,
             @RequestParam("description") String description,
-            @RequestParam("isAlaCarte") Boolean isAlaCarte) {
+            @RequestParam("isAlaCarte") Boolean isAlaCarte,
+            @RequestParam(name="subscriberAlaCarteServicesID", required = false) Integer subscriberAlaCarteServiceID // added this to distinguish ala-carte services
+            
+            ) {
 
         // Step 1: Fetch the packageServiceID associated with the subscriber
         Integer packageID = subscriberService.getPackageIDBySubscriber(subscriberID);
         System.out.println("packageID: " + packageID);
 
         // Fetch ala-carte service ID
-        Integer subscriberAlaCarteServicesID = service.getSubscriberAlaCarteServicesID(subscriberID, serviceID);
-        System.out.println("subscriberAlaCarteServicesID: " + subscriberAlaCarteServicesID);
+  //      Integer subscriberAlaCarteServicesID = service.getSubscriberAlaCarteServicesID(subscriberID, serviceID);
+  //      System.out.println("subscriberAlaCarteServicesID: " + subscriberAlaCarteServicesID);
 
-        if (packageID == null && subscriberAlaCarteServicesID == null) {
+        if (packageID == null && subscriberAlaCarteServiceID == null) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No valid package or ala-carte service found for the subscriber.");
         }
 
@@ -501,15 +515,13 @@ public class SubscriberController {
         Map<String, List<ServiceReport>> updatedServices;
 
         if (isAlaCarte) {
-        	
-            // Update ala-carte service completion
-            updatedServices = serviceCompletionService.updateServiceCompletion(subscriberID, serviceID, true);
+        	System.out.println("hh");
+            // Update ala-carte service completion using subscriberAlaCarteServiceID
+            updatedServices = serviceCompletionService.updateServiceCompletion(subscriberID,serviceID, subscriberAlaCarteServiceID, true);
         } else {
-        	
             // Update package service completion
-            updatedServices = serviceCompletionService.updateServiceCompletion(subscriberID, serviceID, false);
+            updatedServices = serviceCompletionService.updateServiceCompletion(subscriberID, serviceID,null, false);
         }
-
         if (updatedServices != null) {
             try {
                 String filePath = null;
@@ -532,14 +544,17 @@ public class SubscriberController {
                     for (ServiceReport service : services) {
                         // Check both serviceID and the type (Ala-carte or Package) to make sure it's the correct service
                         if (service.getServiceID() == serviceID) {
+                        	 System.out.println("service.getPackageServiceID()"+service.getPackageServiceID());
                             // Check if the request indicates it's an Ala-carte service and match it with the existing service report
-                            if (isAlaCarte && service.getSubscriberAlaCarteServicesID() != null) {
+                            if (isAlaCarte && service.getSubscriberAlaCarteServicesID() != null && service.getSubscriberAlaCarteServicesID()==subscriberAlaCarteServiceID) {
                                 // This is the matching ala-carte service
                                 System.out.println("Processing ala-carte service...");
-                                interactionDTO.setSubscriberAlaCarteServicesID(service.getSubscriberAlaCarteServicesID());
+                               interactionDTO.setSubscriberAlaCarteServicesID(service.getSubscriberAlaCarteServicesID());
+                 //               interactionDTO.setSubscriberAlaCarteServicesID(subscriberAlaCarteServiceID);
                                 interactionDTO.setPackageServicesID(null); 
                                 break;// Clear packageServiceID for ala-carte service
                             }
+                          
                             // Check if it's a package service by ensuring isAlaCarte is false and there's a valid packageServiceID
                             else if (!isAlaCarte && service.getPackageServiceID() != null && service.getPackageServiceID() != 0) {
                                 // This is the matching package service
