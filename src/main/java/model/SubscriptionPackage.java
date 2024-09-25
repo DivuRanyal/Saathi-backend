@@ -19,6 +19,7 @@ public class SubscriptionPackage {
     @Column(name = "PackageID")
     private int packageID;
 
+    
     @Column(name = "PackageName", nullable = false, unique = true)
     private String packageName;
 

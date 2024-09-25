@@ -37,6 +37,9 @@ public class AlaCarteServicesServiceImpl implements AlaCarteServicesService {
 
     @Override
     public AlaCarteServiceDTO createService(AlaCarteServiceDTO alaCarteServiceDTO) {
+    	if (alaCarteServiceDTO.getServiceName() == null || alaCarteServiceDTO.getServiceName().isEmpty()) {
+            throw new IllegalArgumentException("Service name cannot be null or empty");
+        }
         AlaCarteService service = convertToEntity(alaCarteServiceDTO);
         AlaCarteService savedService = alaCarteServiceRepository.save(service);
         return convertToDTO(savedService);

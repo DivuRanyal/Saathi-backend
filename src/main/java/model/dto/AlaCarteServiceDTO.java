@@ -3,9 +3,14 @@ package model.dto;
 import java.math.BigDecimal;
 import java.sql.Time;
 
+import javax.persistence.Column;
+
+import jakarta.validation.constraints.NotNull;
+
 public class AlaCarteServiceDTO {
 
     private Integer serviceID;
+    @NotNull(message = "Service name cannot be null")
     private String serviceName;
     private String serviceDescription;
     private Integer frequency;

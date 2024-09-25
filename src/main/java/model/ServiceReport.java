@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 
@@ -24,7 +25,7 @@ public class ServiceReport implements Serializable {
     
    
     // Define the JSON format to return only the date part of the LocalDateTime
-    @JsonFormat(pattern = "yyyy-MM-dd")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime completionDate;    
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private LocalDate requestedDate;
@@ -145,11 +146,12 @@ public class ServiceReport implements Serializable {
 
     public String getCompletionDate() {
         if (completionDate != null) {
-            return completionDate.toLocalDate().toString();  // Convert to date format
+            // Format both date and time
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+            return completionDate.format(formatter);  // Format to "yyyy-MM-dd HH:mm:ss"
         }
         return null;
     }
-
     public void setCompletionDate(LocalDateTime completionDate) {
         this.completionDate = completionDate;
     }

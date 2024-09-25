@@ -42,6 +42,9 @@ public class SubscriptionPackageServiceImpl implements SubscriptionPackageServic
             // Create a new SubscriptionPackage object
             SubscriptionPackage subscriptionPackage = new SubscriptionPackage();
 
+            if (subscriptionPackageDTO.getPackageName() == null || subscriptionPackageDTO.getPackageName().isEmpty()) {
+                throw new IllegalArgumentException("Package name cannot be null or empty");
+            }
             // Set values only if they are provided
             if (subscriptionPackageDTO.getPackageName() != null) {
                 subscriptionPackage.setPackageName(subscriptionPackageDTO.getPackageName());
@@ -272,7 +275,8 @@ public class SubscriptionPackageServiceImpl implements SubscriptionPackageServic
                             serviceDTO.setServiceName(service.getService().getServiceName());
                         }
                         serviceDTO.setFrequency(service.getFrequency());
-                        serviceDTO.setFrequencyUnit(service.getFrequencyUnit());
+                        
+                        serviceDTO.setFrequencyUnit(service.getService().getFrequencyUnit());
                         serviceDTO.setStatus(service.getStatus());
                         serviceDTO.setPackageName(subscriptionPackage.getPackageName());
                         serviceDTO.setPackageID(subscriptionPackage.getPackageID());

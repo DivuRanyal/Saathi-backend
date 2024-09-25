@@ -4,6 +4,8 @@ import javax.persistence.*;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
+import jakarta.validation.constraints.NotNull;
+
 import java.math.BigDecimal;
 import java.sql.Time;
 import java.util.Date;
@@ -17,7 +19,8 @@ public class AlaCarteService {
     @Column(name = "ServiceID")
     private Integer serviceID;
 
-    @Column(name = "ServiceName")
+    
+    @Column(name = "ServiceName",nullable = false)
     private String serviceName;
 
     // Corrected the typo from "ServiceDesciption" to "ServiceDescription"
