@@ -123,20 +123,32 @@ public class AdminUsersController {
         adminUser.setCreatedBy(createdBy);
         System.out.println(dob);
        
-	      // Handle picture upload if present
+	    AdminUser createdAdminUser = adminUsersService.createAdminUser(adminUser);
+        
+	 // Handle picture upload if present
         if (picture != null && !picture.isEmpty()) {
+            // Create a directory for the admin using the admin_id
+            String adminIdFolder = "/home/saathi/tomcat/webapps/saathi_images/" + createdAdminUser.getAdminUserID();
+            File directory = new File(adminIdFolder);
+            if (!directory.exists()) {
+                directory.mkdirs();  // Create the directory if it doesn't exist
+            }
+
+            // Save the file in the new directory
             String fileName = picture.getOriginalFilename();
-            String storageLocation = "/home/saathi/tomcat/webapps/saathi_images/" + fileName;
+            String storageLocation = adminIdFolder + "/" + fileName;
             try {
                 picture.transferTo(new File(storageLocation));
-                adminUser.setPicture(storageLocation);
+                // Store only the relative path in the database
+                adminUser.setPicture(createdAdminUser.getAdminUserID() + "/" + fileName);
             } catch (IOException e) {
                 return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
             }
         }
-        
-        AdminUser createdAdminUser = adminUsersService.createAdminUser(adminUser);
-        
+
+        // Update the adminUser with the picture path
+        adminUsersService.updateAdminUser(adminUser);
+
         // Send email based on userType
         if ("Admin".equalsIgnoreCase(userType)) {
             // Send email with Admin template
@@ -217,17 +229,27 @@ public class AdminUsersController {
             existingAdminUser.setUpdatedBy(updatedBy);
         }
 
-        // Handle picture upload if present
+     // Handle picture upload if present
         if (picture != null && !picture.isEmpty()) {
             String fileName = picture.getOriginalFilename();
-            String storageLocation = "/home/saathi/tomcat/webapps/saathi_images/" + fileName;
+            
+            // Create a directory for the admin using the admin_id
+            String adminIdFolder = "/home/saathi/tomcat/webapps/saathi_images/" + existingAdminUser.getAdminUserID();
+            File directory = new File(adminIdFolder);
+            if (!directory.exists()) {
+                directory.mkdirs();  // Create the directory if it doesn't exist
+            }
+
+            // Save the file in the new directory
+            String storageLocation = adminIdFolder + "/" + fileName;
             try {
                 picture.transferTo(new File(storageLocation));
-                existingAdminUser.setPicture(storageLocation);
+                // Store only the relative path in the database
+                existingAdminUser.setPicture(existingAdminUser.getAdminUserID() + "/" + fileName);
             } catch (IOException e) {
                 return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
             }
-        }
+        }        
 
         AdminUser updatedAdminUser = adminUsersService.updateAdminUser(existingAdminUser);
         return ResponseEntity.ok(updatedAdminUser);

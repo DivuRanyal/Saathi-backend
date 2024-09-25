@@ -191,6 +191,13 @@ public class SubscriberController {
     @GetMapping("/{id}/saathi")
     public ResponseEntity<AdminUser> getSubscriberDetails(@PathVariable int id) {
     	AdminUser adminUser = subscriberService.getSubscriberDetails(id);
+    	String baseUrl = "https://saathi.etheriumtech.com:444/saathi_images/";  // Base URL for the images
+     // When retrieving the AdminUser object, construct the full URL for the picture
+        if (adminUser.getPicture() != null && !adminUser.getPicture().isEmpty()) {
+            
+            String pictureUrl = baseUrl + adminUser.getPicture();
+            adminUser.setPicture(pictureUrl);  // Set the full URL in the response
+        }
         return new ResponseEntity<>(adminUser, HttpStatus.OK);
     }
     
