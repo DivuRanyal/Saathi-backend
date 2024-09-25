@@ -48,8 +48,12 @@ public class AlaCarteServicesServiceImpl implements AlaCarteServicesService {
     @Override
     public AlaCarteServiceDTO updateService(Integer id, AlaCarteServiceDTO alaCarteServiceDTO) {
         Optional<AlaCarteService> serviceOpt = alaCarteServiceRepository.findById(id);
+       
         if (serviceOpt.isPresent()) {
             AlaCarteService service = serviceOpt.get();
+            if (alaCarteServiceDTO.getServiceName() == null || alaCarteServiceDTO.getServiceName().isEmpty()) {
+                throw new IllegalArgumentException("Service Name cannot be null or empty");
+            }
             service.setServiceName(alaCarteServiceDTO.getServiceName());
             service.setServiceDescription(alaCarteServiceDTO.getServiceDescription());
             service.setFrequency(alaCarteServiceDTO.getFrequency());
@@ -111,7 +115,7 @@ public class AlaCarteServicesServiceImpl implements AlaCarteServicesService {
     // Helper method to convert DTO to entity
     private AlaCarteService convertToEntity(AlaCarteServiceDTO dto) {
         AlaCarteService service = new AlaCarteService();
-        service.setServiceID(dto.getServiceID());
+       
         service.setServiceName(dto.getServiceName());
         service.setServiceDescription(dto.getServiceDescription());
         service.setFrequency(dto.getFrequency());

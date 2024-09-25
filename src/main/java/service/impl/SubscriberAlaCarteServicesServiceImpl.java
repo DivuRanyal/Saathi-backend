@@ -42,6 +42,15 @@ public class SubscriberAlaCarteServicesServiceImpl implements SubscriberAlaCarte
     @Override
     public SubscriberAlaCarteServices createOrUpdateService(SubscriberAlaCarteServices serviceRequest) {
         // Validate that the serviceID exists in the Services table
+    	// Check if subscriberID is null
+        if (serviceRequest.getSubscriberID() == null) {
+            throw new IllegalArgumentException("SubscriberID cannot be null");
+        }
+
+        // Check if serviceID is null
+        if (serviceRequest.getServiceID() == null) {
+            throw new IllegalArgumentException("ServiceID cannot be null");
+        }
         Optional<AlaCarteService> service = repository.findById(serviceRequest.getServiceID());
 
         if (!service.isPresent()) {

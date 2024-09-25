@@ -15,11 +15,12 @@ public class SubscriberAlaCarteServices {
     @Column(name = "SubscriberAlaCarteServicesID")
     private int SubscriberAlaCarteServicesID;
 
-    @Column(name = "SubscriberID")
+    @Column(name = "SubscriberID",nullable=false)
     private Integer subscriberID;
 
-    @Column(name = "ServiceID")
+    @Column(name = "ServiceID",nullable=false)
     private Integer serviceID;
+    
     @Temporal(TemporalType.DATE)
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     @Column(name = "ServiceDate")
