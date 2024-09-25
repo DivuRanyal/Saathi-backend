@@ -58,4 +58,6 @@ public interface SubscriberService {
 
     // Check if a subscriber exists by their ID
     boolean subscriberExists(Integer subscriberID);
+    
+    Integer getAdminUserIDBySubscriber(Integer subscriberID);
 }

@@ -515,4 +515,14 @@ public class SubscriberServiceImpl implements SubscriberService {
                 .collect(Collectors.toList());
     }
 
+    @Override
+    public Integer getAdminUserIDBySubscriber(Integer subscriberID) {
+        // Assuming that there is a relationship between Subscriber and AdminUser, fetch adminUserID
+        Subscriber subscriber = subscriberRepository.findById(subscriberID).orElse(null);
+        if (subscriber != null && subscriber.getSaathi() != null) {
+            return subscriber.getSaathi().getAdminUserID();
+        }
+        return null;  // Or throw an exception if necessary
+    }
+
 }

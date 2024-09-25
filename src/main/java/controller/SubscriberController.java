@@ -200,7 +200,7 @@ public class SubscriberController {
         }
         return new ResponseEntity<>(adminUser, HttpStatus.OK);
     }
-    
+
     @GetMapping("/sendTestEmail")
     public String sendTestEmail(@RequestParam String saathiEmail) throws TemplateNotFoundException, MalformedTemplateNameException, ParseException, IOException, TemplateException {
         Map<String, Object> model = new HashMap<>();
@@ -532,20 +532,31 @@ public class SubscriberController {
         if (updatedServices != null) {
             try {
                 String filePath = null;
-                // Step 3: Upload file if present and get file path
+                String fileUrl=null;
                 if (file != null && !file.isEmpty()) {
-   //                 String uploadDirectory = "C:\\Users\\ether\\Divya\\"; // Specify the directory where you want to store the file
-                	String uploadDirectory ="/home/saathi/tomcat/webapps/interaction/";
-                	filePath = uploadDirectory + file.getOriginalFilename(); // Get the original file name
-                    // Save the file to the server
+                	// Fetch the adminUserID using the subscriberID
+                    Integer adminUserID = subscriberService.getAdminUserIDBySubscriber(subscriberID); // Adjust the service name
+                    // Build the folder path for the uploaded file
+                    String uploadDirectory = "/home/saathi/tomcat/webapps/saathi_images/" + adminUserID + "/" + subscriberID + "/";
+                    File directory = new File(uploadDirectory);
+                    if (!directory.exists()) {
+                        directory.mkdirs(); // Create the directory if it doesn't exist
+                    }
+
+                    // Define the file path and save it to the server
+                    String fileName = file.getOriginalFilename();
+                    filePath = uploadDirectory + fileName;
                     File dest = new File(filePath);
                     file.transferTo(dest);
+
+                    // Construct the file URL for use in the response or storage
+                     fileUrl = "https://saathi.etheriumtech.com:444/saathi_images/" + adminUserID + "/" + subscriberID + "/" + fileName;
                 }
                 // Step 4: Create and add interaction when the service is completed
                 InteractionDTO interactionDTO = new InteractionDTO();
                 interactionDTO.setSubscriberID(subscriberID);
                 interactionDTO.setDescription(description); // Get the description from the request payload
-                interactionDTO.setDocuments(filePath);  // Store the file path in the documents attribute
+                interactionDTO.setDocuments(fileUrl);  // Store the file path in the documents attribute
                 List<ServiceReport> services = updatedServices.get("allServices");
                 if (services != null) {
                     for (ServiceReport service : services) {

@@ -321,7 +321,7 @@ public class AdminUsersController {
                     // Filter out services where packageServiceID is not null and only include valid services
                     List<ServiceReport> filteredServices = new ArrayList<>();
                     for (ServiceReport serviceReport : serviceReports) {
-                        if (serviceReport.getPackageServiceID() == null && serviceReport.getServiceName() != null) { // Check for valid services
+                        if (serviceReport.getPackageServiceID() == null && serviceReport.getServiceName() != null  && !"Completed".equals(serviceReport.getCompletionStatus())) { // Check for valid services
                             System.out.println(serviceReport.getPackageName());
                             // Add color attribute based on requestedDate and requestedTime
                             if (serviceReport.getRequestedDate() != null && serviceReport.getRequestedTime() != null) {
