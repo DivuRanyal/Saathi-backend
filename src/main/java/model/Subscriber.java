@@ -104,17 +104,17 @@ public class Subscriber {
     private CreditCard creditCard;
     
     @JsonIgnore
-    private String otp;
+    private Integer otp;
     
     @JsonIgnore
     @Temporal(TemporalType.TIMESTAMP)
     private Date otpGeneratedTime;
     
- public String getOtp() {
+ public Integer getOtp() {
 		return otp;
 	}
 
-	public void setOtp(String otp) {
+	public void setOtp(Integer otp) {
 		this.otp = otp;
 	}
 

@@ -546,7 +546,7 @@ public class SubscriberServiceImpl implements SubscriberService {
         }
 
         // Generate OTP and create the new subscriber
-        String otp = otpService.generateOtp();
+        Integer otp = otpService.generateOtp();
         Subscriber subscriber = convertToEntity(subscriberDTO, false); // Exclude password at this point
         subscriber.setOtp(otp);
         subscriber.setOtpGeneratedTime(new Date());
@@ -563,7 +563,7 @@ public class SubscriberServiceImpl implements SubscriberService {
         return convertToDTO(savedSubscriber);
     }
     @Override
-    public int verifyOtp(String email, String otp) {
+    public int verifyOtp(String email, Integer otp) {
         Optional<Subscriber> existingSubscriber = subscriberRepository.findByEmail(email);
 
         if (!existingSubscriber.isPresent()) {

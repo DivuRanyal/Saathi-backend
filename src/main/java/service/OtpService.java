@@ -21,10 +21,10 @@ public class OtpService {
 
     private static final int OTP_VALID_DURATION = 5 * 60 * 1000; // 5 minutes
 
-    public String generateOtp() {
+    public Integer generateOtp() {
         Random random = new Random();
-        int otp = 100000 + random.nextInt(900000); // Generate a 6-digit OTP
-        return String.valueOf(otp);
+        Integer otp = 100000 + random.nextInt(900000); // Generate a 6-digit OTP
+       return otp;
     }
 
     public boolean isOtpExpired(Date otpGeneratedTime) {
@@ -33,7 +33,7 @@ public class OtpService {
         return (currentTimeInMillis - otpTimeInMillis) > OTP_VALID_DURATION;
     }
 
-    public void sendOtpEmail(String subscriberEmail, String otp, String firstName) throws MessagingException, IOException, TemplateException {
+    public void sendOtpEmail(String subscriberEmail, Integer otp, String firstName) throws MessagingException, IOException, TemplateException {
         // Create a model for the email template
         Map<String, Object> model = new HashMap<>();
         model.put("firstName", firstName);

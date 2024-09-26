@@ -715,7 +715,7 @@ public class SubscriberController {
     }
 
     @PostMapping("/verify")
-    public ResponseEntity<?> verifyOtp(@RequestParam String email, @RequestParam String otp) {
+    public ResponseEntity<?> verifyOtp(@RequestParam String email, @RequestParam Integer otp) {
         try {
             int result = subscriberService.verifyOtp(email, otp);
             if (result == 1) {
