@@ -721,7 +721,7 @@ public class SubscriberController {
             if (result == 1) {
                 return ResponseEntity.ok(result);
             } else {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("OTP verification failed.");
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(result);
             }
         } catch (SubscriberNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());

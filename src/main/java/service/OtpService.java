@@ -23,7 +23,8 @@ public class OtpService {
 
     public Integer generateOtp() {
         Random random = new Random();
-        Integer otp = 100000 + random.nextInt(900000); // Generate a 6-digit OTP
+        Integer otp = 100000 + random.nextInt(900000);
+        System.out.println(otp);// Generate a 6-digit OTP
        return otp;
     }
 
@@ -38,7 +39,7 @@ public class OtpService {
         Map<String, Object> model = new HashMap<>();
         model.put("firstName", firstName);
         model.put("otp", otp);
-
+        System.out.println(model);
         // Use the emailService to send the OTP email using the template
         emailService.sendEmail(subscriberEmail, "Your OTP Code", "otp-email.ftlh", model);
     }
