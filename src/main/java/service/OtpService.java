@@ -38,8 +38,9 @@ public class OtpService {
         // Create a model for the email template
         Map<String, Object> model = new HashMap<>();
         model.put("firstName", firstName);
-        model.put("otp", otp);
-        System.out.println(model);
+        String otpString = String.valueOf(otp);
+        model.put("otp", otpString);  // Assuming 'model' is the map you pass to FreeMarker
+
         // Use the emailService to send the OTP email using the template
         emailService.sendEmail(subscriberEmail, "Your OTP Code", "otp-email.ftlh", model);
     }
