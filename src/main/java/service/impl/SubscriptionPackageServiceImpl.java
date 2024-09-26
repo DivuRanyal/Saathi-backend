@@ -25,8 +25,7 @@ import javax.transaction.Transactional;
 @Service
 public class SubscriptionPackageServiceImpl implements SubscriptionPackageService {
 
-	@Autowired
-	private EntityManager entityManager;
+	
     @Autowired
     private SubscriptionPackageRepository subscriptionPackageRepository;
 
@@ -108,7 +107,6 @@ public class SubscriptionPackageServiceImpl implements SubscriptionPackageServic
         if (subscriptionPackageDTO.getStatus() != null) {
             subscriptionPackage.setStatus(subscriptionPackageDTO.getStatus());
         }
-
         // Set the updatedBy field and lastUpdatedDate
         if (subscriptionPackageDTO.getUpdatedBy() != null) {
             subscriptionPackage.setUpdatedBy(subscriptionPackageDTO.getUpdatedBy());

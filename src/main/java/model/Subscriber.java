@@ -102,7 +102,31 @@ public class Subscriber {
     @OneToOne(mappedBy = "subscriber", cascade = CascadeType.ALL)
     @JsonIgnore
     private CreditCard creditCard;
- // Date format to be used for date fields
+    
+    @JsonIgnore
+    private String otp;
+    
+    @JsonIgnore
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date otpGeneratedTime;
+    
+ public String getOtp() {
+		return otp;
+	}
+
+	public void setOtp(String otp) {
+		this.otp = otp;
+	}
+
+	public Date getOtpGeneratedTime() {
+		return otpGeneratedTime;
+	}
+
+	public void setOtpGeneratedTime(Date otpGeneratedTime) {
+		this.otpGeneratedTime = otpGeneratedTime;
+	}
+
+	// Date format to be used for date fields
     private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
 
 	

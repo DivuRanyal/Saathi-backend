@@ -60,4 +60,6 @@ public interface SubscriberService {
     boolean subscriberExists(Integer subscriberID);
     
     Integer getAdminUserIDBySubscriber(Integer subscriberID);
+    int verifyOtp(String email, String otp); 
+    SubscriberDTO completeRegistration(String email, SubscriberDTO additionalDetails); 
 }

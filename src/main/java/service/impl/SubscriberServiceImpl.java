@@ -17,12 +17,16 @@ import repository.PatronRepository;
 import repository.SubscriberRepository;
 import repository.SubscriptionPackageRepository;
 import service.EmailService;
+import service.OtpService;
 import service.ServiceCompletionServiceNew;
 import service.SubscriberService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import exception.EmailAlreadyRegisteredException;
+import exception.InvalidOtpException;
+import exception.OtpExpiredException;
+import exception.SubscriberNotFoundException;
 import freemarker.template.TemplateException;
 
 import java.io.IOException;
@@ -61,8 +65,11 @@ public class SubscriberServiceImpl implements SubscriberService {
 
     @Autowired
     private ServiceCompletionServiceNew serviceCompletionService;
+    
+    @Autowired
+    private OtpService otpService;
 
-    @Override
+ /*   @Override
     public SubscriberDTO createSubscriber(SubscriberDTO subscriberDTO) {
         // Check if the email is already registered
         Optional<Subscriber> existingSubscriber = subscriberRepository.findByEmail(subscriberDTO.getEmail());
@@ -76,7 +83,7 @@ public class SubscriberServiceImpl implements SubscriberService {
         Subscriber savedSubscriber = subscriberRepository.save(subscriber);
         return convertToDTO(savedSubscriber);
     }
-
+*/
     @Override
     public SubscriberDTO updateSubscriber(int subscriberId, SubscriberDTO subscriberDTO) {
         Subscriber existingSubscriber = subscriberRepository.findById(subscriberId)
@@ -245,22 +252,24 @@ public class SubscriberServiceImpl implements SubscriberService {
         subscriberDTO.setLastLoginTime(subscriber.getLastLoginTime());
         subscriberDTO.setComments(subscriber.getComments());
         subscriberDTO.setReasonForChange(subscriber.getReasonForChange());
+     // Check if SubscriptionPackage is not null before accessing its properties
         if (subscriber.getSubscriptionPackage() != null) {
             subscriberDTO.setPackageID(subscriber.getSubscriptionPackage().getPackageID());
             subscriberDTO.setPackageName(subscriber.getSubscriptionPackage().getPackageName());
             subscriberDTO.setPriceINR(subscriber.getSubscriptionPackage().getPriceINR());
             subscriberDTO.setPriceUSD(subscriber.getSubscriptionPackage().getPriceUSD());
+
+            // Now check if PackageServices is not null before mapping
+            if (subscriber.getSubscriptionPackage().getPackageServices() != null) {
+                List<PackageServiceDTO> packageServiceDTOs = subscriber.getSubscriptionPackage().getPackageServices()
+                    .stream()
+                    .map(this::mapToPackageServiceDTO)
+                    .collect(Collectors.toList());
+
+                subscriberDTO.setPackageServices(packageServiceDTOs);
+            }
         }
-
-     // Map PackageServices to PackageServicesDTO
-        List<PackageServiceDTO> packageServiceDTOs = subscriber.getSubscriptionPackage().getPackageServices()
-            .stream()
-            .map(this::mapToPackageServiceDTO)
-            .collect(Collectors.toList());
-
-        subscriberDTO.setPackageServices(packageServiceDTOs);
-    
-        if (subscriber.getCreditCard() != null) {
+     if (subscriber.getCreditCard() != null) {
             CreditCardDTO creditCardDTO = new CreditCardDTO();
             creditCardDTO.setNameOnCard(subscriber.getCreditCard().getNameOnCard());
             creditCardDTO.setCreditCardNumber(subscriber.getCreditCard().getCreditCardNumber());
@@ -523,6 +532,87 @@ public class SubscriberServiceImpl implements SubscriberService {
             return subscriber.getSaathi().getAdminUserID();
         }
         return null;  // Or throw an exception if necessary
+    }
+
+   
+
+    @Override
+    public SubscriberDTO createSubscriber(SubscriberDTO subscriberDTO) {
+        // Check if the email is already registered
+        Optional<Subscriber> existingSubscriber = subscriberRepository.findByEmail(subscriberDTO.getEmail());
+
+        if (existingSubscriber.isPresent()) {
+            throw new EmailAlreadyRegisteredException("The email address is already registered.");
+        }
+
+        // Generate OTP and create the new subscriber
+        String otp = otpService.generateOtp();
+        Subscriber subscriber = convertToEntity(subscriberDTO, false); // Exclude password at this point
+        subscriber.setOtp(otp);
+        subscriber.setOtpGeneratedTime(new Date());
+        subscriber.setStatus(0); // Not verified
+
+        Subscriber savedSubscriber = subscriberRepository.save(subscriber);
+
+        try {
+            otpService.sendOtpEmail(subscriberDTO.getEmail(), otp, subscriberDTO.getFirstName());
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to send OTP email.", e);
+        }
+
+        return convertToDTO(savedSubscriber);
+    }
+    @Override
+    public int verifyOtp(String email, String otp) {
+        Optional<Subscriber> existingSubscriber = subscriberRepository.findByEmail(email);
+
+        if (!existingSubscriber.isPresent()) {
+            throw new SubscriberNotFoundException("Subscriber not found.");
+        }
+
+        Subscriber subscriber = existingSubscriber.get();
+
+        if (otpService.isOtpExpired(subscriber.getOtpGeneratedTime())) {
+            return 0; // OTP expired, return 0
+        }
+
+        if (!subscriber.getOtp().equals(otp)) {
+            return 0; // Invalid OTP, return 0
+        }
+
+        // OTP verified successfully, mark as verified and clear OTP data
+        subscriber.setOtp(null);
+        subscriber.setOtpGeneratedTime(null);
+        subscriber.setStatus(1); // Mark as verified
+
+        subscriberRepository.save(subscriber);  // Save the changes
+
+        return 1; // Return 1 for success
+    }
+
+    @Override
+    public SubscriberDTO completeRegistration(String email, SubscriberDTO additionalDetails) {
+        Optional<Subscriber> existingSubscriber = subscriberRepository.findByEmail(email);
+
+        if (!existingSubscriber.isPresent()) {
+            throw new SubscriberNotFoundException("Subscriber not found.");
+        }
+
+        Subscriber subscriber = existingSubscriber.get();
+
+        // Ensure that the subscriber is verified before completing registration
+        if (subscriber.getStatus() != 1) {  // 1: Verified
+            throw new IllegalStateException("Subscriber is not verified.");
+        }
+
+        // Set the additional details (e.g., password, country code, etc.)
+        subscriber.setPassword(passwordEncoder.encode(additionalDetails.getPassword()));
+       
+        // Save the updated subscriber details
+        Subscriber updatedSubscriber = subscriberRepository.save(subscriber);
+
+        // Convert the updated subscriber entity back to DTO
+        return convertToDTO(updatedSubscriber);
     }
 
 }

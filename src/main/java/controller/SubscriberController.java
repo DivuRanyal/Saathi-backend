@@ -32,6 +32,9 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import exception.EmailAlreadyRegisteredException;
+import exception.InvalidOtpException;
+import exception.OtpExpiredException;
+import exception.SubscriberNotFoundException;
 import freemarker.core.ParseException;
 import freemarker.template.MalformedTemplateNameException;
 import freemarker.template.TemplateException;
@@ -522,7 +525,7 @@ public class SubscriberController {
         Map<String, List<ServiceReport>> updatedServices;
 
         if (isAlaCarte) {
-        	System.out.println("hh");
+        	
             // Update ala-carte service completion using subscriberAlaCarteServiceID
             updatedServices = serviceCompletionService.updateServiceCompletion(subscriberID,serviceID, subscriberAlaCarteServiceID, true);
         } else {
@@ -537,7 +540,8 @@ public class SubscriberController {
                 	// Fetch the adminUserID using the subscriberID
                     Integer adminUserID = subscriberService.getAdminUserIDBySubscriber(subscriberID); // Adjust the service name
                     // Build the folder path for the uploaded file
-                    String uploadDirectory = "/home/saathi/tomcat/webapps/saathi_images/" + adminUserID + "/" + subscriberID + "/";
+ //                   String uploadDirectory = "/home/saathi/tomcat/webapps/saathi_images/" + adminUserID + "/" + subscriberID + "/";
+              String uploadDirectory="C:\\Users\\ether\\OneDrive\\Documents\\New folder\\"+ adminUserID + "\\" + subscriberID + "\\";
                     File directory = new File(uploadDirectory);
                     if (!directory.exists()) {
                         directory.mkdirs(); // Create the directory if it doesn't exist
@@ -613,7 +617,7 @@ public class SubscriberController {
         try {
             // Parse the requestedDate and requestedTime from the input strings
             DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-            DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm:ss");
+            DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm");
             
             LocalDate parsedRequestedDate = LocalDate.parse(requestedDate, dateFormatter);
             LocalTime parsedRequestedTime = LocalTime.parse(requestedTime, timeFormatter);
@@ -710,4 +714,62 @@ public class SubscriberController {
         }
     }
 
+    @PostMapping("/verify")
+    public ResponseEntity<?> verifyOtp(@RequestParam String email, @RequestParam String otp) {
+        try {
+            int result = subscriberService.verifyOtp(email, otp);
+            if (result == 1) {
+                return ResponseEntity.ok(result);
+            } else {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("OTP verification failed.");
+            }
+        } catch (SubscriberNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error during OTP verification. Please try again.");
+        }
+    }
+
+    @PostMapping("/complete")
+    public ResponseEntity<?> completeRegistration(@RequestParam String email, @RequestBody SubscriberDTO additionalDetails) {
+        try {
+            SubscriberDTO response = subscriberService.completeRegistration(email, additionalDetails);
+            // Send email notification to admin after successful creation
+            String adminEmail = "suchigupta@etheriumtech.com"; // Replace with actual admin email
+            String subject = "New Subscriber Added";
+            Map<String, Object> model = new HashMap<>();
+            
+            // Create a Map for the subscriber data
+            Map<String, Object> subscriberData = new HashMap<>();
+            subscriberData.put("name", response.getFirstName() + " " + response.getLastName());
+
+            // Add the subscriber map to the main model
+            model.put("subscriber", subscriberData); // Pass the subscriber object
+
+            // Assuming you have an email service that sends Freemarker templated emails
+            emailService.sendEmail(adminEmail, subject, "subscriber-added-email.ftlh", model);
+            
+            return ResponseEntity.ok(response);
+        } catch (SubscriberNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        } catch (IllegalStateException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error during registration completion. Please try again.");
+        }
+    }
+
+    
+    @PostMapping("/register")
+    public ResponseEntity<?> registerSubscriber(@RequestBody SubscriberDTO subscriberDTO) {
+        try {
+            SubscriberDTO response = subscriberService.createSubscriber(subscriberDTO);
+            return ResponseEntity.ok(response);
+        } catch (EmailAlreadyRegisteredException e) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
+        } catch (Exception e) {
+        	System.out.println(e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occurred during registration. Please try again.");
+        }
+    }
 }
