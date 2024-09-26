@@ -759,8 +759,7 @@ public class SubscriberController {
         }
     }
 
-    
-    @PostMapping
+    @PostMapping("/register")
     public ResponseEntity<?> registerSubscriber(@RequestBody SubscriberDTO subscriberDTO) {
         try {
             SubscriberDTO response = subscriberService.createSubscriber(subscriberDTO);
