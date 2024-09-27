@@ -254,47 +254,59 @@ public class ServiceCompletionServiceNew {
     }
     
     @CachePut(value = "subscriberServicesCache", key = "#subscriberID")
-    public ServiceReport updateServiceRequest(Integer subscriberID, int serviceID, LocalDate requestedDate, LocalTime requestedTime) {
-        // Fetch the cached list of services for the subscriber
-        List<ServiceReport> allServices = subscriberServiceMap.get(subscriberID);
-        ServiceReport updatedReport = null;
+    @Transactional
+    public ServiceReport updateServiceRequestedDateTime(int subscriberID, int serviceID, boolean isAlaCarte, LocalDate newRequestedDate, LocalTime newRequestedTime) throws Exception {
+        ServiceReport serviceReport = null;
 
-        if (allServices != null) {
-            // Iterate over the list of all services to find the one that matches the serviceID
-            for (ServiceReport report : allServices) {
-                if (report.getServiceID() == serviceID) {
-                    // Check if the service is ala-carte or package
-                    if (report.isAlaCarte()) {
-                        System.out.println("Updating requested date/time for an ala-carte service.");
-                        // Optionally update in the database as well
-      //                  updateAlaCarteServiceInDatabase(subscriberID, serviceID, requestedDate, requestedTime);
-                    } else {
-                        System.out.println("Updating requested date/time for a package service.");
-                        // Optionally update in the database as well
-      //                  updatePackageServiceInDatabase(subscriberID, serviceID, requestedDate, requestedTime);
-                    }
+        if (isAlaCarte) {
+            // Fetch the ala-carte service
+            SubscriberAlaCarteServices alaCarteService = alaCarteServicesRepository.findBySubscriberIDAndServiceID(subscriberID, serviceID);
 
-                    // Update the requested date and time for the cached service report
-                    report.setRequestedDate(requestedDate);
-                    report.setRequestedTime(requestedTime);
-                    updatedReport = report;  // Keep track of the updated report
-                    break;  // Break the loop since we found and updated the correct report
-                }
-            }
+            if (alaCarteService != null) {
+                // Update the ala-carte service with the new requested date and time
+    //            alaCarteService.setRequestedDate(newRequestedDate);
+    //            alaCarteService.setRequestedTime(newRequestedTime);
+                alaCarteServicesRepository.save(alaCarteService); // Save the updated ala-carte service
 
-            // Update the cache with the modified list of services
-            if (updatedReport != null) {
-                subscriberServiceMap.put(subscriberID, allServices);  // Update cache with modified list
-            } else {
-                throw new RuntimeException("Service report not found for subscriber: " + subscriberID + " and serviceID: " + serviceID);
+                // Build the updated ServiceReport
+                serviceReport = new ServiceReport();
+                serviceReport.setServiceID(alaCarteService.getService().getServiceID());
+                serviceReport.setServiceName(alaCarteService.getService().getServiceName());
+                serviceReport.setRequestedDate(newRequestedDate);
+                serviceReport.setRequestedTime(newRequestedTime);
+                serviceReport.setCompletionStatus("In Progress");
+                serviceReport.setAlaCarte(true);
             }
         } else {
-            throw new RuntimeException("No cached data found for subscriber: " + subscriberID);
+            // Fetch the subscriber's packageID first
+            Subscriber subscriber = subscriberRepository.findById(subscriberID).orElseThrow(() -> new Exception("Subscriber not found"));
+
+            // Use the packageID to find the corresponding PackageServices
+            PackageServices packageService = packageServiceRepository.findByPackageIDAndServiceID(subscriber.getSubscriptionPackage().getPackageID(), serviceID);
+
+            if (packageService != null) {
+                // Build the updated ServiceReport for this package service
+                serviceReport = new ServiceReport();
+                serviceReport.setServiceID(packageService.getService().getServiceID());
+                serviceReport.setServiceName(packageService.getService().getServiceName());
+                serviceReport.setRequestedDate(newRequestedDate);
+                serviceReport.setRequestedTime(newRequestedTime);
+                serviceReport.setCompletionStatus("In Progress");
+                serviceReport.setAlaCarte(false);  // Mark it as a package service
+            } else {
+                throw new Exception("Package service not found for package ID: " + subscriber.getSubscriptionPackage().getPackageID() + " and service ID: " + serviceID);
+            }
         }
 
-        return updatedReport;
+        // If no service was found, throw an exception
+        if (serviceReport == null) {
+            throw new Exception("Service not found for subscriber with ID: " + subscriberID + " and service ID: " + serviceID);
+        }
+
+        // Return the updated service report
+        return serviceReport;
     }
-    
+
    
     @CachePut(value = "subscriberServicesCache", key = "#subscriberID")
     public Map<String, List<ServiceReport>> updateServiceCompletion(Integer subscriberID, Integer serviceID, Integer subscriberAlaCarteServicesID, boolean isAlaCarteService) {

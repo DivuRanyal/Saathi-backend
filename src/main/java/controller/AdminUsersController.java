@@ -3,14 +3,20 @@ package controller;
 import model.AdminUser;
 import model.ServiceReport;
 import model.Subscriber;
+import model.SubscriptionPackage;
 import model.dto.AdminUsersDTO;
+import model.dto.PackageDetailDTO;
+import model.dto.ServiceCountDTO;
+import model.dto.ServiceSummaryDTO;
 import model.dto.SubscriberDTO;
 import model.dto.SubscriberSaathiDTO;
 import model.dto.SubscriberServicesDTO;
+import model.dto.SubscriptionPackageDTO;
 import service.AdminUsersService;
 import service.EmailService;
 import service.ServiceCompletionServiceNew;
 import service.SubscriberService;
+import service.SubscriptionPackageService;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -37,6 +43,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import javax.mail.MessagingException;
 
@@ -57,6 +64,8 @@ public class AdminUsersController {
     @Autowired
     private ServiceCompletionServiceNew serviceCompletionService;
 
+    @Autowired
+    private SubscriptionPackageService subscriptionPackageService;
  
 
     @Autowired
@@ -482,6 +491,109 @@ public class AdminUsersController {
         }
     }
 
+    @GetMapping("/{saathiId}/subscribers/services/all")
+    public ResponseEntity<?> getAllSubscribersServicesBySaathi(@PathVariable int saathiId) {
+        try {
+            // Fetch the list of subscribers for the given Saathi (AdminUser)
+            List<SubscriberDTO> subscribers = subscriberService.getSubscribersBySaathiID(saathiId);
+
+            // Fetch all available subscription packages
+            List<SubscriptionPackageDTO> allPackages = subscriptionPackageService.getAllSubscriptionPackages();
+
+            // Check if the list of subscribers is null or empty
+            if (subscribers == null || subscribers.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body("No subscribers found for Saathi with ID: " + saathiId);
+            }
+
+            // Initialize counters and maps to track services and their status
+            int totalPending = 0;
+            int totalCompleted = 0;
+            int totalServices = 0;
+            int totalSubscribers = subscribers.size(); // Track the total number of subscribers
+
+            // A map to hold service type breakdown (e.g., Phone Call, House Errand, etc.)
+            Map<String, ServiceCountDTO> serviceBreakdown = new HashMap<>();
+            
+            // A map to hold the breakdown of subscription packages and their subscriber count
+            Map<String, Integer> packageSubscriberCount = new HashMap<>();
+
+            // Initialize the packageSubscriberCount map with all available packages, setting their count to 0
+            for (SubscriptionPackageDTO subscriptionPackage : allPackages) {
+                packageSubscriberCount.put(subscriptionPackage.getPackageName(), 0); // Default count is 0
+            }
+
+            // Loop through each subscriber and fetch their services
+            for (SubscriberDTO subscriber : subscribers) {
+                // Get the name of the package the subscriber is subscribed to
+                String packageName = subscriber.getPackageName();
+                
+                // Update the package subscriber count
+                if (packageName != null) {
+                    packageSubscriberCount.put(packageName, packageSubscriberCount.getOrDefault(packageName, 0) + 1);
+                }
+
+                // Fetch the services for each subscriber
+                Map<String, List<ServiceReport>> services = serviceCompletionService.getSubscriberServices(subscriber.getSubscriberID());
+
+                // Check if the services exist and are valid
+                if (services != null && services.containsKey("allServices")) {
+                    List<ServiceReport> serviceReports = services.get("allServices");
+
+                    // Loop through each service and process it
+                    for (ServiceReport serviceReport : serviceReports) {
+                        if (serviceReport.getFrequencyCount() != 0) {
+                            totalServices += serviceReport.getFrequencyCount();  // Count every service
+
+                            // Determine if the service is completed or pending
+                            if ("Completed".equals(serviceReport.getCompletionStatus())) {
+                                totalCompleted++;
+                            } else {
+                                totalPending++;
+                            }
+
+                            // Get the service name (e.g., "Phone Call", "House Errand") and track it in the breakdown map
+                            String serviceName = serviceReport.getServiceName();
+                            ServiceCountDTO countDTO = serviceBreakdown.getOrDefault(serviceName, new ServiceCountDTO(serviceName));
+
+                            // Update the counts for this particular service type
+                            if ("Completed".equals(serviceReport.getCompletionStatus())) {
+                                countDTO.incrementCompleted();
+                            } else {
+                                countDTO.incrementPending();
+                            }
+
+                            // Update the map with the new counts
+                            serviceBreakdown.put(serviceName, countDTO);
+                        }
+                    }
+                }
+            }
+
+            // Create a list of package details to send in the response
+            List<PackageDetailDTO> packageDetails = packageSubscriberCount.entrySet().stream()
+                    .map(entry -> new PackageDetailDTO(entry.getKey(), entry.getValue()))
+                    .collect(Collectors.toList());
+
+            // Create the response object
+            ServiceSummaryDTO summary = new ServiceSummaryDTO(
+                    totalServices,
+                    totalPending,
+                    totalCompleted,
+                    new ArrayList<>(serviceBreakdown.values()),
+                    totalSubscribers, // Include total number of subscribers
+                    packageDetails  // Include package subscriber breakdown
+            );
+
+            // Return the result
+            return ResponseEntity.ok(summary);
+        } catch (Exception e) {
+            // Log the error and return a response with status 500
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("An error occurred while retrieving services for Saathi ID: " + saathiId);
+        }
+    }
 
 
 }

@@ -44,5 +44,7 @@ public interface SubscriberAlaCarteServicesRepository extends JpaRepository<Subs
 	    @Query("SELECT COUNT(s) FROM SubscriberAlaCarteServices s WHERE s.subscriberID = :subscriberID")
 	    int countAlaCarteServicesBySubscriber(@Param("subscriberID") Integer subscriberID);
 
+	    SubscriberAlaCarteServices findBySubscriberIDAndServiceID(int subscriberID, int serviceID);
+	    
 	    }
 

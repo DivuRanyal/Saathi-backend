@@ -49,6 +49,8 @@ public interface PackageServiceRepository extends JpaRepository<PackageServices,
  // Method to count the total services associated with a package for a given subscriber
     @Query("SELECT COUNT(ps) FROM PackageServices ps WHERE ps.subscriptionPackage = (SELECT s.subscriptionPackage FROM Subscriber s WHERE s.subscriberID = :subscriberID)")
     int countServicesBySubscriber(@Param("subscriberID") Integer subscriberID);
-
+    
+    @Query("SELECT ps FROM PackageServices ps WHERE ps.subscriptionPackage.packageID = :packageID AND ps.service.serviceID = :serviceID")
+    PackageServices findByPackageIDAndServiceID(@Param("packageID") int packageID, @Param("serviceID") int serviceID);
 
 }

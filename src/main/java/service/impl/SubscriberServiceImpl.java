@@ -519,7 +519,8 @@ public class SubscriberServiceImpl implements SubscriberService {
                     subscriber.getLastName(), 
                     subscriber.getEmail(), 
                     subscriber.getContactNo(), 
-                    subscriber.getSaathi()  // Assuming getSaathi() returns the AdminUser (Saathi)
+                    subscriber.getSaathi(),
+                    subscriber.getSubscriptionPackage().getPackageName()// Assuming getSaathi() returns the AdminUser (Saathi)
                 ))
                 .collect(Collectors.toList());
     }

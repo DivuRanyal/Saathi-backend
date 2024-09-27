@@ -244,13 +244,14 @@ public class SubscriberDTO {
     }
 
 	// Constructor
-    public SubscriberDTO(int subscriberID, String firstName, String lastName, String email, String contactNo, AdminUser saathi) {
+    public SubscriberDTO(int subscriberID, String firstName, String lastName, String email, String contactNo, AdminUser saathi,String packageName) {
         this.subscriberID = subscriberID;
         this.firstName = firstName;
         this.lastName = lastName;
         this.email = email;
         this.contactNo = contactNo;
         this.saathi = saathi;
+        this.packageName=packageName;
     }
     // Getters and Setters
 	public SubscriberDTO() {

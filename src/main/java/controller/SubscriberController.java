@@ -623,8 +623,8 @@ public class SubscriberController {
             LocalTime parsedRequestedTime = LocalTime.parse(requestedTime, timeFormatter);
 
             // Call the service layer to update the service request
-            ServiceReport updatedServiceReport = serviceCompletionService.updateServiceRequest(
-                    subscriberID, serviceID, parsedRequestedDate, parsedRequestedTime);
+            ServiceReport updatedServiceReport = serviceCompletionService.updateServiceRequestedDateTime(
+                    subscriberID, serviceID,false, parsedRequestedDate, parsedRequestedTime);
 
             // Return the updated ServiceReport in the response
             return ResponseEntity.ok(updatedServiceReport);
