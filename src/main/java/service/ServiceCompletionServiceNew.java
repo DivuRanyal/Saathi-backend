@@ -16,6 +16,7 @@ import java.util.Set;
 import javax.transaction.Transactional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
@@ -33,6 +34,9 @@ import repository.SubscriberRepository;
 
 @Service
 public class ServiceCompletionServiceNew {
+
+	@Autowired
+    private CacheManager cacheManager;
 
     // In-memory map to store services for each subscriber
     private final Map<Integer, List<ServiceReport>> subscriberServiceMap = new HashMap<>();
@@ -255,57 +259,60 @@ public class ServiceCompletionServiceNew {
     
     @CachePut(value = "subscriberServicesCache", key = "#subscriberID")
     @Transactional
-    public ServiceReport updateServiceRequestedDateTime(int subscriberID, int serviceID, boolean isAlaCarte, LocalDate newRequestedDate, LocalTime newRequestedTime) throws Exception {
-        ServiceReport serviceReport = null;
+    public Map<String, List<ServiceReport>> updateServiceRequestedDateTime(int subscriberID, int serviceID, boolean isAlaCarte, LocalDate newRequestedDate, LocalTime newRequestedTime) throws Exception {
+        // Fetch the cached service reports from Memcached
+        Map<String, List<ServiceReport>> allServicesMap = safeGetCachedServices(subscriberID);
 
-        if (isAlaCarte) {
-            // Fetch the ala-carte service
-            SubscriberAlaCarteServices alaCarteService = alaCarteServicesRepository.findBySubscriberIDAndServiceID(subscriberID, serviceID);
+        if (allServicesMap == null || allServicesMap.get("allServices") == null) {
+            throw new Exception("No services found for subscriber ID: " + subscriberID);
+        }
 
-            if (alaCarteService != null) {
-                // Update the ala-carte service with the new requested date and time
-    //            alaCarteService.setRequestedDate(newRequestedDate);
-    //            alaCarteService.setRequestedTime(newRequestedTime);
-                alaCarteServicesRepository.save(alaCarteService); // Save the updated ala-carte service
+        List<ServiceReport> allServiceReports = allServicesMap.get("allServices");
+        ServiceReport updatedServiceReport = null;
 
-                // Build the updated ServiceReport
-                serviceReport = new ServiceReport();
-                serviceReport.setServiceID(alaCarteService.getService().getServiceID());
-                serviceReport.setServiceName(alaCarteService.getService().getServiceName());
+        // Iterate over the service reports and update only the targeted service
+        for (ServiceReport serviceReport : allServiceReports) {
+            if (serviceReport.getServiceID() == serviceID && serviceReport.isAlaCarte() == isAlaCarte) {
+                // Update requested date and time for the specific service
                 serviceReport.setRequestedDate(newRequestedDate);
                 serviceReport.setRequestedTime(newRequestedTime);
-                serviceReport.setCompletionStatus("In Progress");
-                serviceReport.setAlaCarte(true);
+                serviceReport.setCompletionStatus("In Progress");  // Mark the service as in progress
+                updatedServiceReport = serviceReport;
+                break;  // Exit the loop after updating the targeted service
+            }
+        }
+
+        if (updatedServiceReport == null) {
+            throw new Exception("Service not found for subscriber ID: " + subscriberID + " and service ID: " + serviceID);
+        }
+
+        // Update the cache with the modified list of service reports without adding new services
+        cacheManager.getCache("subscriberServicesCache").put(subscriberID, allServicesMap);
+
+        // Update the in-memory map and tracker
+        subscriberServiceMap.put(subscriberID, allServiceReports);  // Assuming you want to keep track of all services here
+        inMemoryServiceTracker.startTracking(subscriberID, allServiceReports);
+
+        // Return the updated data map
+        return allServicesMap;  // Return the entire map of service reports
+    }
+
+    @SuppressWarnings("unchecked")
+    private Map<String, List<ServiceReport>> safeGetCachedServices(int subscriberID) throws Exception {
+        Object cachedData = cacheManager.getCache("subscriberServicesCache").get(subscriberID, Object.class);
+
+        if (cachedData instanceof Map) {
+            try {
+                // Try casting to the expected type
+                return (Map<String, List<ServiceReport>>) cachedData;
+            } catch (ClassCastException e) {
+                throw new Exception("Cached data is not in the expected format for subscriber ID: " + subscriberID);
             }
         } else {
-            // Fetch the subscriber's packageID first
-            Subscriber subscriber = subscriberRepository.findById(subscriberID).orElseThrow(() -> new Exception("Subscriber not found"));
-
-            // Use the packageID to find the corresponding PackageServices
-            PackageServices packageService = packageServiceRepository.findByPackageIDAndServiceID(subscriber.getSubscriptionPackage().getPackageID(), serviceID);
-
-            if (packageService != null) {
-                // Build the updated ServiceReport for this package service
-                serviceReport = new ServiceReport();
-                serviceReport.setServiceID(packageService.getService().getServiceID());
-                serviceReport.setServiceName(packageService.getService().getServiceName());
-                serviceReport.setRequestedDate(newRequestedDate);
-                serviceReport.setRequestedTime(newRequestedTime);
-                serviceReport.setCompletionStatus("In Progress");
-                serviceReport.setAlaCarte(false);  // Mark it as a package service
-            } else {
-                throw new Exception("Package service not found for package ID: " + subscriber.getSubscriptionPackage().getPackageID() + " and service ID: " + serviceID);
-            }
+            throw new Exception("Cached data is missing or invalid for subscriber ID: " + subscriberID);
         }
-
-        // If no service was found, throw an exception
-        if (serviceReport == null) {
-            throw new Exception("Service not found for subscriber with ID: " + subscriberID + " and service ID: " + serviceID);
-        }
-
-        // Return the updated service report
-        return serviceReport;
     }
+
 
    
     @CachePut(value = "subscriberServicesCache", key = "#subscriberID")

@@ -406,8 +406,8 @@ public class SubscriberController {
                 serviceWithInteraction.put("completions", serviceReport.getCompletions());
                 serviceWithInteraction.put("completionStatus", serviceReport.getCompletionStatus());
                 serviceWithInteraction.put("completionDate", serviceReport.getCompletionDate());
-     //           serviceWithInteraction.put("requestedDate", serviceReport.getRequestedDate().toString());
-    //            serviceWithInteraction.put("requestedTime", serviceReport.getRequestedTime().toString());
+                serviceWithInteraction.put("requestedDate", serviceReport.getRequestedDate().toString());
+                serviceWithInteraction.put("requestedTime", serviceReport.getRequestedTime().toString());
                 serviceWithInteraction.put("frequencyCount", serviceReport.getFrequencyCount());
                 serviceWithInteraction.put("pending", serviceReport.getPending());
                 serviceWithInteraction.put("alaCarte", serviceReport.isAlaCarte());
@@ -612,23 +612,24 @@ public class SubscriberController {
             @PathVariable Integer subscriberID, 
             @PathVariable int serviceID,
             @RequestParam String requestedDate, 
-            @RequestParam String requestedTime) {
+            @RequestParam String requestedTime,
+            @RequestParam(required = false) Boolean isAlaCarte) {
 
         try {
             // Parse the requestedDate and requestedTime from the input strings
             DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
             DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm");
-            
+
             LocalDate parsedRequestedDate = LocalDate.parse(requestedDate, dateFormatter);
             LocalTime parsedRequestedTime = LocalTime.parse(requestedTime, timeFormatter);
 
             // Call the service layer to update the service request
-            ServiceReport updatedServiceReport = serviceCompletionService.updateServiceRequestedDateTime(
-                    subscriberID, serviceID,false, parsedRequestedDate, parsedRequestedTime);
+            Map<String, List<ServiceReport>> updatedServiceReportMap = serviceCompletionService.updateServiceRequestedDateTime(
+                    subscriberID, serviceID, Boolean.FALSE.equals(isAlaCarte), parsedRequestedDate, parsedRequestedTime);
 
-            // Return the updated ServiceReport in the response
-            return ResponseEntity.ok(updatedServiceReport);
-            
+            // Return the updated list of ServiceReports in the response
+            return ResponseEntity.ok(updatedServiceReportMap);
+
         } catch (Exception e) {
             // Handle exceptions and return error message with HTTP status
             e.printStackTrace();
@@ -636,6 +637,8 @@ public class SubscriberController {
                     .body("An error occurred while updating the service request.");
         }
     }
+
+
     
  // Endpoint to rebuild all services for a given subscriber
     @GetMapping("/rebuild/{subscriberID}")

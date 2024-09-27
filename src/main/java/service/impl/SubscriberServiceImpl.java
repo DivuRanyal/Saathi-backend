@@ -501,7 +501,10 @@ public class SubscriberServiceImpl implements SubscriberService {
         PackageServiceDTO packageServiceDTO = new PackageServiceDTO();
         packageServiceDTO.setServiceID(packageService.getService().getServiceID());
         packageServiceDTO.setServiceName(packageService.getService().getServiceName());
-      
+        packageServiceDTO.setPackageID(packageService.getSubscriptionPackage().getPackageID());
+        packageServiceDTO.setPackageName(packageService.getSubscriptionPackage().getPackageName());
+        packageServiceDTO.setPackageServiceID(packageService.getPackageServicesID());
+        
         return packageServiceDTO;
     }
     
