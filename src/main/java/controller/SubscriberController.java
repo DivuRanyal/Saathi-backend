@@ -607,25 +607,25 @@ public class SubscriberController {
         }
     }
     
-    @PutMapping("/{subscriberID}/service/{serviceID}/updateRequest")
+    @PutMapping("/service/updateRequest")
     public ResponseEntity<?> updateServiceRequest(
-            @PathVariable Integer subscriberID, 
-            @PathVariable int serviceID,
-            @RequestParam String requestedDate, 
-            @RequestParam String requestedTime,
-            @RequestParam(required = false) Boolean isAlaCarte) {
+            @RequestBody HashMap<String, Object> requestBody) {
 
         try {
+        	 String requestedDate = (String) requestBody.get("requestedDate");
+             String requestedTime = (String) requestBody.get("requestedTime");
+             Integer subscriberID=(Integer) requestBody.get("subscriberID");
+             Integer serviceID=(Integer) requestBody.get("serviceID");
             // Parse the requestedDate and requestedTime from the input strings
             DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
             DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm");
-
+            
             LocalDate parsedRequestedDate = LocalDate.parse(requestedDate, dateFormatter);
             LocalTime parsedRequestedTime = LocalTime.parse(requestedTime, timeFormatter);
 
             // Call the service layer to update the service request
             Map<String, List<ServiceReport>> updatedServiceReportMap = serviceCompletionService.updateServiceRequestedDateTime(
-                    subscriberID, serviceID, Boolean.FALSE.equals(isAlaCarte), parsedRequestedDate, parsedRequestedTime);
+                    subscriberID, serviceID, false, parsedRequestedDate, parsedRequestedTime);
 
             // Return the updated list of ServiceReports in the response
             return ResponseEntity.ok(updatedServiceReportMap);
