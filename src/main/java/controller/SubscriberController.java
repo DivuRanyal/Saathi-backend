@@ -427,12 +427,12 @@ public class SubscriberController {
                 	    })
                 	    .map(interaction -> {
                 	        // Build the full URL for the documents
-                	        String baseUrl = "https://saathi.etheriumtech.com:444/saathi_images/interaction/";
-
+                	        
                 	        // If document exists, prepend the base URL
                 	        if (interaction.getDocuments() != null && !interaction.getDocuments().isEmpty()) {
-                	            String documentUrl = baseUrl + new File(interaction.getDocuments()).getName();
-                	            interaction.setDocuments(documentUrl); // Set the full document URL in the response
+                	            String documentUrl = interaction.getDocuments();
+                	            interaction.setDocuments(documentUrl);
+                	            // Set the full document URL in the response
                 	        }
 
                 	        return interaction;
