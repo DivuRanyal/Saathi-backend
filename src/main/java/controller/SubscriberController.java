@@ -31,6 +31,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import exception.EmailAlreadyRegisteredException;
 import exception.InvalidOtpException;
 import exception.OtpExpiredException;
@@ -137,10 +139,84 @@ public class SubscriberController {
     }
 
     @GetMapping("/{subscriberId}")
-    public ResponseEntity<SubscriberDTO> getSubscriberById(@PathVariable int subscriberId) {
-        SubscriberDTO subscriber = subscriberService.getSubscriberById(subscriberId);
-        return new ResponseEntity<>(subscriber, HttpStatus.OK);
+    public ResponseEntity<?> getSubscriberById(@PathVariable int subscriberId) {
+        try {
+            // Fetch subscriber details
+            SubscriberDTO subscriber = subscriberService.getSubscriberById(subscriberId);
+
+            // Fetch services for the subscriber
+            Map<String, List<ServiceReport>> services = serviceCompletionService.getSubscriberServices(subscriberId);
+            List<Map<String, Object>> servicesWithInteractions = new ArrayList<>();
+
+            if (services != null && !services.isEmpty() && services.containsKey("allServices")) {
+                List<ServiceReport> serviceReports = services.get("allServices");
+
+                if (serviceReports != null && !serviceReports.isEmpty()) {
+                    // Fetch interactions related to the subscriber
+                    List<InteractionDTO> interactions = interactionService.getInteractionsBySubscriberID(subscriberId);
+
+                    // Create the final response list of services, each with its associated interactions
+                    for (ServiceReport serviceReport : serviceReports) {
+                        Map<String, Object> serviceWithInteraction = new HashMap<>();
+                        
+                        // Add the service details to the map
+                        serviceWithInteraction.put("serviceID", serviceReport.getServiceID());
+                        serviceWithInteraction.put("serviceName", serviceReport.getServiceName());
+                        serviceWithInteraction.put("packageName", serviceReport.getPackageName());
+                        serviceWithInteraction.put("packageServiceID", serviceReport.getPackageServiceID());
+                        serviceWithInteraction.put("frequency", serviceReport.getFrequency());
+                        serviceWithInteraction.put("frequencyUnit", serviceReport.getFrequencyUnit());
+                        serviceWithInteraction.put("completions", serviceReport.getCompletions());
+                        serviceWithInteraction.put("completionStatus", serviceReport.getCompletionStatus());
+                        serviceWithInteraction.put("completionDate", serviceReport.getCompletionDate());
+                        serviceWithInteraction.put("requestedDate", serviceReport.getRequestedDate().toString());
+                        serviceWithInteraction.put("requestedTime", serviceReport.getRequestedTime().toString());
+                        serviceWithInteraction.put("frequencyCount", serviceReport.getFrequencyCount());
+                        serviceWithInteraction.put("pending", serviceReport.getPending());
+                        serviceWithInteraction.put("alaCarte", serviceReport.isAlaCarte());
+                        serviceWithInteraction.put("subscriberAlaCarteServicesID", serviceReport.getSubscriberAlaCarteServicesID());
+
+                        // Filter interactions for this service
+                        List<InteractionDTO> relatedInteractions = interactions.stream()
+                            .filter(interaction -> {
+                                if (serviceReport.isAlaCarte()) {
+                                    return interaction.getSubscriberAlaCarteServicesID() != null &&
+                                           interaction.getSubscriberAlaCarteServicesID().equals(serviceReport.getSubscriberAlaCarteServicesID());
+                                } else if (serviceReport.getPackageServiceID() != 0 && interaction.getPackageServicesID() != null) {
+                                    return interaction.getPackageServicesID().equals(serviceReport.getPackageServiceID());
+                                } else {
+                                    return false; // No matching service
+                                }
+                            })
+                            .collect(Collectors.toList());
+
+                        // Add the interactions to the service
+                        serviceWithInteraction.put("interactions", relatedInteractions);
+
+                        // Add the service with its interactions to the list
+                        servicesWithInteractions.add(serviceWithInteraction);
+                    }
+                }
+            }
+
+            // Create a response map combining subscriber and services
+            Map<String, Object> response = new HashMap<>();
+            // Add the subscriber details
+            response.putAll(new ObjectMapper().convertValue(subscriber, Map.class));
+            // Add the services
+            response.put("services", servicesWithInteractions);
+
+            // Return the combined response
+            return new ResponseEntity<>(response, HttpStatus.OK);
+
+        } catch (Exception e) {
+            // Log the error and return a response with status 500
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                                 .body("An error occurred while retrieving data for subscriber ID: " + subscriberId);
+        }
     }
+
 
     @GetMapping
     public ResponseEntity<List<SubscriberDTO>> getAllSubscribers() {
