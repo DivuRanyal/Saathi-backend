@@ -619,7 +619,7 @@ public class SubscriberController {
              Integer serviceID=(Integer) requestBody.get("serviceID");
             // Parse the requestedDate and requestedTime from the input strings
             DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-            DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm");
+            DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm:ss");
             
             LocalDate parsedRequestedDate = LocalDate.parse(requestedDate, dateFormatter);
             LocalTime parsedRequestedTime = LocalTime.parse(requestedTime, timeFormatter);
