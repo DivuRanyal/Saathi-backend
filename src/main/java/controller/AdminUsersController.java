@@ -253,8 +253,9 @@ public class AdminUsersController {
             String storageLocation = adminIdFolder + "/" + fileName;
             try {
                 picture.transferTo(new File(storageLocation));
-                String baseUrl = "https://saathi.etheriumtech.com:444/saathi_images/";  // Base URL for the images
+    //            String baseUrl = "https://saathi.etheriumtech.com:444/saathi_images/";  // Base URL for the images
                 // Store only the relative path in the database
+                String baseUrl = "http://uat.etheriumtech.com:8080/saathi_images/";
                 existingAdminUser.setPicture(baseUrl + existingAdminUser.getAdminUserID() + "/" + fileName);
             } catch (IOException e) {
                 return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);

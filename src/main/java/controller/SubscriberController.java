@@ -630,7 +630,8 @@ public class SubscriberController {
                     file.transferTo(dest);
 
                     // Construct the file URL for use in the response or storage
-                     fileUrl = "https://saathi.etheriumtech.com:444/saathi_images/" + adminUserID + "/" + subscriberID + "/" + fileName;
+       //              fileUrl = "https://saathi.etheriumtech.com:444/saathi_images/" + adminUserID + "/" + subscriberID + "/" + fileName;
+                   fileUrl = "http://uat.etheriumtech.com:8080/saathi_images/" + adminUserID + "/" + subscriberID + "/" + fileName;
                 }
                 // Step 4: Create and add interaction when the service is completed
                 InteractionDTO interactionDTO = new InteractionDTO();
