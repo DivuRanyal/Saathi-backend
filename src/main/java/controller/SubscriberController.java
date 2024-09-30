@@ -540,8 +540,8 @@ public class SubscriberController {
                 	// Fetch the adminUserID using the subscriberID
                     Integer adminUserID = subscriberService.getAdminUserIDBySubscriber(subscriberID); // Adjust the service name
                     // Build the folder path for the uploaded file
- //                   String uploadDirectory = "/home/saathi/tomcat/webapps/saathi_images/" + adminUserID + "/" + subscriberID + "/";
-              String uploadDirectory="C:\\Users\\ether\\OneDrive\\Documents\\New folder\\"+ adminUserID + "\\" + subscriberID + "\\";
+                    String uploadDirectory = "/home/saathi/tomcat/webapps/saathi_images/" + adminUserID + "/" + subscriberID + "/";
+  //            String uploadDirectory="C:\\Users\\ether\\OneDrive\\Documents\\New folder\\"+ adminUserID + "\\" + subscriberID + "\\";
                     File directory = new File(uploadDirectory);
                     if (!directory.exists()) {
                         directory.mkdirs(); // Create the directory if it doesn't exist
@@ -606,6 +606,7 @@ public class SubscriberController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Service not found for the subscriber.");
         }
     }
+   
     
     @PutMapping("/service/updateRequest")
     public ResponseEntity<?> updateServiceRequest(
@@ -639,7 +640,6 @@ public class SubscriberController {
     }
 
 
-    
  // Endpoint to rebuild all services for a given subscriber
     @GetMapping("/rebuild/{subscriberID}")
     public ResponseEntity<Map<String, List<ServiceReport>>> rebuildAllServices(
@@ -663,8 +663,7 @@ public class SubscriberController {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
-    
-    
+        
     @GetMapping("/rebuild-all-subscribers")
     public ResponseEntity<Map<Integer, Map<String, List<ServiceReport>>>> rebuildForAllSubscribers() {
         try {
@@ -774,4 +773,14 @@ public class SubscriberController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occurred during registration. Please try again.");
         }
     }
+       
+    @GetMapping("/counts")
+    public Map<String, Long> getSubscriberCounts() {
+        Map<String, Long> subscriberCounts = new HashMap<>();
+        subscriberCounts.put("activeBillingStatusZero", subscriberService.countActiveSubscribersWithBillingStatusZero());
+        subscriberCounts.put("activeBillingStatusOne", subscriberService.countActiveSubscribersWithBillingStatusOne());
+        subscriberCounts.put("inactiveSubscribers", subscriberService.countInactiveSubscribers());
+        return subscriberCounts;
+    }
+       
 }

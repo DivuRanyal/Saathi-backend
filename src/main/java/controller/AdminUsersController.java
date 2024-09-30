@@ -498,7 +498,7 @@ public class AdminUsersController {
             List<SubscriberDTO> subscribers = subscriberService.getSubscribersBySaathiID(saathiId);
 
             // Fetch all available subscription packages
-            List<SubscriptionPackageDTO> allPackages = subscriptionPackageService.getAllSubscriptionPackages();
+            List<SubscriptionPackageDTO> allPackages = subscriptionPackageService.getActiveSubscriptionPackages();
 
             // Check if the list of subscribers is null or empty
             if (subscribers == null || subscribers.isEmpty()) {
@@ -595,5 +595,12 @@ public class AdminUsersController {
         }
     }
 
-
+    @GetMapping("/saathi/counts")
+    public Map<String, Long> getSaathiCounts() {
+        Map<String, Long> saathiCounts = new HashMap<>();
+        saathiCounts.put("assignedSaathi", adminUsersService.countAssignedSaathi());
+        saathiCounts.put("unassignedSaathi", adminUsersService.countUnassignedSaathi());
+        return saathiCounts;
+    }
+   
 }

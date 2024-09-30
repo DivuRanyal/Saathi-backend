@@ -32,5 +32,14 @@ public interface SubscriberRepository extends JpaRepository<Subscriber, Integer>
 //	 @Query("SELECT s.subscriberID FROM Subscriber s WHERE s.billingStatus = 1 AND s.subscriptionPackage IS NOT NULL")
 	 @Query("SELECT s.subscriberID FROM Subscriber s WHERE s.subscriptionPackage IS NOT NULL")
 	 List<Integer> findSubscribersWithPurchasedPackages();
+	 
+	 @Query("SELECT COUNT(s) FROM Subscriber s WHERE s.status = 1 AND s.billingStatus = 0")
+	    long countActiveSubscribersWithBillingStatusZero();
+
+	    @Query("SELECT COUNT(s) FROM Subscriber s WHERE s.status = 1 AND s.billingStatus = 1")
+	    long countActiveSubscribersWithBillingStatusOne();
+
+	    @Query("SELECT COUNT(s) FROM Subscriber s WHERE s.status = 0")
+	    long countInactiveSubscribers();
 
 }

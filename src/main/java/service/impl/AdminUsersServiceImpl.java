@@ -176,5 +176,13 @@ public class AdminUsersServiceImpl implements AdminUsersService {
         return subscriberDTO;
     }
     
-    
+    @Override
+    public long countAssignedSaathi() {
+        return adminUsersRepository.countAssignedSaathi();
+    }
+
+    @Override
+    public long countUnassignedSaathi() {
+        return adminUsersRepository.countUnassignedSaathi();
+    }
 }

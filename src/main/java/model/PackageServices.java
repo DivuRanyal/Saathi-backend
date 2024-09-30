@@ -1,6 +1,5 @@
 package model;
 
-
 import java.math.BigDecimal;
 import java.util.Date;
 
@@ -10,6 +9,7 @@ import javax.persistence.*;
 @Table(name = "PackageServices", uniqueConstraints = {
 	    @UniqueConstraint(columnNames = {"PackageID", "ServiceID"})
 	})
+
 public class PackageServices {
 
     @Id
@@ -73,18 +73,19 @@ public class PackageServices {
     public void setUpdatedBy(Integer updatedBy) {
         this.updatedBy = updatedBy;
     }
+    
 	public Integer getPackageServicesID() {
 		return packageServicesID;
 	}
-
+	
 	public void setPackageServicesID(Integer packageServicesID) {
 		this.packageServicesID = packageServicesID;
 	}
-
+	
 	public SubscriptionPackage getSubscriptionPackage() {
 		return subscriptionPackage;
 	}
-
+	
 	public void setSubscriptionPackage(SubscriptionPackage subscriptionPackage) {
 		this.subscriptionPackage = subscriptionPackage;
 	}
@@ -147,6 +148,7 @@ public class PackageServices {
 	    protected void onUpdate() {
 	        lastUpdatedDate = new Date();  // Set the current timestamp for lastUpdatedDate
 	    }
+	 
     // Getters and Setters
     
 }

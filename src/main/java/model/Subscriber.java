@@ -325,7 +325,6 @@ public class Subscriber {
 	    }
 	}
 
-
     public List<SaathiAssignmentHistory> getSaathiAssignmentHistoryList() {
         return saathiAssignmentHistoryList;
     }
@@ -333,6 +332,5 @@ public class Subscriber {
     public void setSaathiAssignmentHistoryList(List<SaathiAssignmentHistory> saathiAssignmentHistoryList) {
         this.saathiAssignmentHistoryList = saathiAssignmentHistoryList;
     }
-    // Getters and Setters
-   
+    // Getters and Setters   
 }

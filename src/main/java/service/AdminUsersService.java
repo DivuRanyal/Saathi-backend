@@ -28,4 +28,7 @@ public interface AdminUsersService {
    
     List<AdminUsersDTO> getAllAdminUsersWithSubscribersByUserType();
     
+    public long countAssignedSaathi();
+    public long countUnassignedSaathi();
+    
 }

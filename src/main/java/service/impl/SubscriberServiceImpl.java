@@ -619,4 +619,17 @@ public class SubscriberServiceImpl implements SubscriberService {
         return convertToDTO(updatedSubscriber);
     }
 
+    public long countActiveSubscribersWithBillingStatusZero() {
+        return subscriberRepository.countActiveSubscribersWithBillingStatusZero();
+    }
+
+    public long countActiveSubscribersWithBillingStatusOne() {
+        return subscriberRepository.countActiveSubscribersWithBillingStatusOne();
+    }
+
+    public long countInactiveSubscribers() {
+        return subscriberRepository.countInactiveSubscribers();
+    }
+    
+    
 }

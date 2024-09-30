@@ -62,4 +62,8 @@ public interface SubscriberService {
     Integer getAdminUserIDBySubscriber(Integer subscriberID);
     int verifyOtp(String email, Integer otp); 
     SubscriberDTO completeRegistration(String email, SubscriberDTO additionalDetails); 
+    
+    public long countActiveSubscribersWithBillingStatusZero();
+    public long countActiveSubscribersWithBillingStatusOne();
+    public long countInactiveSubscribers();
 }

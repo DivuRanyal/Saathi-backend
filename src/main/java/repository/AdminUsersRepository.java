@@ -30,4 +30,11 @@ public interface AdminUsersRepository extends JpaRepository<AdminUser, Integer> 
     @Query("SELECT a FROM AdminUser a LEFT JOIN FETCH a.subscribers WHERE a.userType = 'Saathi'")
     List<AdminUser> findAllAdminUsersWithSubscribersByUserType();
     
+    // Count Saathi users who are assigned to at least one subscriber
+    @Query("SELECT COUNT(a) FROM AdminUser a WHERE a.userType = 'Saathi' AND a.subscribers IS NOT EMPTY")
+    long countAssignedSaathi();
+
+    // Count Saathi users who are not assigned to any subscriber
+    @Query("SELECT COUNT(a) FROM AdminUser a WHERE a.userType = 'Saathi' AND a.subscribers IS EMPTY")
+    long countUnassignedSaathi();
 }
