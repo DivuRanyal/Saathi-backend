@@ -30,7 +30,7 @@ public class ServiceReport implements Serializable {
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private LocalDate requestedDate;
 
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "HH:mm")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "HH:mm:ss")
     private LocalTime requestedTime;
     private int frequencyCount; // Calculated based on frequency and frequencyUnit
     private int pending; // Calculated as frequencyCount - completions
