@@ -465,8 +465,13 @@ public class SubscriberServiceImpl implements SubscriberService {
         dto.setEmail(subscriber.getEmail());
         dto.setContactNo(subscriber.getContactNo());
         dto.setStatus(subscriber.getStatus());
-        dto.setPackageID(subscriber.getSubscriptionPackage().getPackageID());
-        dto.setPackageName(subscriber.getSubscriptionPackage().getPackageName());
+        if (subscriber.getSubscriptionPackage() != null) {
+            dto.setPackageID(subscriber.getSubscriptionPackage().getPackageID());
+            dto.setPackageName(subscriber.getSubscriptionPackage().getPackageName());
+        } else {
+            // Handle the case where subscription package is null, if needed
+            dto.setPackageID(null); // Or handle it in another appropriate way
+        }
         
         AdminUser saathi = subscriber.getSaathi();
         if (saathi != null) {
@@ -538,8 +543,6 @@ public class SubscriberServiceImpl implements SubscriberService {
         return null;  // Or throw an exception if necessary
     }
 
-   
-
     @Override
     public SubscriberDTO createSubscriber(SubscriberDTO subscriberDTO) {
         // Check if the email is already registered
@@ -566,6 +569,7 @@ public class SubscriberServiceImpl implements SubscriberService {
 
         return convertToDTO(savedSubscriber);
     }
+    
     @Override
     public int verifyOtp(String email, Integer otp) {
         Optional<Subscriber> existingSubscriber = subscriberRepository.findByEmail(email);
@@ -630,6 +634,5 @@ public class SubscriberServiceImpl implements SubscriberService {
     public long countInactiveSubscribers() {
         return subscriberRepository.countInactiveSubscribers();
     }
-    
     
 }
