@@ -59,12 +59,11 @@ public class SubscriptionPackageController {
         
         // Sorting the list by packageName and wrapping it in ResponseEntity
         List<SubscriptionPackageDTO> sortedPackages = activePackages.stream()
-                .sorted(Comparator.comparing(SubscriptionPackageDTO::getPackageName))
+                .sorted(Comparator.comparing(SubscriptionPackageDTO::getPriceINR))
                 .collect(Collectors.toList());
         
         return ResponseEntity.ok(sortedPackages);
     }
-
     
     @GetMapping("/{packageId}/services")
     public ResponseEntity<List<PackageServiceDTO>> getPackageServices(@PathVariable Integer packageId) {

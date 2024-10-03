@@ -149,7 +149,6 @@ public class SubscriberServiceImpl implements SubscriberService {
                 }
             }
         
-
         if (subscriberDTO.getComments() != null) {
             existingSubscriber.setComments(subscriberDTO.getComments());
         }
@@ -195,6 +194,7 @@ public class SubscriberServiceImpl implements SubscriberService {
 
         return convertToDTO(updatedSubscriber);    
     }
+    
     @Override
     public SubscriberDTO getSubscriberById(int subscriberId) {
         Subscriber subscriber = subscriberRepository.findById(subscriberId)
