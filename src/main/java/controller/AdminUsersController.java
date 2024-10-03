@@ -763,6 +763,12 @@ public class AdminUsersController {
             saathiCounts.put("totalSaathi", totalSaathi);
             combinedDto.setSaathiCounts(saathiCounts);
 
+            // Initialize totals for all Saathi
+            int totalPendingPackageServices = 0;
+            int totalCompletedPackageServices = 0;
+            int totalPendingAlaCarteServices = 0;
+            int totalCompletedAlaCarteServices = 0;
+
             // Call the Saathi subscriber services API logic
             List<AdminUser> saathiUsers = adminUsersService.getAllSaathiUsers();
             List<SubscriptionPackageDTO> allPackages = subscriptionPackageService.getActiveSubscriptionPackages();
@@ -801,14 +807,14 @@ public class AdminUsersController {
                             if (serviceReport.getFrequencyCount() != 0) {
                                 totalServices += serviceReport.getFrequencyCount();
 
-                                if (!serviceReport.isAlaCarte()) {
+                                if (!serviceReport.isAlaCarte()) { // Package services
                                     if ("Not Started".equals(serviceReport.getCompletionStatus())) {
                                         saathiPendingPackageServices += serviceReport.getFrequencyCount();
                                     } else {
                                         saathiCompletedPackageServices += serviceReport.getCompletions();
                                         saathiPendingPackageServices += (serviceReport.getFrequencyCount() - serviceReport.getCompletions());
                                     }
-                                } else {
+                                } else { // Ala-carte services
                                     if ("Not Started".equals(serviceReport.getCompletionStatus())) {
                                         saathiPendingAlaCarteServices += serviceReport.getFrequencyCount();
                                     } else {
@@ -821,6 +827,13 @@ public class AdminUsersController {
                     }
                 }
 
+                // Add individual Saathi counts to the totals
+                totalPendingPackageServices += saathiPendingPackageServices;
+                totalCompletedPackageServices += saathiCompletedPackageServices;
+                totalPendingAlaCarteServices += saathiPendingAlaCarteServices;
+                totalCompletedAlaCarteServices += saathiCompletedAlaCarteServices;
+
+                // Create DTO for the current Saathi
                 SaathiServiceCountDTO saathiServiceCountDTO = new SaathiServiceCountDTO(
                     saathi.getFirstName() + saathi.getLastName(),
                     saathiPendingPackageServices,
@@ -831,6 +844,13 @@ public class AdminUsersController {
                 saathiServiceCountList.add(saathiServiceCountDTO);
             }
 
+            // Add total package and ala-carte service counts to the response
+            combinedDto.setTotalPendingPackageServices(totalPendingPackageServices);
+            combinedDto.setTotalCompletedPackageServices(totalCompletedPackageServices);
+            combinedDto.setTotalPendingAlaCarteServices(totalPendingAlaCarteServices);
+            combinedDto.setTotalCompletedAlaCarteServices(totalCompletedAlaCarteServices);
+
+            // Prepare package details
             List<PackageDetailDTO> packageDetails = packageSubscriberCount.entrySet().stream()
                     .map(entry -> new PackageDetailDTO(entry.getKey(), entry.getValue()))
                     .collect(Collectors.toList());
@@ -859,5 +879,6 @@ public class AdminUsersController {
                     .body("An error occurred while retrieving combined counts.");
         }
     }
+
 
 }
