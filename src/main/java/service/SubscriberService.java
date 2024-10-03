@@ -28,6 +28,9 @@ public interface SubscriberService {
     // Get active subscribers
     List<SubscriberDTO> getActiveSubscribers();
 
+    // Get active subscribers
+    List<SubscriberDTO> getInActiveBillingSubscribers();
+
     // Find a subscriber by email and password
     Subscriber findByEmailAndPassword(String email, String password);
 

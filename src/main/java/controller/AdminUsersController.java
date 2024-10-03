@@ -516,6 +516,9 @@ public class AdminUsersController {
             int totalServices = 0;
             int totalSubscribers = subscribers.size(); // Track the total number of subscribers
 
+            // Counter to track the number of subscribers with billingStatus = 0
+            int inActiveSubscribers = 0;
+
             // A map to hold service type breakdown (e.g., Phone Call, House Errand, etc.)
             Map<String, ServiceCountDTO> serviceBreakdown = new HashMap<>();
             
@@ -535,6 +538,11 @@ public class AdminUsersController {
                 // Update the package subscriber count
                 if (packageName != null) {
                     packageSubscriberCount.put(packageName, packageSubscriberCount.getOrDefault(packageName, 0) + 1);
+                }
+
+                // Check if billingStatus is 0 for this subscriber and increment the counter
+                if (subscriber.getBillingStatus() == 0) {
+                	inActiveSubscribers++;
                 }
 
                 // Fetch the services for each subscriber
@@ -586,7 +594,8 @@ public class AdminUsersController {
                     totalCompleted,
                     new ArrayList<>(serviceBreakdown.values()),
                     totalSubscribers, // Include total number of subscribers
-                    packageDetails  // Include package subscriber breakdown
+                    packageDetails,  // Include package subscriber breakdown
+                    inActiveSubscribers // Include the count of subscribers with billingStatus = 0
             );
 
             // Return the result
@@ -598,6 +607,7 @@ public class AdminUsersController {
                     .body("An error occurred while retrieving services for Saathi ID: " + saathiId);
         }
     }
+
     @GetMapping("/saathi/counts")
     public Map<String, Long> getSaathiCounts() {
         Map<String, Long> saathiCounts = new HashMap<>();

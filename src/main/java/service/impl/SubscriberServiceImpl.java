@@ -220,6 +220,14 @@ public class SubscriberServiceImpl implements SubscriberService {
     }
 
     @Override
+    public List<SubscriberDTO> getInActiveBillingSubscribers() {
+        List<Subscriber> subscribers = subscriberRepository.findByBillingStatus(0);
+        return subscribers.stream()
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
+    }
+
+    @Override
     public void deleteSubscriber(int subscriberId) {
         subscriberRepository.deleteById(subscriberId);
     }
@@ -528,7 +536,8 @@ public class SubscriberServiceImpl implements SubscriberService {
                     subscriber.getEmail(), 
                     subscriber.getContactNo(), 
                     subscriber.getSaathi(),
-                    subscriber.getSubscriptionPackage().getPackageName()// Assuming getSaathi() returns the AdminUser (Saathi)
+                    subscriber.getSubscriptionPackage().getPackageName(),
+                    subscriber.getBillingStatus()// Assuming getSaathi() returns the AdminUser (Saathi)
                 ))
                 .collect(Collectors.toList());
     }
@@ -592,9 +601,7 @@ public class SubscriberServiceImpl implements SubscriberService {
         subscriber.setOtp(null);
         subscriber.setOtpGeneratedTime(null);
         subscriber.setStatus(1); // Mark as verified
-
         subscriberRepository.save(subscriber);  // Save the changes
-
         return 1; // Return 1 for success
     }
 

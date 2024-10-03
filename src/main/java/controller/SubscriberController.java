@@ -229,6 +229,13 @@ public class SubscriberController {
         List<SubscriberDTO> subscribers = subscriberService.getActiveSubscribers();
         return ResponseEntity.ok(subscribers);
     }
+    
+    @GetMapping("/billing/inactive")
+    public ResponseEntity<List<SubscriberDTO>> getInActiveBillingSubscribers() {
+        List<SubscriberDTO> subscribers = subscriberService.getInActiveBillingSubscribers();
+        return ResponseEntity.ok(subscribers);
+    }
+
     @DeleteMapping("/{subscriberId}")
     public ResponseEntity<Void> deleteSubscriber(@PathVariable int subscriberId) {
         subscriberService.deleteSubscriber(subscriberId);

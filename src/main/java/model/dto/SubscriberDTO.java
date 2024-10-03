@@ -244,7 +244,7 @@ public class SubscriberDTO {
     }
 
 	// Constructor
-    public SubscriberDTO(int subscriberID, String firstName, String lastName, String email, String contactNo, AdminUser saathi,String packageName) {
+    public SubscriberDTO(int subscriberID, String firstName, String lastName, String email, String contactNo, AdminUser saathi,String packageName, int billingStatus ) {
         this.subscriberID = subscriberID;
         this.firstName = firstName;
         this.lastName = lastName;
@@ -252,6 +252,7 @@ public class SubscriberDTO {
         this.contactNo = contactNo;
         this.saathi = saathi;
         this.packageName=packageName;
+        this.billingStatus=billingStatus;
     }
     // Getters and Setters
 	public SubscriberDTO() {

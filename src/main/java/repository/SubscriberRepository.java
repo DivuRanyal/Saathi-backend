@@ -20,6 +20,7 @@ public interface SubscriberRepository extends JpaRepository<Subscriber, Integer>
 	// You can define custom query methods here if needed, e.g.,
 	
 	List<Subscriber> findByStatus(Integer status);
+	List<Subscriber> findByBillingStatus(Integer billingStatus);
 	 Optional<Subscriber> findByEmail(String email);
 	 List<Subscriber> findBySaathi(AdminUser saathi);
 	 @Query(value = "SELECT * FROM Subscribers WHERE SaathiID IS NULL", nativeQuery = true)
