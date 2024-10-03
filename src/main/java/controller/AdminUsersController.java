@@ -5,7 +5,10 @@ import model.ServiceReport;
 import model.Subscriber;
 import model.SubscriptionPackage;
 import model.dto.AdminUsersDTO;
+import model.dto.CombinedSaathiSubscriberDTO;
 import model.dto.PackageDetailDTO;
+import model.dto.SaathiServiceCountDTO;
+import model.dto.SaathiServiceSummaryDTO;
 import model.dto.ServiceCountDTO;
 import model.dto.ServiceSummaryDTO;
 import model.dto.SubscriberDTO;
@@ -255,6 +258,7 @@ public class AdminUsersController {
                 picture.transferTo(new File(storageLocation));
                 String baseUrl = "https://saathi.etheriumtech.com:444/saathi_images/";  // Base URL for the images
                 // Store only the relative path in the database
+    //            String baseUrl = "http://uat.etheriumtech.com:8080/saathi_images/";
                 existingAdminUser.setPicture(baseUrl + existingAdminUser.getAdminUserID() + "/" + fileName);
             } catch (IOException e) {
                 return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
@@ -594,13 +598,256 @@ public class AdminUsersController {
                     .body("An error occurred while retrieving services for Saathi ID: " + saathiId);
         }
     }
-
     @GetMapping("/saathi/counts")
     public Map<String, Long> getSaathiCounts() {
         Map<String, Long> saathiCounts = new HashMap<>();
-        saathiCounts.put("assignedSaathi", adminUsersService.countAssignedSaathi());
-        saathiCounts.put("unassignedSaathi", adminUsersService.countUnassignedSaathi());
+        long assignedSaathi = adminUsersService.countAssignedSaathi();
+        long unassignedSaathi = adminUsersService.countUnassignedSaathi();
+        long totalSaathi = assignedSaathi + unassignedSaathi;
+
+        saathiCounts.put("assignedSaathi", assignedSaathi);
+        saathiCounts.put("unassignedSaathi", unassignedSaathi);
+        saathiCounts.put("totalSaathi", totalSaathi);
+
         return saathiCounts;
     }
-   
+
+    
+    @GetMapping("/subscribers/services/all/saathis")
+    public ResponseEntity<?> getAllSaathiSubscribersServices() {
+        try {
+            // Fetch the list of admin users of userType 'Saathi'
+            List<AdminUser> saathiUsers = adminUsersService.getAllSaathiUsers();
+
+            // Fetch all available subscription packages
+            List<SubscriptionPackageDTO> allPackages = subscriptionPackageService.getActiveSubscriptionPackages();
+
+            // Initialize the overall counters and data holders
+            int totalServices = 0;
+            int totalSubscribers = 0;
+
+            // A list to hold Saathi-specific breakdowns
+            List<SaathiServiceCountDTO> saathiServiceCountList = new ArrayList<>();
+
+            // A map to hold the breakdown of subscription packages and their subscriber count
+            Map<String, Integer> packageSubscriberCount = new HashMap<>();
+
+            // Initialize the packageSubscriberCount map with all available packages, setting their count to 0
+            for (SubscriptionPackageDTO subscriptionPackage : allPackages) {
+                packageSubscriberCount.put(subscriptionPackage.getPackageName(), 0); // Default count is 0
+            }
+
+            // Loop through each Saathi user and fetch their subscribers
+            for (AdminUser saathi : saathiUsers) {
+                List<SubscriberDTO> subscribers = subscriberService.getSubscribersBySaathiID(saathi.getAdminUserID());
+
+                // Initialize counters for this specific Saathi
+                int saathiPendingPackageServices = 0;
+                int saathiCompletedPackageServices = 0;
+                int saathiPendingAlaCarteServices = 0;
+                int saathiCompletedAlaCarteServices = 0;
+
+                // Check if the list of subscribers is null or empty
+                if (subscribers == null || subscribers.isEmpty()) {
+                    continue; // Skip this Saathi if no subscribers found
+                }
+
+                totalSubscribers += subscribers.size(); // Track the total number of subscribers
+
+                // Loop through each subscriber and fetch their services
+                for (SubscriberDTO subscriber : subscribers) {
+                    // Get the name of the package the subscriber is subscribed to
+                    String packageName = subscriber.getPackageName();
+
+                    // Update the package subscriber count
+                    if (packageName != null) {
+                        packageSubscriberCount.put(packageName, packageSubscriberCount.getOrDefault(packageName, 0) + 1);
+                    }
+
+                    // Fetch the services for each subscriber
+                    Map<String, List<ServiceReport>> services = serviceCompletionService.getSubscriberServices(subscriber.getSubscriberID());
+
+                    // Check if the services exist and are valid
+                    if (services != null && services.containsKey("allServices")) {
+                        List<ServiceReport> serviceReports = services.get("allServices");
+
+                        // Loop through each service and process it
+                        for (ServiceReport serviceReport : serviceReports) {
+                            if (serviceReport.getFrequencyCount() != 0) {
+                                totalServices += serviceReport.getFrequencyCount();  // Count every service occurrence based on frequencyCount
+
+                                // Determine if the service is a package or ala-carte service
+                                if (!serviceReport.isAlaCarte()) {
+                                    // Package service logic
+                                    if ("Not Started".equals(serviceReport.getCompletionStatus())) {
+                                    	saathiPendingPackageServices += serviceReport.getFrequencyCount();  // All pending if not completed
+                                        
+                                        } else {
+                                        	saathiCompletedPackageServices += serviceReport.getCompletions();  // Completed services based on actual completions
+                                            saathiPendingPackageServices += (serviceReport.getFrequencyCount() - serviceReport.getCompletions());  // Remaining are pending
+                                        }
+                                } else {
+                                    // Ala-carte service logic
+                                    if ("Not Started".equals(serviceReport.getCompletionStatus())) {
+                                    	saathiPendingAlaCarteServices += serviceReport.getFrequencyCount();  // All ala-carte services pending if not completed
+                                        
+                                        } else {
+                                        	saathiCompletedAlaCarteServices += serviceReport.getCompletions();  // Completed ala-carte services
+                                            saathiPendingAlaCarteServices += (serviceReport.getFrequencyCount() - serviceReport.getCompletions());  // Remaining ala-carte services pending
+                                         }
+                                }
+                            }
+                        }
+
+                    }
+                }
+
+                // After processing all subscribers for this Saathi, create a DTO for the counts
+                SaathiServiceCountDTO saathiServiceCountDTO = new SaathiServiceCountDTO(
+                    saathi.getFirstName()+saathi.getLastName(), 
+                    saathiPendingPackageServices,
+                    saathiCompletedPackageServices,
+                    saathiPendingAlaCarteServices,
+                    saathiCompletedAlaCarteServices
+                );
+
+                // Add this Saathi's counts to the overall list
+                saathiServiceCountList.add(saathiServiceCountDTO);
+            }
+
+            // Create a list of package details to send in the response
+            List<PackageDetailDTO> packageDetails = packageSubscriberCount.entrySet().stream()
+                    .map(entry -> new PackageDetailDTO(entry.getKey(), entry.getValue()))
+                    .collect(Collectors.toList());
+
+            // Create the response object with combined Saathi-specific data
+            SaathiServiceSummaryDTO summary = new SaathiServiceSummaryDTO(
+                    totalServices,
+                    totalSubscribers, 
+                    saathiServiceCountList, // List of Saathi's service counts
+                    packageDetails  // Include package subscriber breakdown
+            );
+
+            // Return the result
+            return ResponseEntity.ok(summary);
+        } catch (Exception e) {
+            // Log the error and return a response with status 500
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("An error occurred while retrieving services for all Saathi users.");
+        }
+    }
+
+    @GetMapping("/combined/saathi-subscriber-counts")
+    public ResponseEntity<?> getCombinedSaathiSubscriberCounts() {
+        try {
+            CombinedSaathiSubscriberDTO combinedDto = new CombinedSaathiSubscriberDTO();
+
+            // Call the Saathi counts API logic
+            Map<String, Long> saathiCounts = new HashMap<>();
+            long assignedSaathi = adminUsersService.countAssignedSaathi();
+            long unassignedSaathi = adminUsersService.countUnassignedSaathi();
+            long totalSaathi = assignedSaathi + unassignedSaathi;
+            saathiCounts.put("assignedSaathi", assignedSaathi);
+            saathiCounts.put("unassignedSaathi", unassignedSaathi);
+            saathiCounts.put("totalSaathi", totalSaathi);
+            combinedDto.setSaathiCounts(saathiCounts);
+
+            // Call the Saathi subscriber services API logic
+            List<AdminUser> saathiUsers = adminUsersService.getAllSaathiUsers();
+            List<SubscriptionPackageDTO> allPackages = subscriptionPackageService.getActiveSubscriptionPackages();
+            int totalServices = 0;
+            int totalSubscribers = 0;
+            List<SaathiServiceCountDTO> saathiServiceCountList = new ArrayList<>();
+            Map<String, Integer> packageSubscriberCount = new HashMap<>();
+
+            for (SubscriptionPackageDTO subscriptionPackage : allPackages) {
+                packageSubscriberCount.put(subscriptionPackage.getPackageName(), 0);
+            }
+
+            for (AdminUser saathi : saathiUsers) {
+                List<SubscriberDTO> subscribers = subscriberService.getSubscribersBySaathiID(saathi.getAdminUserID());
+                if (subscribers == null || subscribers.isEmpty()) {
+                    continue;
+                }
+
+                totalSubscribers += subscribers.size();
+                int saathiPendingPackageServices = 0;
+                int saathiCompletedPackageServices = 0;
+                int saathiPendingAlaCarteServices = 0;
+                int saathiCompletedAlaCarteServices = 0;
+
+                for (SubscriberDTO subscriber : subscribers) {
+                    String packageName = subscriber.getPackageName();
+                    if (packageName != null) {
+                        packageSubscriberCount.put(packageName, packageSubscriberCount.getOrDefault(packageName, 0) + 1);
+                    }
+
+                    Map<String, List<ServiceReport>> services = serviceCompletionService.getSubscriberServices(subscriber.getSubscriberID());
+                    if (services != null && services.containsKey("allServices")) {
+                        List<ServiceReport> serviceReports = services.get("allServices");
+
+                        for (ServiceReport serviceReport : serviceReports) {
+                            if (serviceReport.getFrequencyCount() != 0) {
+                                totalServices += serviceReport.getFrequencyCount();
+
+                                if (!serviceReport.isAlaCarte()) {
+                                    if ("Not Started".equals(serviceReport.getCompletionStatus())) {
+                                        saathiPendingPackageServices += serviceReport.getFrequencyCount();
+                                    } else {
+                                        saathiCompletedPackageServices += serviceReport.getCompletions();
+                                        saathiPendingPackageServices += (serviceReport.getFrequencyCount() - serviceReport.getCompletions());
+                                    }
+                                } else {
+                                    if ("Not Started".equals(serviceReport.getCompletionStatus())) {
+                                        saathiPendingAlaCarteServices += serviceReport.getFrequencyCount();
+                                    } else {
+                                        saathiCompletedAlaCarteServices += serviceReport.getCompletions();
+                                        saathiPendingAlaCarteServices += (serviceReport.getFrequencyCount() - serviceReport.getCompletions());
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                SaathiServiceCountDTO saathiServiceCountDTO = new SaathiServiceCountDTO(
+                    saathi.getFirstName() + saathi.getLastName(),
+                    saathiPendingPackageServices,
+                    saathiCompletedPackageServices,
+                    saathiPendingAlaCarteServices,
+                    saathiCompletedAlaCarteServices
+                );
+                saathiServiceCountList.add(saathiServiceCountDTO);
+            }
+
+            List<PackageDetailDTO> packageDetails = packageSubscriberCount.entrySet().stream()
+                    .map(entry -> new PackageDetailDTO(entry.getKey(), entry.getValue()))
+                    .collect(Collectors.toList());
+
+            SaathiServiceSummaryDTO summary = new SaathiServiceSummaryDTO(
+                    totalServices,
+                    totalSubscribers,
+                    saathiServiceCountList,
+                    packageDetails
+            );
+
+            combinedDto.setSaathiServiceSummary(summary);
+
+            // Call the subscriber counts API logic
+            Map<String, Long> subscriberCounts = new HashMap<>();
+            subscriberCounts.put("Registered Users", subscriberService.countActiveSubscribersWithBillingStatusZero());
+            subscriberCounts.put("Subscribers", subscriberService.countActiveSubscribersWithBillingStatusOne());
+            combinedDto.setSubscriberCounts(subscriberCounts);
+
+            // Return the combined data
+            return ResponseEntity.ok(combinedDto);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("An error occurred while retrieving combined counts.");
+        }
+    }
+
 }
