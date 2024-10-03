@@ -866,7 +866,7 @@ public class AdminUsersController {
 
             // Call the subscriber counts API logic
             Map<String, Long> subscriberCounts = new HashMap<>();
-            subscriberCounts.put("Registered-Users", subscriberService.countActiveSubscribersWithBillingStatusZero());
+            subscriberCounts.put("RegisteredUsers", subscriberService.countActiveSubscribersWithBillingStatusZero());
             subscriberCounts.put("totalSubscribers", subscriberService.countActiveSubscribersWithBillingStatusOne());
             combinedDto.setSubscriberCounts(subscriberCounts);
 
