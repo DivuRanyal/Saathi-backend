@@ -250,15 +250,13 @@ public class SubscriberController {
  //       System.out.println(createdService);
         return new ResponseEntity<>(serviceRequest, HttpStatus.CREATED);
     }
-    
-  
+      
     @PostMapping("/savePatronAndService")
     public ResponseEntity<PatronServiceDTO> savePatronAndService(@RequestBody PatronServiceDTO patronServiceDTO) {
         // Ensure that the incoming DTO is not null
         if (patronServiceDTO == null || patronServiceDTO.getSubscriberAlaCarteServices() == null) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
-
         // Save Patron
         PatronDTO savedPatron = patronService.savePatron(patronServiceDTO.getPatronDTO());
 
@@ -280,7 +278,7 @@ public class SubscriberController {
     	
      // When retrieving the AdminUser object, construct the full URL for the picture
         if (adminUser.getPicture() != null && !adminUser.getPicture().isEmpty()) {
-            
+    
             String pictureUrl = adminUser.getPicture();
             adminUser.setPicture(pictureUrl);  // Set the full URL in the response
         }

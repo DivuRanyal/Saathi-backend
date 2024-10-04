@@ -525,9 +525,10 @@ public class SubscriberServiceImpl implements SubscriberService {
     @Override
     public List<SubscriberDTO> getSubscribersBySaathiID(int saathiId) {
         // Fetch subscribers from repository
-    	List<Subscriber> subscribers = subscriberRepository.findSubscribersBySaathiID(saathiId);
-    	System.out.println("size::" + subscribers.size());
-        // Convert to DTOs
+        List<Subscriber> subscribers = subscriberRepository.findSubscribersBySaathiID(saathiId);
+        System.out.println("size::" + subscribers.size());
+
+        // Convert to DTOs with null check for SubscriptionPackage
         return subscribers.stream()
                 .map(subscriber -> new SubscriberDTO(
                     subscriber.getSubscriberID(), 
@@ -535,9 +536,11 @@ public class SubscriberServiceImpl implements SubscriberService {
                     subscriber.getLastName(), 
                     subscriber.getEmail(), 
                     subscriber.getContactNo(), 
-                    subscriber.getSaathi(),
-                    subscriber.getSubscriptionPackage().getPackageName(),
-                    subscriber.getBillingStatus()// Assuming getSaathi() returns the AdminUser (Saathi)
+                    subscriber.getSaathi(), 
+                    (subscriber.getSubscriptionPackage() != null) 
+                        ? subscriber.getSubscriptionPackage().getPackageName() 
+                        : null, // Check for null and handle it
+                    subscriber.getBillingStatus() // Assuming getSaathi() returns the AdminUser (Saathi)
                 ))
                 .collect(Collectors.toList());
     }

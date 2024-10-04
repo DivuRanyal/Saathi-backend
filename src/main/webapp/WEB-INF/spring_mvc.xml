@@ -4,7 +4,7 @@
        xmlns:context="http://www.springframework.org/schema/context"
        xmlns:mvc="http://www.springframework.org/schema/mvc"
        xmlns:jpa="http://www.springframework.org/schema/data/jpa"
-        xmlns:cache="http://www.springframework.org/schema/cache"
+       xmlns:cache="http://www.springframework.org/schema/cache"
        xmlns:tx="http://www.springframework.org/schema/tx"
        xsi:schemaLocation="http://www.springframework.org/schema/beans 
            http://www.springframework.org/schema/beans/spring-beans.xsd
@@ -33,11 +33,11 @@
         <property name="password" value="Root@12345" />
     </bean>
  <!-- EntityManagerFactory -->
-<bean id="entityManagerFactory" class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">
+	<bean id="entityManagerFactory" class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">
     <property name="dataSource" ref="dataSource" />
     <property name="packagesToScan" value="model" />
     <property name="jpaVendorAdapter">
-        <bean class="org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter" />
+    <bean class="org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter" />
     </property>
     <property name="jpaProperties">
         <props>
@@ -46,11 +46,11 @@
             <prop key="hibernate.hbm2ddl.auto">update</prop>
         </props>
     </property>
-</bean>
-<!-- Transaction Manager -->
-<bean id="transactionManager" class="org.springframework.orm.jpa.JpaTransactionManager">
+	</bean>
+	<!-- Transaction Manager -->
+	<bean id="transactionManager" class="org.springframework.orm.jpa.JpaTransactionManager">
     <property name="entityManagerFactory" ref="entityManagerFactory" />
-</bean>
+	</bean>
     <bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver" />
     <!-- Enable JPA repositories -->
     <jpa:repositories base-package="repository" />
