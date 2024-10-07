@@ -526,8 +526,7 @@ public class SubscriberServiceImpl implements SubscriberService {
     public List<SubscriberDTO> getSubscribersBySaathiID(int saathiId) {
         // Fetch subscribers from repository
         List<Subscriber> subscribers = subscriberRepository.findSubscribersBySaathiID(saathiId);
-        System.out.println("size::" + subscribers.size());
-
+       
         // Convert to DTOs with null check for SubscriptionPackage
         return subscribers.stream()
                 .map(subscriber -> new SubscriberDTO(
@@ -559,47 +558,40 @@ public class SubscriberServiceImpl implements SubscriberService {
     public SubscriberDTO createSubscriber(SubscriberDTO subscriberDTO) {
         // Check if the email is already registered
         Optional<Subscriber> existingSubscriber = subscriberRepository.findByEmail(subscriberDTO.getEmail());
-
         if (existingSubscriber.isPresent()) {
             throw new EmailAlreadyRegisteredException("The email address is already registered.");
         }
-
         // Generate OTP and create the new subscriber
         Integer otp = otpService.generateOtp();
         Subscriber subscriber = convertToEntity(subscriberDTO, false); // Exclude password at this point
         subscriber.setOtp(otp);
         subscriber.setOtpGeneratedTime(new Date());
         subscriber.setStatus(0); // Not verified
-
         Subscriber savedSubscriber = subscriberRepository.save(subscriber);
-
         try {
             otpService.sendOtpEmail(subscriberDTO.getEmail(), otp, subscriberDTO.getFirstName());
         } catch (Exception e) {
             throw new RuntimeException("Failed to send OTP email.", e);
         }
-
         return convertToDTO(savedSubscriber);
     }
     
     @Override
     public int verifyOtp(String email, Integer otp) {
         Optional<Subscriber> existingSubscriber = subscriberRepository.findByEmail(email);
-
         if (!existingSubscriber.isPresent()) {
             throw new SubscriberNotFoundException("Subscriber not found.");
         }
-
+        
         Subscriber subscriber = existingSubscriber.get();
-
         if (otpService.isOtpExpired(subscriber.getOtpGeneratedTime())) {
             return 0; // OTP expired, return 0
         }
-
+        
         if (!subscriber.getOtp().equals(otp)) {
             return 0; // Invalid OTP, return 0
         }
-
+        
         // OTP verified successfully, mark as verified and clear OTP data
         subscriber.setOtp(null);
         subscriber.setOtpGeneratedTime(null);
@@ -617,18 +609,15 @@ public class SubscriberServiceImpl implements SubscriberService {
         }
 
         Subscriber subscriber = existingSubscriber.get();
-
         // Ensure that the subscriber is verified before completing registration
         if (subscriber.getStatus() != 1) {  // 1: Verified
             throw new IllegalStateException("Subscriber is not verified.");
         }
 
         // Set the additional details (e.g., password, country code, etc.)
-        subscriber.setPassword(passwordEncoder.encode(additionalDetails.getPassword()));
-       
+        subscriber.setPassword(passwordEncoder.encode(additionalDetails.getPassword()));       
         // Save the updated subscriber details
         Subscriber updatedSubscriber = subscriberRepository.save(subscriber);
-
         // Convert the updated subscriber entity back to DTO
         return convertToDTO(updatedSubscriber);
     }

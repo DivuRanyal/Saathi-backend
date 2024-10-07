@@ -771,114 +771,62 @@ public class AdminUsersController {
 
             // Call the Saathi subscriber services API logic
             List<AdminUser> saathiUsers = adminUsersService.getAllSaathiUsers();
-            List<SubscriptionPackageDTO> allPackages = subscriptionPackageService.getActiveSubscriptionPackages();
-            int totalServices = 0;
-            int totalSubscribers = 0;
-            List<SaathiServiceCountDTO> saathiServiceCountList = new ArrayList<>();
-            Map<String, Integer> packageSubscriberCount = new HashMap<>();
-
-            for (SubscriptionPackageDTO subscriptionPackage : allPackages) {
-                packageSubscriberCount.put(subscriptionPackage.getPackageName(), 0);
-            }
-
             for (AdminUser saathi : saathiUsers) {
                 List<SubscriberDTO> subscribers = subscriberService.getSubscribersBySaathiID(saathi.getAdminUserID());
-                if (subscribers == null || subscribers.isEmpty()) {
-                    continue;
-                }
-
-                totalSubscribers += subscribers.size();
-                int saathiPendingPackageServices = 0;
-                int saathiCompletedPackageServices = 0;
-                int saathiPendingAlaCarteServices = 0;
-                int saathiCompletedAlaCarteServices = 0;
 
                 for (SubscriberDTO subscriber : subscribers) {
-                    String packageName = subscriber.getPackageName();
-                    if (packageName != null) {
-                        packageSubscriberCount.put(packageName, packageSubscriberCount.getOrDefault(packageName, 0) + 1);
-                    }
-
                     Map<String, List<ServiceReport>> services = serviceCompletionService.getSubscriberServices(subscriber.getSubscriberID());
                     if (services != null && services.containsKey("allServices")) {
                         List<ServiceReport> serviceReports = services.get("allServices");
 
                         for (ServiceReport serviceReport : serviceReports) {
-                            if (serviceReport.getFrequencyCount() != 0) {
-                                totalServices += serviceReport.getFrequencyCount();
-
-                                if (!serviceReport.isAlaCarte()) { // Package services
-                                    if ("Not Started".equals(serviceReport.getCompletionStatus())) {
-                                        saathiPendingPackageServices += serviceReport.getFrequencyCount();
-                                    } else {
-                                        saathiCompletedPackageServices += serviceReport.getCompletions();
-                                        saathiPendingPackageServices += (serviceReport.getFrequencyCount() - serviceReport.getCompletions());
-                                    }
-                                } else { // Ala-carte services
-                                    if ("Not Started".equals(serviceReport.getCompletionStatus())) {
-                                        saathiPendingAlaCarteServices += serviceReport.getFrequencyCount();
-                                    } else {
-                                        saathiCompletedAlaCarteServices += serviceReport.getCompletions();
-                                        saathiPendingAlaCarteServices += (serviceReport.getFrequencyCount() - serviceReport.getCompletions());
-                                    }
+                            if (!serviceReport.isAlaCarte()) {
+                                // Package services
+                                if ("Not Started".equals(serviceReport.getCompletionStatus())) {
+                                    totalPendingPackageServices += serviceReport.getFrequencyCount();
+                                } else {
+                                    totalCompletedPackageServices += serviceReport.getCompletions();
+                                    totalPendingPackageServices += (serviceReport.getFrequencyCount() - serviceReport.getCompletions());
+                                }
+                            } else {
+                                // Ala-carte services
+                                if ("Not Started".equals(serviceReport.getCompletionStatus())) {
+                                    totalPendingAlaCarteServices += serviceReport.getFrequencyCount();
+                                } else {
+                                    totalCompletedAlaCarteServices += serviceReport.getCompletions();
+                                    totalPendingAlaCarteServices += (serviceReport.getFrequencyCount() - serviceReport.getCompletions());
                                 }
                             }
                         }
                     }
                 }
-
-                // Add individual Saathi counts to the totals
-                totalPendingPackageServices += saathiPendingPackageServices;
-                totalCompletedPackageServices += saathiCompletedPackageServices;
-                totalPendingAlaCarteServices += saathiPendingAlaCarteServices;
-                totalCompletedAlaCarteServices += saathiCompletedAlaCarteServices;
-
-                // Create DTO for the current Saathi
-                SaathiServiceCountDTO saathiServiceCountDTO = new SaathiServiceCountDTO(
-                    saathi.getFirstName() + saathi.getLastName(),
-                    saathiPendingPackageServices,
-                    saathiCompletedPackageServices,
-                    saathiPendingAlaCarteServices,
-                    saathiCompletedAlaCarteServices
-                );
-                saathiServiceCountList.add(saathiServiceCountDTO);
             }
 
-            // Add total package and ala-carte service counts to the response
+            // Set the calculated values
             combinedDto.setTotalPendingPackageServices(totalPendingPackageServices);
             combinedDto.setTotalCompletedPackageServices(totalCompletedPackageServices);
             combinedDto.setTotalPendingAlaCarteServices(totalPendingAlaCarteServices);
-            combinedDto.setTotalCompletedAlaCarteServices(totalCompletedAlaCarteServices);
+          combinedDto.setTotalCompletedAlaCarteServices(totalCompletedAlaCarteServices);
 
-            // Prepare package details
-            List<PackageDetailDTO> packageDetails = packageSubscriberCount.entrySet().stream()
-                    .map(entry -> new PackageDetailDTO(entry.getKey(), entry.getValue()))
-                    .collect(Collectors.toList());
-
-            SaathiServiceSummaryDTO summary = new SaathiServiceSummaryDTO(
-                    totalServices,
-                    totalSubscribers,
-                    saathiServiceCountList,
-                    packageDetails
-            );
-
-            combinedDto.setSaathiServiceSummary(summary);
+            // Calculate total services
+            combinedDto.calculateTotalServices();
 
             // Call the subscriber counts API logic
             Map<String, Long> subscriberCounts = new HashMap<>();
-            subscriberCounts.put("RegisteredUsers", subscriberService.countActiveSubscribersWithBillingStatusZero());
-            subscriberCounts.put("totalSubscribers", subscriberService.countActiveSubscribersWithBillingStatusOne());
+            long registeredSubscribers = subscriberService.countActiveSubscribersWithBillingStatusZero();
+            long completedSubscribers = subscriberService.countActiveSubscribersWithBillingStatusOne();
+            subscriberCounts.put("RegisteredUsers", registeredSubscribers);
+            subscriberCounts.put("CompletedUsers", completedSubscribers);
+            subscriberCounts.put("TotalSubscribers", registeredSubscribers + completedSubscribers);
             combinedDto.setSubscriberCounts(subscriberCounts);
 
             // Return the combined data
             return ResponseEntity.ok(combinedDto);
-
         } catch (Exception e) {
             e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("An error occurred while retrieving combined counts.");
         }
     }
-
 
 }
