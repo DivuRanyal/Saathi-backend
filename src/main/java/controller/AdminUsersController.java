@@ -819,7 +819,7 @@ public class AdminUsersController {
             subscriberCounts.put("CompletedUsers", completedSubscribers);
             subscriberCounts.put("TotalSubscribers", registeredSubscribers + completedSubscribers);
             combinedDto.setSubscriberCounts(subscriberCounts);
-
+            System.out.println(combinedDto);
             // Return the combined data
             return ResponseEntity.ok(combinedDto);
         } catch (Exception e) {
