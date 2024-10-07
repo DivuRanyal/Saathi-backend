@@ -657,7 +657,8 @@ public class ServiceCompletionServiceNew {
 
                 System.out.println("--"+packageService.getService().getServiceName());
                 // Set frequency and pending values for services that haven't been started yet
-                int frequencyCount = packageService.getService().getFrequency();
+ //               int frequencyCount = packageService.getService().getFrequency();
+                int frequencyCount = packageService.getFrequency();
                 System.out.println("frequencyCount"+frequencyCount);
                 serviceReport.setFrequencyCount(frequencyCount);
                 serviceReport.setFrequency(frequencyCount);
