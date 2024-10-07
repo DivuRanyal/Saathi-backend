@@ -3,7 +3,7 @@ package model.dto;
 public class PackageDetailDTO {
     private String packageName;
     private int subscriberCount;
-
+    
     public PackageDetailDTO(String packageName, int subscriberCount) {
         this.packageName = packageName;
         this.subscriberCount = subscriberCount;
