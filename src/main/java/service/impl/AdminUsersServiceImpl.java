@@ -185,4 +185,26 @@ public class AdminUsersServiceImpl implements AdminUsersService {
     public long countUnassignedSaathi() {
         return adminUsersRepository.countUnassignedSaathi();
     }
+    
+    @Override
+    public AdminUser changePassword(String email, String oldPassword, String newPassword) {
+        // Find AdminUser by email
+        Optional<AdminUser> optionalAdminUser = adminUsersRepository.findByEmail(email);
+        if (!optionalAdminUser.isPresent()) {
+            throw new IllegalArgumentException("AdminUser not found.");
+        }
+
+        AdminUser adminUser = optionalAdminUser.get();
+
+        // Validate old password using passwordEncoder
+        if (!passwordEncoder.matches(oldPassword, adminUser.getPassword())) {
+            throw new IllegalArgumentException("Incorrect old password.");
+        }
+
+        // Encode the new password and update
+        adminUser.setPassword(passwordEncoder.encode(newPassword));
+        adminUsersRepository.save(adminUser);  // Save updated user
+
+        return adminUser;
+    }
 }

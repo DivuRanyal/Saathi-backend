@@ -30,5 +30,5 @@ public interface AdminUsersService {
     
     public long countAssignedSaathi();
     public long countUnassignedSaathi();
-    
+    AdminUser changePassword(String email, String oldPassword, String newPassword);
 }

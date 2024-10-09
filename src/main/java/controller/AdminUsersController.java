@@ -6,6 +6,7 @@ import model.ServiceReport;
 import model.Subscriber;
 import model.SubscriptionPackage;
 import model.dto.AdminUsersDTO;
+import model.dto.ChangePasswordRequest;
 import model.dto.CombinedSaathiSubscriberDTO;
 import model.dto.PackageDetailDTO;
 import model.dto.SaathiServiceCountDTO;
@@ -937,4 +938,13 @@ public class AdminUsersController {
         }
     }
 
+    @PutMapping("/change-password")
+    public ResponseEntity<String> changePassword(@RequestBody ChangePasswordRequest request) {
+        try {
+            adminUsersService.changePassword(request.getEmail(), request.getOldPassword(), request.getNewPassword());
+            return ResponseEntity.ok("Password changed successfully.");
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
 }
