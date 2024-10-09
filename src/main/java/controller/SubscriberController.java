@@ -634,10 +634,12 @@ public class SubscriberController {
         // Parse the preferredDate and preferredTime from the input strings
         DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
         DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm:ss");
-
-        LocalDate parsedPreferredDate = LocalDate.parse(preferredDate, dateFormatter);
-        LocalTime parsedPreferredTime = LocalTime.parse(preferredTime, timeFormatter);
-
+        LocalDate parsedPreferredDate=null;
+        LocalTime parsedPreferredTime=null;
+        if (preferredDate != null && preferredTime != null) {
+         parsedPreferredDate = LocalDate.parse(preferredDate, dateFormatter);
+         parsedPreferredTime = LocalTime.parse(preferredTime, timeFormatter);
+        }
         // If no valid package or ala-carte service found for the subscriber
         if (packageID == null && subscriberAlaCarteServiceID == null) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No valid package or ala-carte service found for the subscriber.");
