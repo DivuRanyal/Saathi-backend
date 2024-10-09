@@ -15,36 +15,31 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface SubscriberAlaCarteServicesRepository extends JpaRepository<SubscriberAlaCarteServices, Integer> {
 
-	// Query to get services with no corresponding interaction
-/*	@Query("SELECT s, i.completionStatus, sv FROM SubscriberAlaCarteServices s " +
-	           "LEFT JOIN Interaction i ON s.SubscriberAlaCarteServicesID = i.subscriberAlaCarteServices.SubscriberAlaCarteServicesID " +
-	           "JOIN Services sv ON s.serviceID = sv.serviceID " +
-	           "WHERE s.subscriberID = :subscriberID")
-	    List<Object[]> findAlaCarteServicesWithCompletionStatusAndServiceDetails(Integer subscriberID); */
-	
-	
-	@Query("SELECT s, i.completionStatus, sv FROM SubscriberAlaCarteServices s " +
-	           "LEFT JOIN Interaction i ON s.SubscriberAlaCarteServicesID = i.subscriberAlaCarteServices.SubscriberAlaCarteServicesID " +
-	           "JOIN AlaCarteService sv ON s.serviceID = sv.serviceID " +
-	           "WHERE s.subscriberID = :subscriberID")
-	    List<Object[]> findAlaCarteServicesWithCompletionStatusAndServiceDetails(@Param("subscriberID")  Integer subscriberID);
-	   
-	 
-	 // Query using the 'subscriber' field
-	    List<SubscriberAlaCarteServices> findBySubscriber(Subscriber subscriber);
-	    Optional<SubscriberAlaCarteServices> findBySubscriberIDAndServiceID(Integer subscriberId,  Integer serviceId);
-	    
-	    // Method to fetch all ala-carte services for a specific subscriber
-	    List<SubscriberAlaCarteServices> findBySubscriberID(int subscriberID);
-	    
-	    @Query("SELECT s.subscriber.subscriberID FROM SubscriberAlaCarteServices s WHERE s.SubscriberAlaCarteServicesID NOT IN (SELECT i.subscriberAlaCarteServices.SubscriberAlaCarteServicesID FROM Interaction i)")
-	    List<Integer> findSubscribersWithUntrackedAlaCarteServices();
+	// Corrected Query to get services with no corresponding interaction
+	@Query("SELECT s, i.completionStatus, sv.serviceName FROM SubscriberAlaCarteServices s " +
+	       "LEFT JOIN Interaction i ON s.SubscriberAlaCarteServicesID = i.subscriberAlaCarteServices.SubscriberAlaCarteServicesID " +
+	       "JOIN AlaCarteService sv ON s.serviceID = sv.serviceID " +
+	       "WHERE s.subscriber.subscriberID = :subscriberID")
+	List<Object[]> findAlaCarteServicesWithCompletionStatusAndServiceDetails(@Param("subscriberID") Integer subscriberID);
 
-	    // Method to count the total number of ala-carte services for a given subscriber
-	    @Query("SELECT COUNT(s) FROM SubscriberAlaCarteServices s WHERE s.subscriberID = :subscriberID")
-	    int countAlaCarteServicesBySubscriber(@Param("subscriberID") Integer subscriberID);
+	// Find services by the `Subscriber` entity
+	List<SubscriberAlaCarteServices> findBySubscriber(Subscriber subscriber);
 
-	    SubscriberAlaCarteServices findBySubscriberIDAndServiceID(int subscriberID, int serviceID);
-	    
-	    }
+	// Corrected method to find by `subscriberID` and `serviceID`
+	Optional<SubscriberAlaCarteServices> findBySubscriber_SubscriberIDAndServiceID(Integer subscriberId, Integer serviceId);
 
+	// Find all ala-carte services for a specific subscriber, using `SubscriberID`
+	List<SubscriberAlaCarteServices> findBySubscriber_SubscriberID(int subscriberID);
+
+	// Query to find subscribers with untracked ala-carte services
+	@Query("SELECT s.subscriber.subscriberID FROM SubscriberAlaCarteServices s " +
+	       "WHERE s.SubscriberAlaCarteServicesID NOT IN (SELECT i.subscriberAlaCarteServices.SubscriberAlaCarteServicesID FROM Interaction i)")
+	List<Integer> findSubscribersWithUntrackedAlaCarteServices();
+
+	// Count the total number of ala-carte services for a given subscriber
+	@Query("SELECT COUNT(s) FROM SubscriberAlaCarteServices s WHERE s.subscriber.subscriberID = :subscriberID")
+	int countAlaCarteServicesBySubscriber(@Param("subscriberID") Integer subscriberID);
+
+	// Find ala-carte services by `subscriberID` and `serviceID` (optional if still needed)
+	SubscriberAlaCarteServices findBySubscriber_SubscriberIDAndServiceID(int subscriberID, int serviceID);
+}

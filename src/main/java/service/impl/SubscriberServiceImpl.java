@@ -188,7 +188,7 @@ public class SubscriberServiceImpl implements SubscriberService {
         	serviceCompletionService.trackSubscriberServices(
                 updatedSubscriber.getSubscriberID(), 
                  updatedSubscriber.getSubscriptionPackage().getPackageID(), 
-                0 // Assuming subscriberAlaCarteServicesID is not relevant here, or you can adjust this value
+                0 ,null,null// Assuming subscriberAlaCarteServicesID is not relevant here, or you can adjust this value
             );
         }
 

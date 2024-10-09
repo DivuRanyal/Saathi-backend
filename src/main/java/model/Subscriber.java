@@ -7,6 +7,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -34,7 +35,8 @@ public class Subscriber {
     @NotNull(message = "Email is required")
     @Email(message = "Email should be valid")
     @Column(name = "Email")
-    private String email;
+//    @Pattern(regexp = "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,6}$", 
+      private String email;
 
     @NotNull(message = "Contact number is required")
     @Column(name = "ContactNo")

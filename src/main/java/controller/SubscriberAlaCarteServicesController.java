@@ -1,7 +1,10 @@
 package controller;
 
+import model.AlaCarteService;
 import model.ServiceReport;
+import model.Subscriber;
 import model.SubscriberAlaCarteServices;
+import model.dto.SubscriberAlaCarteServicesDTO;
 import service.ServiceCompletionServiceNew;
 import service.SubscriberAlaCarteServicesService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,24 +42,55 @@ public class SubscriberAlaCarteServicesController {
     }
 
     @PostMapping
-    public ResponseEntity<SubscriberAlaCarteServices> createService(@RequestBody SubscriberAlaCarteServices serviceRequest) {
-        // Create or update the service
- //       System.out.println(serviceRequest.getSubscriberID());
-        SubscriberAlaCarteServices createdService = service.createOrUpdateService(serviceRequest);
-       
-        // Call the trackSubscriberServices method automatically after service creation
+    public ResponseEntity<SubscriberAlaCarteServices> createService(@RequestBody SubscriberAlaCarteServicesDTO serviceRequest) {
+        // Convert DTO to entity
+        SubscriberAlaCarteServices entity = mapDTOToEntity(serviceRequest);
+
+        // Validate and save the service
+        SubscriberAlaCarteServices createdService = service.createOrUpdateService(entity);
+
+        // Automatically track subscriber services
         Map<String, List<ServiceReport>> trackedServices = serviceCompletionService.trackSubscriberServices(
-                createdService.getSubscriberID(), 
-                0, 
-                createdService.getSubscriberAlaCarteServicesID()
+                createdService.getSubscriber().getSubscriberID(),
+                0,
+                createdService.getSubscriberAlaCarteServicesID(),
+                createdService.getServiceDate(),
+                createdService.getServiceTime()
         );
-        
+
+        // If tracking is not needed or empty, return the created service
         if (trackedServices == null || trackedServices.isEmpty()) {
             return new ResponseEntity<>(createdService, HttpStatus.CREATED);
         }
 
-        // You can return tracked services in the response or handle as needed
         return new ResponseEntity<>(createdService, HttpStatus.CREATED);
+    }
+
+    private SubscriberAlaCarteServices mapDTOToEntity(SubscriberAlaCarteServicesDTO dto) {
+        SubscriberAlaCarteServices entity = new SubscriberAlaCarteServices();
+        
+        // Mapping fields from DTO to entity
+        entity.setSubscriberAlaCarteServicesID(dto.getSubscriberAlaCarteServicesID());
+        entity.setServiceID(dto.getServiceID());
+        entity.setServiceDate(dto.getServiceDate());
+        entity.setServiceTime(dto.getServiceTime());
+        entity.setBillingStatus(dto.getBillingStatus());
+        entity.setCreatedDate(dto.getCreatedDate());
+        entity.setLastUpdatedDate(dto.getLastUpdatedDate());
+        entity.setIsAccepted(dto.getIsAccepted());
+        entity.setIsPackageService(dto.getIsPackageService());
+        
+        // Setting subscriber object based on subscriberID
+        Subscriber subscriber = new Subscriber();
+        subscriber.setSubscriberID(dto.getSubscriberID());
+        entity.setSubscriber(subscriber);
+        
+        // Similarly, you can handle AlaCarteService if needed
+        AlaCarteService service = new AlaCarteService();
+        service.setServiceID(dto.getServiceID());
+        entity.setService(service);
+
+        return entity;
     }
 
 

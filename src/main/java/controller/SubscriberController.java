@@ -2,6 +2,7 @@ package controller;
 
 import model.AdminUser;
 import model.AlaCarteService;
+import model.PreferredDateTime;
 import model.ServiceReport;
 import model.Subscriber;
 import model.SubscriberAlaCarteServices;
@@ -169,12 +170,30 @@ public class SubscriberController {
                         serviceWithInteraction.put("completions", serviceReport.getCompletions());
                         serviceWithInteraction.put("completionStatus", serviceReport.getCompletionStatus());
                         serviceWithInteraction.put("completionDate", serviceReport.getCompletionDate());
-                        serviceWithInteraction.put("requestedDate", serviceReport.getRequestedDate().toString());
-                        serviceWithInteraction.put("requestedTime", serviceReport.getRequestedTime().toString());
                         serviceWithInteraction.put("frequencyCount", serviceReport.getFrequencyCount());
                         serviceWithInteraction.put("pending", serviceReport.getPending());
                         serviceWithInteraction.put("alaCarte", serviceReport.isAlaCarte());
                         serviceWithInteraction.put("subscriberAlaCarteServicesID", serviceReport.getSubscriberAlaCarteServicesID());
+
+                        // Handle list of requested dates and times
+                        List<Map<String, String>> preferredDatesTimes = new ArrayList<>();
+                        if (serviceReport.getPreferredDateTimes() != null) {
+                        for (PreferredDateTime preferredDateTime : serviceReport.getPreferredDateTimes()) {
+                            Map<String, String> dateTimeMap = new HashMap<>();
+                            dateTimeMap.put("preferredDate", preferredDateTime.getPreferredDate().toString());
+                            dateTimeMap.put("preferredTime", preferredDateTime.getPreferredTime().toString());
+                            dateTimeMap.put("completionStatus", preferredDateTime.getCompletionStatus());
+                            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+                            // Format the LocalDateTime object
+                            String formattedDate = preferredDateTime.getRequestedDate().format(formatter);
+                            dateTimeMap.put("requestedDate",formattedDate);
+                            if (preferredDateTime.getCompletionDate() != null) {
+                                dateTimeMap.put("completionDate", preferredDateTime.getCompletionDate().toString());
+                            }
+                            preferredDatesTimes.add(dateTimeMap);
+                        }
+                        }
+                        serviceWithInteraction.put("preferredDatesTimes", preferredDatesTimes);
 
                         // Filter interactions for this service
                         List<InteractionDTO> relatedInteractions = interactions.stream()
@@ -189,7 +208,6 @@ public class SubscriberController {
                                 }
                             })
                             .collect(Collectors.toList());
-
                         // Add the interactions to the service
                         serviceWithInteraction.put("interactions", relatedInteractions);
 
@@ -216,7 +234,6 @@ public class SubscriberController {
                                  .body("An error occurred while retrieving data for subscriber ID: " + subscriberId);
         }
     }
-
 
     @GetMapping
     public ResponseEntity<List<SubscriberDTO>> getAllSubscribers() {
@@ -457,6 +474,7 @@ public class SubscriberController {
             // Fetch the services for the subscriber
             Map<String, List<ServiceReport>> services = serviceCompletionService.getSubscriberServices(subscriberID);
             System.out.println(services);
+            
             // Check if the list of services is null or empty
             if (services == null || services.isEmpty() || !services.containsKey("allServices")) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No services found for subscriber with ID: " + subscriberID);
@@ -487,40 +505,59 @@ public class SubscriberController {
                 serviceWithInteraction.put("completions", serviceReport.getCompletions());
                 serviceWithInteraction.put("completionStatus", serviceReport.getCompletionStatus());
                 serviceWithInteraction.put("completionDate", serviceReport.getCompletionDate());
-                serviceWithInteraction.put("requestedDate", serviceReport.getRequestedDate().toString());
-                serviceWithInteraction.put("requestedTime", serviceReport.getRequestedTime().toString());
                 serviceWithInteraction.put("frequencyCount", serviceReport.getFrequencyCount());
                 serviceWithInteraction.put("pending", serviceReport.getPending());
                 serviceWithInteraction.put("alaCarte", serviceReport.isAlaCarte());
                 serviceWithInteraction.put("subscriberAlaCarteServicesID", serviceReport.getSubscriberAlaCarteServicesID());
+
+                // Handling list of requested dates and times
+                List<Map<String, String>> preferredDatesTimes = new ArrayList<>();
+                if (serviceReport.getPreferredDateTimes() != null) {
+                for (PreferredDateTime preferredDateTime : serviceReport.getPreferredDateTimes()) {
+                    Map<String, String> dateTimeMap = new HashMap<>();
+                    dateTimeMap.put("preferredDate", preferredDateTime.getPreferredDate().toString());
+                    dateTimeMap.put("preferredTime", preferredDateTime.getPreferredTime().toString());
+                    dateTimeMap.put("completionStatus", preferredDateTime.getCompletionStatus());
+                    System.out.println("preferredDateTime.getRequestedDate()"+preferredDateTime.getRequestedDate());
+                    // Define the formatter to display in "yyyy-MM-dd HH:mm:ss" format
+                    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+                    // Format the LocalDateTime object
+                    if(preferredDateTime.getRequestedDate() != null) {
+                    	String formattedDate = preferredDateTime.getRequestedDate().format(formatter);
+                        dateTimeMap.put("requestedDate",formattedDate);
+                    }
+                    if (preferredDateTime.getCompletionDate() != null) {
+                        dateTimeMap.put("completionDate", preferredDateTime.getCompletionDate().toString());
+                    }
+                    preferredDatesTimes.add(dateTimeMap);
+                }
+                }
+                serviceWithInteraction.put("preferredDatesTimes", preferredDatesTimes);
+                System.out.println("-"+serviceReport.getPackageServiceID());
+                // Filter interactions related to the current service
                 List<InteractionDTO> relatedInteractions = interactions.stream()
-                	    .filter(interaction -> {
-                	        if (serviceReport.isAlaCarte()) {
-                	            // Only check against SubscriberAlaCarteServicesID for ala-carte services
-                	            return interaction.getSubscriberAlaCarteServicesID() != null &&
-                	                   interaction.getSubscriberAlaCarteServicesID().equals(serviceReport.getSubscriberAlaCarteServicesID());
-                	        } else if (serviceReport.getPackageServiceID() != 0 && interaction.getPackageServicesID() != null) {
-                	            // Only check against PackageServicesID for package services
-                	            return interaction.getPackageServicesID().equals(serviceReport.getPackageServiceID());
-                	        } else {
-                	            return false; // No matching service
-                	        }
-                	    })
-                	    .map(interaction -> {
-                	        // Build the full URL for the documents
-                	        
-                	        // If document exists, prepend the base URL
-                	        if (interaction.getDocuments() != null && !interaction.getDocuments().isEmpty()) {
-                	            String documentUrl = interaction.getDocuments();
-                	            interaction.setDocuments(documentUrl);
-                	            // Set the full document URL in the response
-                	        }
+                    .filter(interaction -> {
+                        if (serviceReport.isAlaCarte()) {
+                            // Only check against SubscriberAlaCarteServicesID for ala-carte services
+                            return interaction.getSubscriberAlaCarteServicesID() != null &&
+                                   interaction.getSubscriberAlaCarteServicesID().equals(serviceReport.getSubscriberAlaCarteServicesID());
+                        } else if (serviceReport.getPackageServiceID() != 0 && interaction.getPackageServicesID() != null) {
+                            // Only check against PackageServicesID for package services
+                            return interaction.getPackageServicesID().equals(serviceReport.getPackageServiceID());
+                        } else {
+                            return false; // No matching service
+                        }
+                    })
+                    .map(interaction -> {
+                        // If the interaction contains documents, you can prepend a base URL if required
+                        if (interaction.getDocuments() != null && !interaction.getDocuments().isEmpty()) {
+                            String documentUrl = interaction.getDocuments();
+                            interaction.setDocuments(documentUrl); // Set the document URL in the response
+                        }
+                        return interaction;
+                    })
+                    .collect(Collectors.toList());
 
-                	        return interaction;
-                	    })
-                	    .collect(Collectors.toList());
-
-                System.out.println("relatedInteractions"+relatedInteractions);
                 // Add the interactions to the service
                 serviceWithInteraction.put("interactions", relatedInteractions);
 
@@ -567,7 +604,7 @@ public class SubscriberController {
             @RequestParam(required = false, defaultValue = "0") int subscriberAlaCarteServicesID
     		) {
         // Call the service method to track services
-        Map<String, List<ServiceReport>> trackedServices = serviceCompletionService.trackSubscriberServices(subscriberID, packageID, subscriberAlaCarteServicesID);
+        Map<String, List<ServiceReport>> trackedServices = serviceCompletionService.trackSubscriberServices(subscriberID, packageID, subscriberAlaCarteServicesID,null,null);
         // Check if any services were tracked
         if (trackedServices == null || trackedServices.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
@@ -585,33 +622,41 @@ public class SubscriberController {
             @RequestParam(value = "file", required = false) MultipartFile file,
             @RequestParam("description") String description,
             @RequestParam("isAlaCarte") Boolean isAlaCarte,
-            @RequestParam(name="subscriberAlaCarteServicesID", required = false) Integer subscriberAlaCarteServiceID // added this to distinguish ala-carte services
-            
-            ) {
+            @RequestParam(name = "subscriberAlaCarteServicesID", required = false) Integer subscriberAlaCarteServiceID, // Distinguish ala-carte services
+            @RequestParam(name = "preferredDate", required = false) String preferredDate, // Required for package services
+            @RequestParam(name = "preferredTime", required = false) String preferredTime // Required for package services
+    ) {
 
         // Step 1: Fetch the packageServiceID associated with the subscriber
         Integer packageID = subscriberService.getPackageIDBySubscriber(subscriberID);
         System.out.println("packageID: " + packageID);
 
-        // Fetch ala-carte service ID
-  //      Integer subscriberAlaCarteServicesID = service.getSubscriberAlaCarteServicesID(subscriberID, serviceID);
-  //      System.out.println("subscriberAlaCarteServicesID: " + subscriberAlaCarteServicesID);
+        // Parse the preferredDate and preferredTime from the input strings
+        DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm:ss");
 
+        LocalDate parsedPreferredDate = LocalDate.parse(preferredDate, dateFormatter);
+        LocalTime parsedPreferredTime = LocalTime.parse(preferredTime, timeFormatter);
+
+        // If no valid package or ala-carte service found for the subscriber
         if (packageID == null && subscriberAlaCarteServiceID == null) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No valid package or ala-carte service found for the subscriber.");
         }
 
-     // Step 2: Update service completion logic
-       
+        // Ensure preferredDate and preferredTime are provided for package services
+        if (!isAlaCarte && (preferredDate == null || preferredTime == null)) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Preferred date and time must be provided for package services.");
+        }
+
+        // Step 2: Update service completion logic
         Map<String, List<ServiceReport>> updatedServices;
 
         if (isAlaCarte) {
-        	
-            // Update ala-carte service completion using subscriberAlaCarteServiceID
-            updatedServices = serviceCompletionService.updateServiceCompletion(subscriberID,serviceID, subscriberAlaCarteServiceID, true);
+            // Update ala-carte service completion
+            updatedServices = serviceCompletionService.updateServiceCompletion(subscriberID, serviceID, subscriberAlaCarteServiceID, true, null, null);
         } else {
-            // Update package service completion
-            updatedServices = serviceCompletionService.updateServiceCompletion(subscriberID, serviceID,null, false);
+            // Update package service completion with preferred date and time
+            updatedServices = serviceCompletionService.updateServiceCompletion(subscriberID, serviceID, null, false, parsedPreferredDate, parsedPreferredTime);
         }
         if (updatedServices != null) {
             try {
@@ -694,21 +739,27 @@ public class SubscriberController {
             @RequestBody HashMap<String, Object> requestBody) {
 
         try {
-        	 String requestedDate = (String) requestBody.get("requestedDate");
-             String requestedTime = (String) requestBody.get("requestedTime");
-             Integer subscriberID=(Integer) requestBody.get("subscriberID");
-             Integer serviceID=(Integer) requestBody.get("serviceID");
-            // Parse the requestedDate and requestedTime from the input strings
+            // Extract request details
+            String preferredDate = (String) requestBody.get("preferredDate"); // Previously "requestedDate"
+            String preferredTime = (String) requestBody.get("preferredTime"); // Previously "requestedTime"
+            Integer subscriberID = (Integer) requestBody.get("subscriberID");
+            Integer serviceID = (Integer) requestBody.get("serviceID");
+
+            // Parse the preferredDate and preferredTime from the input strings
             DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
             DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm:ss");
-            
-            LocalDate parsedRequestedDate = LocalDate.parse(requestedDate, dateFormatter);
-            LocalTime parsedRequestedTime = LocalTime.parse(requestedTime, timeFormatter);
+
+            LocalDate parsedPreferredDate = LocalDate.parse(preferredDate, dateFormatter);
+            LocalTime parsedPreferredTime = LocalTime.parse(preferredTime, timeFormatter);
+
+            // Automatically set the createdDate using the system's current date and time
+            LocalDateTime createdDate = LocalDateTime.now();
 
             // Call the service layer to update the service request
             Map<String, List<ServiceReport>> updatedServiceReportMap = serviceCompletionService.updateServiceRequestedDateTime(
-                    subscriberID, serviceID, false, parsedRequestedDate, parsedRequestedTime);
+                    subscriberID, serviceID, false, parsedPreferredDate, parsedPreferredTime, createdDate);
 
+            System.out.println("updatedServiceReportMap"+updatedServiceReportMap);
             // Return the updated list of ServiceReports in the response
             return ResponseEntity.ok(updatedServiceReportMap);
 
@@ -719,6 +770,7 @@ public class SubscriberController {
                     .body("An error occurred while updating the service request.");
         }
     }
+
 
 
  // Endpoint to rebuild all services for a given subscriber
@@ -750,12 +802,11 @@ public class SubscriberController {
         try {
             // Step 1: Find all subscribers that purchased packages
             List<Integer> packageSubscriberIDs = subscriberRepository.findSubscribersWithPurchasedPackages();
-            System.out.println(packageSubscriberIDs);
-
+            System.out.println("-"+packageSubscriberIDs);
             // Step 2: Find all subscribers that have ala-carte services but no interactions (untracked services)
             List<Integer> alaCarteSubscriberIDs = subscriberAlaCarteServicesRepository.findSubscribersWithUntrackedAlaCarteServices();
-
             // Combine the two lists of subscribers (using a Set to avoid duplicates)
+            System.out.println("-"+alaCarteSubscriberIDs);
             Set<Integer> allSubscriberIDs = new HashSet<>();
             allSubscriberIDs.addAll(packageSubscriberIDs);
             allSubscriberIDs.addAll(alaCarteSubscriberIDs);
@@ -767,6 +818,8 @@ public class SubscriberController {
                 int totalPackageServices = packageServiceRepository.countServicesBySubscriber(subscriberID);
                 int completedPackageServices = interactionRepository.countCompletedPackageServicesBySubscriber(subscriberID);
 
+                System.out.println("-"+totalPackageServices);
+                System.out.println("-"+completedPackageServices);
                 if (completedPackageServices < totalPackageServices) {
                     subscribersWithIncompleteServices.add(subscriberID);
                 }
@@ -784,6 +837,7 @@ public class SubscriberController {
             Map<Integer, Map<String, List<ServiceReport>>> allServicesMapForAllSubscribers = new HashMap<>();
             for (Integer subscriberID : subscribersWithIncompleteServices) {
                 Map<String, List<ServiceReport>> allServicesMap = serviceCompletionService.rebuildAllServices(subscriberID);
+                System.out.println("allServicesMap"+allServicesMap);
                 allServicesMapForAllSubscribers.put(subscriberID, allServicesMap);
             }
 

@@ -1,15 +1,15 @@
 package model.dto;
 
 import java.util.List;
+import java.util.Map;
 
-import model.ServiceReport;
 public class SubscriberServicesDTO {
     private Integer subscriberID;
     private String subscriberName;  // Add other subscriber fields as needed
-    private List<ServiceReport> services;
+    private List<Map<String, Object>> services; // Change to List<Map<String, Object>>
 
     // Constructor
-    public SubscriberServicesDTO(Integer subscriberID, String subscriberName, List<ServiceReport> services) {
+    public SubscriberServicesDTO(Integer subscriberID, String subscriberName, List<Map<String, Object>> services) {
         this.subscriberID = subscriberID;
         this.subscriberName = subscriberName;
         this.services = services;
@@ -32,11 +32,11 @@ public class SubscriberServicesDTO {
         this.subscriberName = subscriberName;
     }
 
-    public List<ServiceReport> getServices() {
+    public List<Map<String, Object>> getServices() {
         return services;
     }
 
-    public void setServices(List<ServiceReport> services) {
+    public void setServices(List<Map<String, Object>> services) {
         this.services = services;
     }
 }

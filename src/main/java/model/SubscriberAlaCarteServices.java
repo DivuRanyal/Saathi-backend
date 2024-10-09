@@ -4,6 +4,8 @@ import javax.persistence.*;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.Date;
 
 @Entity
@@ -15,20 +17,18 @@ public class SubscriberAlaCarteServices {
     @Column(name = "SubscriberAlaCarteServicesID")
     private int SubscriberAlaCarteServicesID;
 
-    @Column(name = "SubscriberID",nullable=false)
-    private Integer subscriberID;
-
     @Column(name = "ServiceID",nullable=false)
     private Integer serviceID;
     
-    @Temporal(TemporalType.DATE)
+    // Use LocalDate for date only
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     @Column(name = "ServiceDate")
-    private Date serviceDate;
+    private LocalDate serviceDate;
 
+    // Use LocalTime for time only
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "HH:mm:ss")
     @Column(name = "ServiceTime")
-    private Date serviceTime;
+    private LocalTime serviceTime;
 
     @Column(name = "BillingStatus")
     private Integer billingStatus;
@@ -47,7 +47,7 @@ public class SubscriberAlaCarteServices {
 
  // Correctly map the ManyToOne relationship
     @ManyToOne
-    @JoinColumn(name = "subscriber_id")
+    @JoinColumn(name = "SubscriberID")
     private Subscriber subscriber;  // Ensure this field name is 'subscriber', not 'subscriberID'
 
 
@@ -59,36 +59,12 @@ public class SubscriberAlaCarteServices {
 		SubscriberAlaCarteServicesID = subscriberAlaCarteServicesID;
 	}
 
-	public Integer getSubscriberID() {
-		return subscriberID;
-	}
-
-	public void setSubscriberID(Integer subscriberID) {
-		this.subscriberID = subscriberID;
-	}
-
 	public Integer getServiceID() {
 		return serviceID;
 	}
 
 	public void setServiceID(Integer serviceID) {
 		this.serviceID = serviceID;
-	}
-
-	public Date getServiceDate() {
-		return serviceDate;
-	}
-
-	public void setServiceDate(Date serviceDate) {
-		this.serviceDate = serviceDate;
-	}
-
-	public Date getServiceTime() {
-		return serviceTime;
-	}
-
-	public void setServiceTime(Date serviceTime) {
-		this.serviceTime = serviceTime;
 	}
 
 	public Integer getBillingStatus() {
@@ -162,7 +138,22 @@ public class SubscriberAlaCarteServices {
 	public void setIsPackageService(Boolean isPackageService) {
 		this.isPackageService = isPackageService;
 	}
+
+	public LocalDate getServiceDate() {
+		return serviceDate;
+	}
+
+	public void setServiceDate(LocalDate serviceDate) {
+		this.serviceDate = serviceDate;
+	}
+
+	public LocalTime getServiceTime() {
+		return serviceTime;
+	}
+
+	public void setServiceTime(LocalTime serviceTime) {
+		this.serviceTime = serviceTime;
+	}
     
 	
-
 }

@@ -1,5 +1,7 @@
 package model.dto;
 
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.Date;
 import com.fasterxml.jackson.annotation.JsonFormat;
 
@@ -9,10 +11,10 @@ public class SubscriberServiceDetailsDTO {
     private int serviceID;
     
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
-    private Date serviceDate;
+    private LocalDate serviceDate;
     
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "HH:mm:ss")
-    private Date serviceTime;
+    private LocalTime serviceTime;
     
     private Integer billingStatus;
     
@@ -29,7 +31,7 @@ public class SubscriberServiceDetailsDTO {
     private String serviceName;
     
     // Constructor with all the necessary parameters
-    public SubscriberServiceDetailsDTO(Integer subscriberID, int serviceID, Date serviceDate, Date serviceTime,
+    public SubscriberServiceDetailsDTO(Integer subscriberID, int serviceID, LocalDate serviceDate, LocalTime serviceTime,
                                        Integer billingStatus, Date createdDate, Date lastUpdatedDate,
                                        Boolean isAccepted, Integer subscriberAlaCarteServicesID, Integer completionStatus,
                                        String serviceName, Boolean isPackageService) {
@@ -65,23 +67,24 @@ public class SubscriberServiceDetailsDTO {
         this.serviceID = serviceID;
     }
 
-    public Date getServiceDate() {
-        return serviceDate;
-    }
+    
+    public LocalDate getServiceDate() {
+		return serviceDate;
+	}
 
-    public void setServiceDate(Date serviceDate) {
-        this.serviceDate = serviceDate;
-    }
+	public void setServiceDate(LocalDate serviceDate) {
+		this.serviceDate = serviceDate;
+	}
 
-    public Date getServiceTime() {
-        return serviceTime;
-    }
+	public LocalTime getServiceTime() {
+		return serviceTime;
+	}
 
-    public void setServiceTime(Date serviceTime) {
-        this.serviceTime = serviceTime;
-    }
+	public void setServiceTime(LocalTime serviceTime) {
+		this.serviceTime = serviceTime;
+	}
 
-    public Integer getBillingStatus() {
+	public Integer getBillingStatus() {
         return billingStatus;
     }
 

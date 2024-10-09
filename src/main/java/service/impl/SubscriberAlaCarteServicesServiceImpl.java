@@ -41,9 +41,8 @@ public class SubscriberAlaCarteServicesServiceImpl implements SubscriberAlaCarte
 
     @Override
     public SubscriberAlaCarteServices createOrUpdateService(SubscriberAlaCarteServices serviceRequest) {
-        // Validate that the serviceID exists in the Services table
-    	// Check if subscriberID is null
-        if (serviceRequest.getSubscriberID() == null) {
+        // Check if the subscriber is null
+        if (serviceRequest.getSubscriber() == null || serviceRequest.getSubscriber().getSubscriberID() == 0) {
             throw new IllegalArgumentException("SubscriberID cannot be null");
         }
 
@@ -51,14 +50,15 @@ public class SubscriberAlaCarteServicesServiceImpl implements SubscriberAlaCarte
         if (serviceRequest.getServiceID() == null) {
             throw new IllegalArgumentException("ServiceID cannot be null");
         }
-        Optional<AlaCarteService> service = repository.findById(serviceRequest.getServiceID());
 
+        // Validate if the service exists
+        Optional<AlaCarteService> service = repository.findById(serviceRequest.getServiceID());
         if (!service.isPresent()) {
             throw new IllegalArgumentException("Invalid serviceID: Service does not exist");
         }
 
-        // Proceed with saving the SubscriberAlaCarteServices entity
-        return servicerepository.save(serviceRequest);
+        // Save the SubscriberAlaCarteServices entity
+        return subscriberAlaCarteServicesRepository.save(serviceRequest);
     }
 
     @Override
@@ -75,11 +75,10 @@ public class SubscriberAlaCarteServicesServiceImpl implements SubscriberAlaCarte
     @Override
     public Integer getSubscriberAlaCarteServicesID(Integer subscriberId, Integer serviceId) {
         // Fetch the SubscriberAlaCarteService entity using subscriberId and serviceId
-        Optional<SubscriberAlaCarteServices> subscriberAlaCarteService = subscriberAlaCarteServicesRepository.findBySubscriberIDAndServiceID(subscriberId, serviceId);
+        Optional<SubscriberAlaCarteServices> subscriberAlaCarteService = subscriberAlaCarteServicesRepository.findBySubscriber_SubscriberIDAndServiceID(subscriberId, serviceId);
 
         // Return the SubscriberAlaCarteServicesID if present, otherwise return null
         return subscriberAlaCarteService.map(SubscriberAlaCarteServices::getSubscriberAlaCarteServicesID).orElse(null);
     }
-    
-    
+        
 }

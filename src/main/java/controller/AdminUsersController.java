@@ -1,6 +1,7 @@
 package controller;
 
 import model.AdminUser;
+import model.PreferredDateTime;
 import model.ServiceReport;
 import model.Subscriber;
 import model.SubscriptionPackage;
@@ -40,6 +41,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -326,49 +328,76 @@ public class AdminUsersController {
             for (SubscriberDTO subscriber : subscribers) {
                 // Fetch the services for each subscriber
                 Map<String, List<ServiceReport>> services = serviceCompletionService.getSubscriberServices(subscriber.getSubscriberID());
-                
+
                 // Check if the services exist and are valid
                 if (services != null && services.containsKey("allServices")) {
                     List<ServiceReport> serviceReports = services.get("allServices");
-                    
+
                     // Filter out services where packageServiceID is not null and only include valid services
-                    List<ServiceReport> filteredServices = new ArrayList<>();
+                    List<Map<String, Object>> filteredServices = new ArrayList<>();
                     for (ServiceReport serviceReport : serviceReports) {
-                        if (serviceReport.getPackageServiceID() == null && serviceReport.getServiceName() != null  && !"Completed".equals(serviceReport.getCompletionStatus())) { // Check for valid services
-                            System.out.println(serviceReport.getPackageName());
-                            // Add color attribute based on requestedDate and requestedTime
-                            if (serviceReport.getRequestedDate() != null && serviceReport.getRequestedTime() != null) {
-                                // Combine requested date and time into a LocalDateTime
-                                LocalDateTime requestedDateTime = LocalDateTime.of(
-                                        LocalDate.parse(serviceReport.getRequestedDate().toString()), // Parse the requested date
-                                        LocalTime.parse(serviceReport.getRequestedTime().toString())  // Parse the requested time
+                        if (serviceReport.getPackageServiceID() == null && serviceReport.getServiceName() != null  
+                            && !"Completed".equals(serviceReport.getCompletionStatus())) { // Check for valid services
+                            
+                            // List to hold each requested date/time entry with color status
+                            List<Map<String, Object>> preferredDateTimes = new ArrayList<>();
+
+                            // Handle multiple requested date/time entries
+                            for (PreferredDateTime preferredDateTime : serviceReport.getPreferredDateTimes()) {
+                                Map<String, Object> dateTimeMap = new HashMap<>();
+                                dateTimeMap.put("preferredDate", preferredDateTime.getPreferredDate().toString());
+                                dateTimeMap.put("preferredTime", preferredDateTime.getPreferredTime().toString());
+                                dateTimeMap.put("completionStatus", preferredDateTime.getCompletionStatus());
+                                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+                                // Format the LocalDateTime object
+                                String formattedDate = preferredDateTime.getRequestedDate().format(formatter);
+                                dateTimeMap.put("requestedDate",formattedDate);
+                                if (preferredDateTime.getCompletionDate() != null) {
+                                    dateTimeMap.put("completionDate", preferredDateTime.getCompletionDate().toString());
+                                }
+
+                                // Add color attribute based on requestedDate and requestedTime
+                                LocalDateTime requestedDateTimeObj = LocalDateTime.of(
+                                		preferredDateTime.getPreferredDate(),
+                                		preferredDateTime.getPreferredTime()
                                 );
 
                                 // Get the current time
                                 LocalDateTime currentTime = LocalDateTime.now(ZoneId.systemDefault());
 
                                 // Calculate the duration between the current time and the requested time
-                                Duration duration = Duration.between(currentTime, requestedDateTime);
+                                Duration duration = Duration.between(currentTime, requestedDateTimeObj);
                                 long hours = duration.toHours();
 
                                 if (hours >= 0 && hours <= 24) {
                                     // Requested date/time is within the next 24 hours
-                                    serviceReport.setColor("green");
+                                    dateTimeMap.put("color", "green");
                                 } else if (hours > 24) {
                                     // Requested date/time is more than 24 hours in the future
-                                    serviceReport.setColor("amber");
+                                    dateTimeMap.put("color", "amber");
                                 } else {
                                     // Requested date/time is in the past
-                                    serviceReport.setColor("red");
+                                    dateTimeMap.put("color", "red");
                                 }
-                            } else {
-                                serviceReport.setColor("no color"); // Handle case where requestedDate or requestedTime is missing
+
+                                preferredDateTimes.add(dateTimeMap);
                             }
-                           
-                            filteredServices.add(serviceReport); // Add the valid service to the filtered list
+
+                            // Create a new map to store service details and requested date/time information
+                            Map<String, Object> serviceData = new HashMap<>();
+                            serviceData.put("serviceID", serviceReport.getServiceID());
+                            serviceData.put("serviceName", serviceReport.getServiceName());
+                            serviceData.put("packageName", serviceReport.getPackageName());
+                            serviceData.put("packageServiceID", serviceReport.getPackageServiceID());
+                            serviceData.put("frequency", serviceReport.getFrequency());
+                            serviceData.put("frequencyUnit", serviceReport.getFrequencyUnit());
+                            serviceData.put("completionStatus", serviceReport.getCompletionStatus());
+                            serviceData.put("preferredDateTimes", preferredDateTimes); // Add requested date/times to the response
+
+                            filteredServices.add(serviceData);
                         }
                     }
-                    System.out.println("filteredServices.size()"+filteredServices.size());
+
                     // Only add the subscriber if they have valid filtered services
                     if (!filteredServices.isEmpty()) {
                         // Create and add the DTO to the list
@@ -397,6 +426,8 @@ public class AdminUsersController {
                     .body("An error occurred while retrieving services for Saathi ID: " + saathiId);
         }
     }
+
+
     @GetMapping("/saathis/subscribers/services")
     public ResponseEntity<?> getSaathisWithSubscribersAndServices() {
         try {
@@ -434,6 +465,45 @@ public class AdminUsersController {
 
                         List<Map<String, Object>> filteredServices = new ArrayList<>();
                         for (ServiceReport serviceReport : serviceReports) {
+                            // List to hold each requested date/time entry with color status
+                            List<Map<String, Object>> preferredDateTimes = new ArrayList<>();
+                            
+                            // Handle multiple requested date/time entries
+                            for (PreferredDateTime preferredDateTime : serviceReport.getPreferredDateTimes()) {
+                                Map<String, Object> dateTimeMap = new HashMap<>();
+                                dateTimeMap.put("preferredDate", preferredDateTime.getPreferredDate().toString());
+                                dateTimeMap.put("preferredTime", preferredDateTime.getPreferredTime().toString());
+                                dateTimeMap.put("completionStatus", preferredDateTime.getCompletionStatus());
+                                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+                                // Format the LocalDateTime object
+                                String formattedDate = preferredDateTime.getRequestedDate().format(formatter);
+                                dateTimeMap.put("requestedDate",formattedDate);
+                                if (preferredDateTime.getCompletionDate() != null) {
+                                    dateTimeMap.put("completionDate", preferredDateTime.getCompletionDate().toString());
+                                }
+
+                                // Add color attribute based on requested date/time
+                                LocalDateTime requestedDateTimeObj = LocalDateTime.of(
+                                		preferredDateTime.getPreferredDate(),
+                                		preferredDateTime.getPreferredTime()
+                                );
+
+                                LocalDateTime currentTime = LocalDateTime.now(ZoneId.systemDefault());
+                                Duration duration = Duration.between(currentTime, requestedDateTimeObj);
+                                long hours = duration.toHours();
+
+                                if (hours >= 0 && hours <= 24) {
+                                    dateTimeMap.put("color", "green");
+                                } else if (hours > 24) {
+                                    dateTimeMap.put("color", "amber");
+                                } else {
+                                    dateTimeMap.put("color", "red");
+                                }
+
+                                preferredDateTimes.add(dateTimeMap);
+                            }
+
+                            // Add service details along with requested date/time list
                             Map<String, Object> serviceData = new HashMap<>();
                             serviceData.put("serviceID", serviceReport.getServiceID());
                             serviceData.put("serviceName", serviceReport.getServiceName());
@@ -442,32 +512,7 @@ public class AdminUsersController {
                             serviceData.put("frequency", serviceReport.getFrequency());
                             serviceData.put("frequencyUnit", serviceReport.getFrequencyUnit());
                             serviceData.put("completionStatus", serviceReport.getCompletionStatus());
-
-                            // Add color attribute based on requested date/time
-                            if (serviceReport.getRequestedDate() != null && serviceReport.getRequestedTime() != null) {
-                                LocalDateTime requestedDateTime = LocalDateTime.of(
-                                        LocalDate.parse(serviceReport.getRequestedDate().toString()),
-                                        LocalTime.parse(serviceReport.getRequestedTime().toString())
-                                );
-
-                                LocalDateTime currentTime = LocalDateTime.now(ZoneId.systemDefault());
-                                Duration duration = Duration.between(currentTime, requestedDateTime);
-                                long hours = duration.toHours();
-
-                                if (hours >= 0 && hours <= 24) {
-                                    serviceReport.setColor("green");
-                                } else if (hours > 24) {
-                                    serviceReport.setColor("amber");
-                                } else {
-                                    serviceReport.setColor("red");
-                                }
-                            } else {
-                                serviceReport.setColor("no color");
-                            }
-
-                            serviceData.put("color", serviceReport.getColor());
-                            serviceData.put("requestedDate", serviceReport.getRequestedDate());
-                            serviceData.put("requestedTime", serviceReport.getRequestedTime());
+                            serviceData.put("preferredDateTimes", preferredDateTimes);
 
                             filteredServices.add(serviceData);
                         }
