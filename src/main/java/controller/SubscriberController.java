@@ -773,8 +773,6 @@ public class SubscriberController {
         }
     }
 
-
-
  // Endpoint to rebuild all services for a given subscriber
     @GetMapping("/rebuild/{subscriberID}")
     public ResponseEntity<Map<String, List<ServiceReport>>> rebuildAllServices(
