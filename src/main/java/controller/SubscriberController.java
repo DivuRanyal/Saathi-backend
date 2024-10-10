@@ -633,7 +633,7 @@ public class SubscriberController {
 
         // Parse the preferredDate and preferredTime from the input strings
         DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-        DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm:ss");
+        DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm");
         LocalDate parsedPreferredDate=null;
         LocalTime parsedPreferredTime=null;
         if (preferredDate != null && preferredTime != null) {
@@ -749,7 +749,7 @@ public class SubscriberController {
 
             // Parse the preferredDate and preferredTime from the input strings
             DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-            DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm:ss");
+            DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm");
 
             LocalDate parsedPreferredDate = LocalDate.parse(preferredDate, dateFormatter);
             LocalTime parsedPreferredTime = LocalTime.parse(preferredTime, timeFormatter);

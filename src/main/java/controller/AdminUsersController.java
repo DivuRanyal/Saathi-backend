@@ -735,7 +735,7 @@ public class AdminUsersController {
                                 // Determine if the service is a package or ala-carte service
                                 if (!serviceReport.isAlaCarte()) {
                                     // Package service logic
-                                    if ("Not Started".equals(serviceReport.getCompletionStatus())) {
+                                    if ("Pending".equals(serviceReport.getCompletionStatus())) {
                                     	saathiPendingPackageServices += serviceReport.getFrequencyCount();  // All pending if not completed
                                         
                                         } else {
@@ -744,7 +744,7 @@ public class AdminUsersController {
                                         }
                                 } else {
                                     // Ala-carte service logic
-                                    if ("Not Started".equals(serviceReport.getCompletionStatus())) {
+                                    if ("Pending".equals(serviceReport.getCompletionStatus())) {
                                     	saathiPendingAlaCarteServices += serviceReport.getFrequencyCount();  // All ala-carte services pending if not completed
                                         
                                         } else {

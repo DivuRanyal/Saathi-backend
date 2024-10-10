@@ -5,12 +5,15 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+
 public class PreferredDateTime implements Serializable {
     private static final long serialVersionUID = 1L;
     
     private LocalDate preferredDate;          // Date preferred for the service
     private LocalTime preferredTime;          // Time preferred for the service
     private String completionStatus;          // To track completion per frequency
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime completionDate;     // Date and time when the service was completed
     private LocalDateTime requestedDate;      // Date and time when the request was made
 
@@ -18,7 +21,7 @@ public class PreferredDateTime implements Serializable {
     public PreferredDateTime(LocalDate preferredDate, LocalTime preferredTime) {
         this.preferredDate = preferredDate;
         this.preferredTime = preferredTime;
-        this.completionStatus = "Not Started"; // Default status
+        this.completionStatus = "Pending"; // Default status
         this.requestedDate = LocalDateTime.now(); // Automatically set requested date to current system time
     }
 

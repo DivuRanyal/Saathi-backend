@@ -402,7 +402,7 @@ public class ServiceCompletionServiceNew {
                 serviceReport.setAlaCarte(true);
                 serviceReport.setSubscriberAlaCarteServicesID(alaCarteService.getSubscriberAlaCarteServicesID());
                 serviceReport.setCompletions(0);
-                serviceReport.setCompletionStatus("Not Started");
+                serviceReport.setCompletionStatus("Pending");
                 serviceReport.setFrequencyCount(1);
                 serviceReport.setPending(1);
                 
@@ -436,7 +436,7 @@ public class ServiceCompletionServiceNew {
                 serviceReport.setPackageServiceID(packageService.getPackageServicesID());
 
                 serviceReport.setCompletions(0);
-                serviceReport.setCompletionStatus("Not Started");
+                serviceReport.setCompletionStatus("Pending");
 
                 int frequencyCount = packageService.getFrequency();
                 serviceReport.setFrequencyCount(frequencyCount);
