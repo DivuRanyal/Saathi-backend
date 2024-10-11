@@ -13,8 +13,9 @@ public class PreferredDateTime implements Serializable {
     private LocalDate preferredDate;          // Date preferred for the service
     private LocalTime preferredTime;          // Time preferred for the service
     private String completionStatus;          // To track completion per frequency
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-    private LocalDateTime completionDate;     // Date and time when the service was completed
+    private LocalDate completionDate;     // Date and time when the service was completed
+
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss") // Apply the same format for requestedDate
     private LocalDateTime requestedDate;      // Date and time when the request was made
 
     // Constructor for preferred date and time, requested date is set to system time
@@ -27,7 +28,7 @@ public class PreferredDateTime implements Serializable {
 
     // Full Constructor including completion details (if needed)
     public PreferredDateTime(LocalDate preferredDate, LocalTime preferredTime, 
-                             String completionStatus, LocalDateTime completionDate) {
+                             String completionStatus, LocalDate completionDate) {
         this.preferredDate = preferredDate;
         this.preferredTime = preferredTime;
         this.completionStatus = completionStatus;
@@ -60,11 +61,11 @@ public class PreferredDateTime implements Serializable {
         this.completionStatus = completionStatus;
     }
 
-    public LocalDateTime getCompletionDate() {
+    public LocalDate getCompletionDate() {
         return completionDate;
     }
 
-    public void setCompletionDate(LocalDateTime completionDate) {
+    public void setCompletionDate(LocalDate completionDate) {
         this.completionDate = completionDate;
     }
 

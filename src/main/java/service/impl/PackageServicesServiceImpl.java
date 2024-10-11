@@ -1,7 +1,9 @@
 package service.impl;
 
 import model.PackageServices;
+import model.Subscriber;
 import repository.PackageServiceRepository;
+import repository.SubscriberRepository;
 import service.PackageServicesService;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +17,9 @@ public class PackageServicesServiceImpl implements PackageServicesService {
 
     @Autowired
     private PackageServiceRepository packageServicesRepository;
+
+    @Autowired
+    private SubscriberRepository subscriberRepository;
 
     // Fetch all package services
     @Override
@@ -61,4 +66,22 @@ public class PackageServicesServiceImpl implements PackageServicesService {
     public void deletePackageService(Integer id) {
         packageServicesRepository.deleteById(id); // Delete the entity by its ID
     }
+/*    
+    @Override
+    public Integer getPackageServiceID(Integer subscriberID, Integer serviceID) {
+        // First, fetch the Subscriber
+        Subscriber subscriber = subscriberRepository.findById(subscriberID).orElse(null);
+
+        if (subscriber == null || subscriber.getSubscriptionPackage() == null) {
+            // Handle cases where the subscriber or subscription package is null
+            return null;
+        }
+
+        // Now fetch the packageID from the subscriber's subscription package
+        Integer packageID = subscriber.getSubscriptionPackage().getPackageID();
+
+        // Use the packageID to find the packageServiceID
+        return packageServicesRepository.findPackageServicesIDByPackageIDAndServiceID(packageID, serviceID);
+    }
+  */  
 }

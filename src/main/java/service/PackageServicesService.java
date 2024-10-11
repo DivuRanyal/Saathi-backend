@@ -21,5 +21,6 @@ public interface PackageServicesService {
 
     // Method to delete a PackageService by its ID
     void deletePackageService(Integer id);
+//    public Integer getPackageServiceID(Integer subscriberID, Integer serviceID);
     
 }

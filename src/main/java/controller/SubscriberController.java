@@ -646,9 +646,9 @@ public class SubscriberController {
         }
 
         // Ensure preferredDate and preferredTime are provided for package services
-        if (!isAlaCarte && (preferredDate == null || preferredTime == null)) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Preferred date and time must be provided for package services.");
-        }
+ //       if (!isAlaCarte && (preferredDate == null || preferredTime == null)) {
+ //           return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Preferred date and time must be provided for package services.");
+ //       }
 
         // Step 2: Update service completion logic
         Map<String, List<ServiceReport>> updatedServices;
@@ -658,8 +658,29 @@ public class SubscriberController {
             updatedServices = serviceCompletionService.updateServiceCompletion(subscriberID, serviceID, subscriberAlaCarteServiceID, true, null, null);
         } else {
             // Update package service completion with preferred date and time
-            updatedServices = serviceCompletionService.updateServiceCompletion(subscriberID, serviceID, null, false, parsedPreferredDate, parsedPreferredTime);
-        }
+        	if (preferredDate != null && preferredTime != null) {
+        	    // Call with preferredDate and preferredTime
+        	    updatedServices = serviceCompletionService.updateServiceCompletion(
+        	        subscriberID, 
+        	        serviceID, 
+        	        null, 
+        	        false, 
+        	        parsedPreferredDate, 
+        	        parsedPreferredTime
+        	    );
+        	} else {
+        	    // Call with null for preferredDate and preferredTime
+        		System.out.println("hhh");
+        	    updatedServices = serviceCompletionService.updateServiceCompletion(
+        	        subscriberID, 
+        	        serviceID, 
+        	        null, 
+        	        false, 
+        	        null, 
+        	        null
+        	    );
+        	}
+       }
         if (updatedServices != null) {
             try {
                 String filePath = null;

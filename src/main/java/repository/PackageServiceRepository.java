@@ -53,4 +53,6 @@ public interface PackageServiceRepository extends JpaRepository<PackageServices,
     @Query("SELECT ps FROM PackageServices ps WHERE ps.subscriptionPackage.packageID = :packageID AND ps.service.serviceID = :serviceID")
     PackageServices findByPackageIDAndServiceID(@Param("packageID") int packageID, @Param("serviceID") int serviceID);
 
+ //   @Query("SELECT ps.packageServicesID FROM PackageServices ps WHERE ps.subscriptionPackage.packageID = :packageID AND ps.service.serviceID = :serviceID")
+ //   Integer findPackageServicesIDByPackageIDAndServiceID(@Param("packageID") Integer packageID, @Param("serviceID") Integer serviceID);
 }
