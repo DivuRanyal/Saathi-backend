@@ -15,7 +15,7 @@ public class SubscriberAlaCarteServices {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "SubscriberAlaCarteServicesID")
-    private int SubscriberAlaCarteServicesID;
+    private Integer SubscriberAlaCarteServicesID;
 
     @Column(name = "ServiceID",nullable=false)
     private Integer serviceID;
@@ -51,11 +51,11 @@ public class SubscriberAlaCarteServices {
     private Subscriber subscriber;  // Ensure this field name is 'subscriber', not 'subscriberID'
 
 
-	public int getSubscriberAlaCarteServicesID() {
+	public Integer getSubscriberAlaCarteServicesID() {
 		return SubscriberAlaCarteServicesID;
 	}
 
-	public void setSubscriberAlaCarteServicesID(int subscriberAlaCarteServicesID) {
+	public void setSubscriberAlaCarteServicesID(Integer subscriberAlaCarteServicesID) {
 		SubscriberAlaCarteServicesID = subscriberAlaCarteServicesID;
 	}
 

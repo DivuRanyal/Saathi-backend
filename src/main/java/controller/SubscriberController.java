@@ -509,7 +509,8 @@ public class SubscriberController {
                 serviceWithInteraction.put("pending", serviceReport.getPending());
                 serviceWithInteraction.put("alaCarte", serviceReport.isAlaCarte());
                 serviceWithInteraction.put("subscriberAlaCarteServicesID", serviceReport.getSubscriberAlaCarteServicesID());
-
+                serviceWithInteraction.put("frequencyInstance", serviceReport.getFrequencyInstance());
+                
                 // Handling list of requested dates and times
                 List<Map<String, String>> preferredDatesTimes = new ArrayList<>();
                 if (serviceReport.getPreferredDateTimes() != null) {
@@ -536,27 +537,30 @@ public class SubscriberController {
                 System.out.println("-"+serviceReport.getPackageServiceID());
                 // Filter interactions related to the current service
                 List<InteractionDTO> relatedInteractions = interactions.stream()
-                    .filter(interaction -> {
-                        if (serviceReport.isAlaCarte()) {
-                            // Only check against SubscriberAlaCarteServicesID for ala-carte services
-                            return interaction.getSubscriberAlaCarteServicesID() != null &&
-                                   interaction.getSubscriberAlaCarteServicesID().equals(serviceReport.getSubscriberAlaCarteServicesID());
-                        } else if (serviceReport.getPackageServiceID() != 0 && interaction.getPackageServicesID() != null) {
-                            // Only check against PackageServicesID for package services
-                            return interaction.getPackageServicesID().equals(serviceReport.getPackageServiceID());
-                        } else {
-                            return false; // No matching service
-                        }
-                    })
-                    .map(interaction -> {
-                        // If the interaction contains documents, you can prepend a base URL if required
-                        if (interaction.getDocuments() != null && !interaction.getDocuments().isEmpty()) {
-                            String documentUrl = interaction.getDocuments();
-                            interaction.setDocuments(documentUrl); // Set the document URL in the response
-                        }
-                        return interaction;
-                    })
-                    .collect(Collectors.toList());
+                	    .filter(interaction -> {
+                	        // Check for ala-carte services by SubscriberAlaCarteServicesID and frequencyCount
+                	        if (serviceReport.isAlaCarte()) {
+                	            return interaction.getSubscriberAlaCarteServicesID() != null &&
+                	                   interaction.getSubscriberAlaCarteServicesID().equals(serviceReport.getSubscriberAlaCarteServicesID()) &&
+                	                   interaction.getFrequencyInstance().equals(serviceReport.getFrequencyInstance());
+                	        } 
+                	        // Check for package services by PackageServicesID and frequencyCount
+                	        else if (serviceReport.getPackageServiceID() != 0 && interaction.getPackageServicesID() != null) {
+                	            return interaction.getPackageServicesID().equals(serviceReport.getPackageServiceID()) &&
+                	                   interaction.getFrequencyInstance().equals(serviceReport.getFrequencyInstance());
+                	        } else {
+                	            return false; // No matching service
+                	        }
+                	    })
+                	    .map(interaction -> {
+                	        // If the interaction contains documents, you can prepend a base URL if required
+                	        if (interaction.getDocuments() != null && !interaction.getDocuments().isEmpty()) {
+                	            String documentUrl = interaction.getDocuments();
+                	            interaction.setDocuments(documentUrl); // Set the document URL in the response
+                	        }
+                	        return interaction;
+                	    })
+                	    .collect(Collectors.toList());
 
                 // Add the interactions to the service
                 serviceWithInteraction.put("interactions", relatedInteractions);
@@ -622,6 +626,7 @@ public class SubscriberController {
             @RequestParam(value = "file", required = false) MultipartFile file,
             @RequestParam("description") String description,
             @RequestParam("isAlaCarte") Boolean isAlaCarte,
+            @RequestParam(name="frequencyInstance",required=false) Integer frequencyInstance,
             @RequestParam(name = "subscriberAlaCarteServicesID", required = false) Integer subscriberAlaCarteServiceID, // Distinguish ala-carte services
             @RequestParam(name = "preferredDate", required = false) String preferredDate, // Required for package services
             @RequestParam(name = "preferredTime", required = false) String preferredTime // Required for package services
@@ -655,18 +660,20 @@ public class SubscriberController {
 
         if (isAlaCarte) {
             // Update ala-carte service completion
-            updatedServices = serviceCompletionService.updateServiceCompletion(subscriberID, serviceID, subscriberAlaCarteServiceID, true, null, null);
+            updatedServices = serviceCompletionService.updateServiceCompletion(subscriberID, serviceID, subscriberAlaCarteServiceID, true, null, null,frequencyInstance);
         } else {
             // Update package service completion with preferred date and time
-        	if (preferredDate != null && preferredTime != null) {
+        	if (subscriberAlaCarteServiceID != null) {
+        		
+        		
         	    // Call with preferredDate and preferredTime
         	    updatedServices = serviceCompletionService.updateServiceCompletion(
         	        subscriberID, 
         	        serviceID, 
-        	        null, 
+        	        subscriberAlaCarteServiceID, 
         	        false, 
         	        parsedPreferredDate, 
-        	        parsedPreferredTime
+        	        parsedPreferredTime,frequencyInstance
         	    );
         	} else {
         	    // Call with null for preferredDate and preferredTime
@@ -677,7 +684,7 @@ public class SubscriberController {
         	        null, 
         	        false, 
         	        null, 
-        	        null
+        	        null,frequencyInstance
         	    );
         	}
        }
@@ -695,7 +702,6 @@ public class SubscriberController {
                     if (!directory.exists()) {
                         directory.mkdirs(); // Create the directory if it doesn't exist
                     }
-
                     // Define the file path and save it to the server
                     String fileName = file.getOriginalFilename();
                     filePath = uploadDirectory + fileName;
@@ -708,6 +714,13 @@ public class SubscriberController {
                 // Step 4: Create and add interaction when the service is completed
                 InteractionDTO interactionDTO = new InteractionDTO();
                 interactionDTO.setSubscriberID(subscriberID);
+                if(subscriberAlaCarteServiceID!=null) {
+                	 interactionDTO.setSubscriberAlaCarteServicesID(subscriberAlaCarteServiceID);
+                }
+                if(frequencyInstance!=null) {
+                	System.out.println("frequencyCount"+frequencyInstance);
+               	 interactionDTO.setFrequencyInstance(frequencyInstance);
+               }	
                 interactionDTO.setDescription(description); // Get the description from the request payload
                 interactionDTO.setDocuments(fileUrl);  // Store the file path in the documents attribute
                 List<ServiceReport> services = updatedServices.get("allServices");
@@ -731,7 +744,7 @@ public class SubscriberController {
                                 // This is the matching package service
                                 System.out.println("Processing package service...");
                                 interactionDTO.setPackageServicesID(service.getPackageServiceID()); // Set the packageServiceID
-                                interactionDTO.setSubscriberAlaCarteServicesID(null); 
+                                interactionDTO.setSubscriberAlaCarteServicesID(subscriberAlaCarteServiceID); 
                                 break;// Clear ala-carte ID for package service
                             }
                             // Set the completion status only if the service is fully completed
@@ -767,7 +780,7 @@ public class SubscriberController {
             String preferredTime = (String) requestBody.get("preferredTime"); // Previously "requestedTime"
             Integer subscriberID = (Integer) requestBody.get("subscriberID");
             Integer serviceID = (Integer) requestBody.get("serviceID");
-
+            Integer frequencyInstance = (Integer) requestBody.get("frequencyInstance");
             // Parse the preferredDate and preferredTime from the input strings
             DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
             DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm");
@@ -780,7 +793,7 @@ public class SubscriberController {
 
             // Call the service layer to update the service request
             Map<String, List<ServiceReport>> updatedServiceReportMap = serviceCompletionService.updateServiceRequestedDateTime(
-                    subscriberID, serviceID, false, parsedPreferredDate, parsedPreferredTime, createdDate);
+                    subscriberID, serviceID, false, parsedPreferredDate, parsedPreferredTime, createdDate,frequencyInstance);
 
             System.out.println("updatedServiceReportMap"+updatedServiceReportMap);
             // Return the updated list of ServiceReports in the response
@@ -838,22 +851,19 @@ public class SubscriberController {
                 // Step 3.1: Check package services completion status
                 int totalPackageServices = packageServiceRepository.countServicesBySubscriber(subscriberID);
                 int completedPackageServices = interactionRepository.countCompletedPackageServicesBySubscriber(subscriberID);
-
                 System.out.println("-"+totalPackageServices);
                 System.out.println("-"+completedPackageServices);
                 if (completedPackageServices < totalPackageServices) {
                     subscribersWithIncompleteServices.add(subscriberID);
                 }
-
                 // Step 3.2: Check ala-carte services completion status
                 int totalAlaCarteServices = subscriberAlaCarteServicesRepository.countAlaCarteServicesBySubscriber(subscriberID);
                 int completedAlaCarteServices = interactionRepository.countCompletedAlaCarteServicesBySubscriber(subscriberID);
-
                 if (completedAlaCarteServices < totalAlaCarteServices) {
                     subscribersWithIncompleteServices.add(subscriberID);
                 }
             }
-
+            
             // Step 4: Call rebuildAllServices for subscribers with incomplete services
             Map<Integer, Map<String, List<ServiceReport>>> allServicesMapForAllSubscribers = new HashMap<>();
             for (Integer subscriberID : subscribersWithIncompleteServices) {
@@ -864,13 +874,13 @@ public class SubscriberController {
 
             // Return the map with all subscribers' services
             return ResponseEntity.ok(allServicesMapForAllSubscribers);
-
         } catch (Exception e) {
             // Handle errors
             e.printStackTrace();
             return ResponseEntity.status(500).body(null);
         }
     }
+
 
     @PostMapping("/verify")
     public ResponseEntity<?> verifyOtp(@RequestParam String email, @RequestParam Integer otp) {

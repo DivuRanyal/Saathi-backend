@@ -4,6 +4,8 @@ import model.AlaCarteService;
 import model.Subscriber;
 import model.SubscriberAlaCarteServices;
 
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -42,4 +44,18 @@ public interface SubscriberAlaCarteServicesRepository extends JpaRepository<Subs
 
 	// Find ala-carte services by `subscriberID` and `serviceID` (optional if still needed)
 	SubscriberAlaCarteServices findBySubscriber_SubscriberIDAndServiceID(int subscriberID, int serviceID);
+	
+	@Query("SELECT s FROM SubscriberAlaCarteServices s WHERE s.serviceID = :serviceID AND s.subscriber.subscriberID = :subscriberID")
+    SubscriberAlaCarteServices findByServiceIDAndSubscriberID(@Param("serviceID") int serviceID, @Param("subscriberID") int subscriberID);
+
+	 @Query("SELECT s.SubscriberAlaCarteServicesID FROM SubscriberAlaCarteServices s " +
+	           "WHERE s.subscriber.subscriberID = :subscriberID " +
+	           "AND s.serviceDate = :serviceDate " +
+	           "AND s.serviceTime = :serviceTime " +
+	           "AND s.service.serviceID = :serviceID")
+	    Integer getSubscriberAlaCarteServicesIDForPackageService(
+	            @Param("subscriberID") Integer subscriberID, 
+	            @Param("serviceDate") LocalDate serviceDate, 
+	            @Param("serviceTime") LocalTime serviceTime, 
+	            @Param("serviceID") Integer serviceID);
 }

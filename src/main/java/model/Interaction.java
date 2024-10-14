@@ -48,6 +48,12 @@ public class Interaction {
     @Column(name = "Description", columnDefinition = "TEXT")
     private String description;
 
+    @Column(name = "ServiceRating")
+    private Integer serviceRating;
+
+    @Column(name = "FrequencyInstance")
+    private Integer frequencyInstance;
+
     @ManyToOne
     @JoinColumn(name = "SubscriberAlaCarteServicesID", referencedColumnName = "SubscriberAlaCarteServicesID")
     private SubscriberAlaCarteServices subscriberAlaCarteServices;
@@ -158,7 +164,24 @@ public class Interaction {
 		this.packageID = packageID;
 	}
 
-	 @PrePersist
+	
+	 public Integer getServiceRating() {
+		return serviceRating;
+	}
+
+	public void setServiceRating(Integer serviceRating) {
+		this.serviceRating = serviceRating;
+	}
+
+	public Integer getFrequencyInstance() {
+		return frequencyInstance;
+	}
+
+	public void setFrequencyInstance(Integer frequencyInstance) {
+		this.frequencyInstance = frequencyInstance;
+	}
+
+	@PrePersist
 	    protected void onCreate() {
 	        createdDate = new Date();  // Set the current timestamp for createdDate
 	        

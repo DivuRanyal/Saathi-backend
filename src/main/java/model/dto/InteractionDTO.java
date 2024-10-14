@@ -24,6 +24,8 @@ public class InteractionDTO {
     private Integer packageID;
     // Add this new field
     private Integer subscriberAlaCarteServicesID;
+    private Integer serviceRating;
+    private Integer frequencyInstance;
 
     // Getters and Setters for all fields including subscriberAlaCarteServicesID
 
@@ -126,6 +128,24 @@ public class InteractionDTO {
 	public void setPackageID(Integer packageID) {
 		this.packageID = packageID;
 	}
-    
+
+	public Integer getServiceRating() {
+		return serviceRating;
+	}
+
+	public void setServiceRating(Integer serviceRating) {
+		this.serviceRating = serviceRating;
+	}
+
+	public Integer getFrequencyInstance() {
+		return frequencyInstance;
+	}
+
+	public void setFrequencyInstance(Integer frequencyInstance) {
+		this.frequencyInstance = frequencyInstance;
+	}
+
+	
+	
     
 }

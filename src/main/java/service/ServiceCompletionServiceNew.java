@@ -89,9 +89,13 @@ public class ServiceCompletionServiceNew {
                 for (PackageServices packageService : packageServices) {
                 	List<PreferredDateTime> requestedDates=null;
                     int calculatedFrequency = packageService.getFrequency();
+                    Integer subscriberAlaCarteServicesID = null;
+
                     if(serviceDate!=null) {
-                    	 requestedDates = generateRequestedDateTimes(calculatedFrequency, serviceDate, serviceTime);                         
-                    }
+                    	 requestedDates = generateRequestedDateTimes(calculatedFrequency, serviceDate, serviceTime);  
+                    	 subscriberAlaCarteServicesID = alaCarteServicesRepository.getSubscriberAlaCarteServicesIDForPackageService(
+                    		        subscriberID, serviceDate, serviceTime, alaCarteServiceID);
+                    	 }
                     ServiceReport report = new ServiceReport(
                         packageService.getService().getServiceID(),
                         packageService.getService().getServiceName(),
@@ -104,7 +108,7 @@ public class ServiceCompletionServiceNew {
                         false,
                         packageService.getPackageServicesID(),
                         requestedDates,
-                        null
+                        subscriberAlaCarteServicesID,null,null
                     );
 
                     if (!serviceReports.contains(report)) {
@@ -131,9 +135,9 @@ public class ServiceCompletionServiceNew {
                 true,
                 null,
                 requestedDates,
-                alaCarteService.getSubscriberAlaCarteServicesID()
+                alaCarteService.getSubscriberAlaCarteServicesID(),1,null
             );
-
+             System.out.println(alaCarteServiceReport);
             if (!serviceReports.contains(alaCarteServiceReport)) {
                 serviceReports.add(alaCarteServiceReport);
             }
@@ -141,7 +145,6 @@ public class ServiceCompletionServiceNew {
 
         subscriberServiceMap.put(subscriberID, serviceReports);
         inMemoryServiceTracker.startTracking(subscriberID, serviceReports);
-
         Map<String, List<ServiceReport>> services = new HashMap<>();
         services.put("allServices", serviceReports);
         return services;
@@ -154,15 +157,15 @@ public class ServiceCompletionServiceNew {
         }
         return requestedDates;
     }
+        
     @CachePut(value = "subscriberServicesCache", key = "#subscriberID")
     public Map<String, List<ServiceReport>> updateServiceRequestedDateTime(
             int subscriberID, int serviceID, boolean isAlaCarte, 
-            LocalDate parsedPreferredDate, LocalTime parsedPreferredTime, LocalDateTime createdDate) throws Exception {
+            LocalDate parsedPreferredDate, LocalTime parsedPreferredTime, LocalDateTime createdDate, Integer frequencyInstance) throws Exception {
 
         // Fetch the cached service reports from Memcached or in-memory
         Map<String, List<ServiceReport>> allServicesMap = safeGetCachedServices(subscriberID);
 
-        // Validate if services exist
         if (allServicesMap == null || allServicesMap.get("allServices") == null) {
             throw new Exception("No services found for subscriber ID: " + subscriberID);
         }
@@ -173,27 +176,51 @@ public class ServiceCompletionServiceNew {
 
         // Iterate through service reports to find the matching service
         for (ServiceReport serviceReport : allServiceReports) {
-            if (serviceReport.getServiceID() == serviceID && serviceReport.isAlaCarte() == isAlaCarte) {
-                // Add the new requested date and time to the service report
-                if (serviceReport.getPreferredDateTimes() != null) {
-                    if (serviceReport.getPreferredDateTimes().size() >= serviceReport.getFrequencyCount()) {
-                        throw new RequestedDateTimesExceedsFrequencyException("RequestedDateTimes exceeds the allowed frequency count for service ID: " + serviceID);
-                    }
+            
+            // Correct comparison with equals() for object types and continue with checks
+            if (serviceReport.getServiceID() == serviceID && 
+                    serviceReport.isAlaCarte() == isAlaCarte && 
+                    serviceReport.getFrequencyInstance().equals(frequencyInstance) && 
+                    serviceReport.getPending() != 0) {
+                System.out.println("Entered update");
+                // Check if the number of preferred date-times exceeds the allowed frequency
+                if (serviceReport.getPreferredDateTimes() != null && 
+                    serviceReport.getPreferredDateTimes().size() >= serviceReport.getFrequencyCount()) {
+                    throw new RequestedDateTimesExceedsFrequencyException(
+                        "RequestedDateTimes exceeds the allowed frequency count for service ID: " + serviceID);
                 }
-                
-                // Create a new RequestedDateTime object with preferred date, preferred time, and created date
+
+                // Add the new requested date and time
                 PreferredDateTime newRequestedDateTime = new PreferredDateTime(parsedPreferredDate, parsedPreferredTime);
-                newRequestedDateTime.setRequestedDate(createdDate); // Set createdDate as the requestedDate
-                
-                // Add the new requested date and time to the service report
+                newRequestedDateTime.setRequestedDate(createdDate);
                 serviceReport.addPreferredDateTime(newRequestedDateTime);
 
+                // Create a new SubscriberAlaCarteServices entity for this request
+                SubscriberAlaCarteServices newAlaCarteService = new SubscriberAlaCarteServices();
+                newAlaCarteService.setServiceID(serviceID);
+                newAlaCarteService.setServiceDate(parsedPreferredDate);
+                newAlaCarteService.setServiceTime(parsedPreferredTime);
+                newAlaCarteService.setIsPackageService(!isAlaCarte); // This sets true if it's a package service, false if ala-carte
+                newAlaCarteService.setSubscriber(
+                    subscriberRepository.findById(subscriberID).orElseThrow(() -> new Exception("Subscriber not found")));
+
+                // Optionally, set other fields like billing status, created date, etc.
+                newAlaCarteService.setBillingStatus(1); // Example value for billing status
+                newAlaCarteService.setIsAccepted(true); // Example value for isAccepted
+                newAlaCarteService.setCreatedDate(new Date()); // Automatically set the creation date
+
+                // Save the new entry in the database
+                SubscriberAlaCarteServices savedAlaCarteService = alaCarteServicesRepository.save(newAlaCarteService);
+
+                // Update the service report to store the new SubscriberAlaCarteServicesID
+                serviceReport.setSubscriberAlaCarteServicesID(savedAlaCarteService.getSubscriberAlaCarteServicesID());
+
                 updatedServiceReport = serviceReport;
-                break; // Exit after updating the requested date and time
+                break;
             }
         }
 
-        // Throw an error if no matching service is found
+        // Handle case when no matching service was found
         if (updatedServiceReport == null) {
             throw new Exception("Service not found for subscriber ID: " + subscriberID + " and service ID: " + serviceID);
         }
@@ -203,9 +230,9 @@ public class ServiceCompletionServiceNew {
         subscriberServiceMap.put(subscriberID, allServiceReports);
         inMemoryServiceTracker.startTracking(subscriberID, allServiceReports);
 
-        // Return the updated services map
         return allServicesMap;
     }
+
 
     private Map<String, List<ServiceReport>> safeGetCachedServices(int subscriberID) throws Exception {
         Object cachedData = cacheManager.getCache("subscriberServicesCache").get(subscriberID, Object.class);
@@ -221,6 +248,7 @@ public class ServiceCompletionServiceNew {
         }
     }
 
+   
     @CachePut(value = "subscriberServicesCache", key = "#subscriberID")
     public Map<String, List<ServiceReport>> updateServiceCompletion(
             Integer subscriberID, 
@@ -228,7 +256,8 @@ public class ServiceCompletionServiceNew {
             Integer subscriberAlaCarteServicesID, 
             boolean isAlaCarteService, 
             LocalDate preferredDate, 
-            LocalTime preferredTime) {
+            LocalTime preferredTime,
+            Integer frequencyInstance) {
 
         // Retrieve the list of services for the subscriber
         List<ServiceReport> services = subscriberServiceMap.get(subscriberID);
@@ -243,23 +272,31 @@ public class ServiceCompletionServiceNew {
 
         // Loop through the services and update the correct one
         for (ServiceReport service : services) {
-            if (service.getServiceID() == serviceID) {
-                System.out.println("PackageserviceID: " + service.getPackageServiceID());
+            System.out.println(service.getServiceID() + " " + serviceID + " " + service.getFrequencyInstance() + " " + frequencyInstance);
+
+            // Use '==' for primitive int comparison instead of .equals()
+            if (service.getServiceID() == serviceID && service.getFrequencyInstance().equals(frequencyInstance)) {
+                System.out.println("PackageServiceID: " + service.getPackageServiceID());
                 System.out.println("isAlaCarteService: " + isAlaCarteService);
 
                 // Handle ala-carte services
                 if (isAlaCarteService && service.getSubscriberAlaCarteServicesID() != null
                         && service.getSubscriberAlaCarteServicesID().equals(subscriberAlaCarteServicesID)) {
-                    serviceUpdated = updateServiceFrequencyCompletion(service, null, null);
+                    serviceUpdated = updateServiceFrequencyCompletion(service, null, null, frequencyInstance);  // Pass frequencyCount
                 }                
 
                 // Handle package services
                 else if (!isAlaCarteService && service.getPackageServiceID() != null) { 
                     // Case where preferredDate and preferredTime are provided
                     if (preferredDate != null && preferredTime != null) {
-                        serviceUpdated = updateServiceFrequencyCompletion(service, preferredDate, preferredTime);
-                    }
-                    
+                        // Ensure we are updating the correct frequency instance
+                        serviceUpdated = updateServiceFrequencyCompletion(service, preferredDate, preferredTime, frequencyInstance);
+                        
+                        // Ensure subscriberAlaCarteServicesID is only updated for the correct frequency instance
+                        if (service.getFrequencyInstance() == frequencyInstance) {
+                            service.setSubscriberAlaCarteServicesID(subscriberAlaCarteServicesID);
+                        }
+                    } 
                     // Case where preferredDate and preferredTime are null
                     else {   
                         System.out.println("Handling package service update for serviceID: " + serviceID);
@@ -285,61 +322,46 @@ public class ServiceCompletionServiceNew {
         return null;
     }
 
-    private boolean updateServiceFrequencyCompletion(ServiceReport service, LocalDate preferredDate, LocalTime preferredTime) {
+
+    private boolean updateServiceFrequencyCompletion(ServiceReport service, LocalDate preferredDate, LocalTime preferredTime, int frequencyInstance) {
         List<PreferredDateTime> requestedDates = service.getPreferredDateTimes();
-        System.out.println(requestedDates.size());
-        // Log basic information
         System.out.println("Service Package Name: " + service.getPackageName());
         System.out.println("Is Ala-carte: " + "Ala-carte".equals(service.getPackageName()));
         System.out.println("Preferred Date: " + preferredDate);
         System.out.println("Preferred Time: " + preferredTime);
+        System.out.println("Frequency Instance: " + frequencyInstance);
 
         boolean updated = false;
 
-        // Loop over requested dates to update Ala-carte services or match based on date and time
-        for (PreferredDateTime preferredDateTime : requestedDates) {
-            // If Ala-carte, force update without checking dates
-            if ("Ala-carte".equals(service.getPackageName())) {
-                System.out.println("Updating Ala-carte service.");
-                LocalDate date=LocalDate.now();
-                preferredDateTime.setCompletionDate(date);
-                preferredDateTime.setCompletionStatus("Completed");
+        // Check if the frequency count matches and update the corresponding service frequency
+        if (service.getFrequencyInstance() == frequencyInstance) {
+            System.out.println("Updating frequency instance: " + frequencyInstance);
+            
+            // Update completion based on date and time for package services, or directly for ala-carte
+            for (PreferredDateTime preferredDateTime : requestedDates) {
+                if ("Ala-carte".equals(service.getPackageName()) || 
+                    (preferredDate != null && preferredDateTime.getPreferredDate() != null &&
+                    preferredTime != null && preferredDateTime.getPreferredTime() != null &&
+                    preferredDate.equals(preferredDateTime.getPreferredDate()) && 
+                    preferredTime.equals(preferredDateTime.getPreferredTime()))) {
 
-                service.setCompletions(service.getCompletions() + 1);
-                service.setPending(service.getFrequencyCount() - service.getCompletions());
+                    // Update based on frequency count and preferred date/time
+                    preferredDateTime.setCompletionDate(LocalDate.now());
+                    preferredDateTime.setCompletionStatus("Completed");
 
-                // Update overall service completion status
-                if (service.getCompletions() >= service.getFrequencyCount()) {
-                    service.setCompletionStatus("Completed");
-                    service.setCompletionDate(LocalDateTime.now());
-                } else {
-                    service.setCompletionStatus("In Progress");
+                    service.setCompletions(service.getCompletions() + 1);
+                    service.setPending(0);
+
+                    if (service.getCompletions()==1) {
+                        service.setCompletionStatus("Completed");
+                        service.setCompletionDate(LocalDateTime.now());
+                    } else {
+                        service.setCompletionStatus("In Progress");
+                    }
+
+                    updated = true;
+                    break;  // Exit loop after first match/update
                 }
-
-                updated = true;
-                break;  // Exit loop after first match/update
-            } else if (preferredDate != null && preferredDateTime.getPreferredDate() != null &&
-                       preferredTime != null && preferredDateTime.getPreferredTime() != null &&
-                       preferredDate.equals(preferredDateTime.getPreferredDate()) && 
-                       preferredTime.equals(preferredDateTime.getPreferredTime())) {
-                // If not Ala-carte, update based on date and time
-                System.out.println("Updating based on date and time match.");
-                
-                preferredDateTime.setCompletionDate(LocalDate.now());
-                preferredDateTime.setCompletionStatus("Completed");
-
-                service.setCompletions(service.getCompletions() + 1);
-                service.setPending(service.getFrequencyCount() - service.getCompletions());
-
-                if (service.getCompletions() >= service.getFrequencyCount()) {
-                    service.setCompletionStatus("Completed");
-                    service.setCompletionDate(LocalDateTime.now());
-                } else {
-                    service.setCompletionStatus("In Progress");
-                }
-
-                updated = true;
-                break;  // Exit loop after first match/update
             }
         }
 
@@ -349,6 +371,7 @@ public class ServiceCompletionServiceNew {
 
         return updated;
     }
+
 
     private boolean updatePackageService(ServiceReport service) {
         // Check if the package service has already reached the frequency limit
@@ -362,10 +385,10 @@ public class ServiceCompletionServiceNew {
         service.setCompletions(newCompletions);
 
         // Recalculate the pending count and frequency count for package service
-        service.setPending(service.getFrequencyCount() - newCompletions);
+        service.setPending(0);
 
         // Check if the package service is fully completed
-        if (newCompletions >= service.getFrequencyCount()) {
+        if (newCompletions ==1) {
             service.setCompletionStatus("Completed");
             service.setCompletionDate(LocalDateTime.now());
             System.out.println("Package Service: " + service.getServiceName() + " marked as completed on " + service.getCompletionDate());
@@ -406,6 +429,7 @@ public class ServiceCompletionServiceNew {
             if (interaction.getSubscriberAlaCarteServices() != null) {
                 serviceReport.setServiceID(interaction.getSubscriberAlaCarteServices().getSubscriberAlaCarteServicesID());
                 serviceReport.setServiceName(interaction.getSubscriberAlaCarteServices().getService().getServiceName());
+                serviceReport.setServiceRating(interaction.getServiceRating());
             }
 
             serviceReports.add(serviceReport);
@@ -419,11 +443,15 @@ public class ServiceCompletionServiceNew {
     public Map<String, List<ServiceReport>> rebuildAllServices(int subscriberID) {
         List<Interaction> interactions = interactionRepository.findBySubscriberID(subscriberID);
         List<SubscriberAlaCarteServices> alaCarteServices = alaCarteServicesRepository.findBySubscriber_SubscriberID(subscriberID);
-        System.out.println("size"+alaCarteServices.size());
+        System.out.println("size" + alaCarteServices.size());
         List<ServiceReport> serviceReports = new ArrayList<>();
         Set<Integer> completedServiceIds = new HashSet<>();
+
+        // Handle interactions (completed services)
         for (Interaction interaction : interactions) {
             ServiceReport serviceReport = new ServiceReport();
+
+            // Case 1: Interaction is of ala-carte
             if (interaction.getSubscriberAlaCarteServices() != null) {
                 SubscriberAlaCarteServices alaCarteService = interaction.getSubscriberAlaCarteServices();
                 serviceReport.setServiceID(alaCarteService.getService().getServiceID());
@@ -436,13 +464,42 @@ public class ServiceCompletionServiceNew {
                 serviceReport.setCompletionDate(LocalDateTime.now());
                 serviceReport.setFrequencyCount(1);
                 serviceReport.setPending(0);
-                
+                serviceReport.setFrequencyInstance(interaction.getFrequencyInstance());
                 completedServiceIds.add(alaCarteService.getService().getServiceID());
+            } 
+            // Case 2: Package service with null preferredDate and preferredTime (no subscriberAlaCarteServicesID)
+            else if (interaction.getPackageServices() != null && interaction.getSubscriberAlaCarteServices() == null) {
+                serviceReport.setServiceID(interaction.getPackageServices().getService().getServiceID());
+                serviceReport.setServiceName(interaction.getPackageServices().getService().getServiceName());
+                serviceReport.setPackageName(interaction.getPackageServices().getSubscriptionPackage().getPackageName());
+                serviceReport.setAlaCarte(false);
+                serviceReport.setPackageServiceID(interaction.getPackageServices().getPackageServicesID());
+                serviceReport.setCompletions(1);
+                serviceReport.setCompletionStatus("Completed");
+                serviceReport.setCompletionDate(LocalDateTime.now());
+                serviceReport.setFrequencyInstance(interaction.getFrequencyInstance()); // Frequency count
+                serviceReport.setPending(0);
+            }
+            // Case 3: Package service with preferredDate and preferredTime (with subscriberAlaCarteServicesID)
+            else if (interaction.getPackageServices() != null && interaction.getSubscriberAlaCarteServices() != null) {
+                SubscriberAlaCarteServices alaCarteService = interaction.getSubscriberAlaCarteServices();
+                serviceReport.setServiceID(interaction.getPackageServices().getService().getServiceID());
+                serviceReport.setServiceName(interaction.getPackageServices().getService().getServiceName());
+                serviceReport.setPackageName(interaction.getPackageServices().getSubscriptionPackage().getPackageName());
+                serviceReport.setAlaCarte(false);
+                serviceReport.setPackageServiceID(interaction.getPackageServices().getPackageServicesID());
+                serviceReport.setSubscriberAlaCarteServicesID(alaCarteService.getSubscriberAlaCarteServicesID()); // Populated
+                serviceReport.setCompletions(1);
+                serviceReport.setCompletionStatus("Completed");
+                serviceReport.setCompletionDate(LocalDateTime.now());
+                serviceReport.setFrequencyInstance(interaction.getFrequencyInstance()); // Frequency count
+                serviceReport.setPending(0);
             }
 
             serviceReports.add(serviceReport);
         }
 
+        // Handle ala-carte services that are not completed
         for (SubscriberAlaCarteServices alaCarteService : alaCarteServices) {
             if (!completedServiceIds.contains(alaCarteService.getService().getServiceID())) {
                 ServiceReport serviceReport = new ServiceReport();
@@ -455,11 +512,11 @@ public class ServiceCompletionServiceNew {
                 serviceReport.setCompletionStatus("Pending");
                 serviceReport.setFrequencyCount(1);
                 serviceReport.setPending(1);
-                
                 serviceReports.add(serviceReport);
             }
         }
 
+        // Add remaining package services
         addRemainingServices(subscriberID, completedServiceIds, serviceReports);
         subscriberServiceMap.put(subscriberID, serviceReports);
         inMemoryServiceTracker.startTracking(subscriberID, serviceReports);
@@ -468,6 +525,7 @@ public class ServiceCompletionServiceNew {
         allServicesMap.put("allServices", serviceReports);
         return allServicesMap;
     }
+
 
     public void addRemainingServices(int subscriberID, Set<Integer> completedServiceIds, List<ServiceReport> serviceReports) {
         Subscriber subscriber = subscriberRepository.findById(subscriberID)
@@ -478,27 +536,37 @@ public class ServiceCompletionServiceNew {
 
         for (PackageServices packageService : packageServices) {
             if (!completedServiceIds.contains(packageService.getService().getServiceID())) {
-                ServiceReport serviceReport = new ServiceReport();
-                serviceReport.setServiceID(packageService.getService().getServiceID());
-                serviceReport.setServiceName(packageService.getService().getServiceName());
-                serviceReport.setPackageName(packageService.getSubscriptionPackage().getPackageName());
-                serviceReport.setAlaCarte(false);
-                serviceReport.setPackageServiceID(packageService.getPackageServicesID());
-
-                serviceReport.setCompletions(0);
-                serviceReport.setCompletionStatus("Pending");
-
                 int frequencyCount = packageService.getFrequency();
-                serviceReport.setFrequencyCount(frequencyCount);
-                serviceReport.setFrequency(frequencyCount);
-                serviceReport.setPending(frequencyCount);
-                serviceReport.setFrequencyUnit(packageService.getService().getFrequencyUnit());
-                serviceReport.setPreferredDateTimes(null);
                 
-                serviceReports.add(serviceReport);
+                // Create a separate ServiceReport for each frequency
+                for (int i = 1; i <= frequencyCount; i++) {
+                    ServiceReport serviceReport = new ServiceReport();
+                    serviceReport.setServiceID(packageService.getService().getServiceID());
+                    serviceReport.setServiceName(packageService.getService().getServiceName());
+                    serviceReport.setPackageName(packageService.getSubscriptionPackage().getPackageName());
+                    serviceReport.setAlaCarte(false);
+                    serviceReport.setPackageServiceID(packageService.getPackageServicesID());
+
+                    serviceReport.setCompletions(0);
+                    serviceReport.setCompletionStatus("Pending");
+
+                    // Set the frequency count and use an integer for frequencyInstance
+                    serviceReport.setFrequencyCount(i);  // The current instance number (1st, 2nd, etc.)
+                    serviceReport.setPending(1); // Total pending occurrences
+                    serviceReport.setFrequency(frequencyCount);  // Total number of occurrences for this service
+                    serviceReport.setFrequencyUnit(packageService.getService().getFrequencyUnit());
+                    
+                    // Use an integer to represent the frequency instance
+                    serviceReport.setFrequencyInstance(i);  // Now an integer representing each instance
+                    
+                    serviceReport.setPreferredDateTimes(null); // Placeholder for preferred times if required
+                    
+                    serviceReports.add(serviceReport);
+                }
             }
         }
     }
+
 
     public static LocalDate convertToLocalDate(Date date) {
         if (date instanceof java.sql.Date) {

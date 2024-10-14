@@ -20,7 +20,7 @@ public class ServiceReport implements Serializable {
     private boolean isAlaCarte;
     private String color;
     private Integer subscriberAlaCarteServicesID;
-
+    private Integer frequencyInstance;
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime completionDate;
 
@@ -29,11 +29,12 @@ public class ServiceReport implements Serializable {
 
     private int frequencyCount;
     private int pending;
-
+    private Integer serviceRating;
     // Constructor
     public ServiceReport(int serviceID, String serviceName, String packageName, int frequency, 
                          String frequencyUnit, int completions, String completionStatus, LocalDateTime completionDate, 
-                         boolean isAlaCarte, Integer packageServiceID, List<PreferredDateTime> preferredDateTimes, Integer subscriberAlaCarteServicesID) {
+                         boolean isAlaCarte, Integer packageServiceID, List<PreferredDateTime> preferredDateTimes, Integer subscriberAlaCarteServicesID,
+                         Integer frequencyInstance,Integer serviceRating) {
         this.serviceID = serviceID;
         this.serviceName = serviceName;
         this.packageName = packageName;
@@ -48,6 +49,8 @@ public class ServiceReport implements Serializable {
         this.frequencyCount = frequency;
         this.pending = calculatePending(); // Initialize pending count
         this.subscriberAlaCarteServicesID = subscriberAlaCarteServicesID;
+        this.frequencyInstance=frequencyInstance;
+        this.serviceRating=serviceRating;
     }
 
     // Default constructor
@@ -57,7 +60,7 @@ public class ServiceReport implements Serializable {
 
     // Method to calculate pending services as frequencyCount - completions
     private int calculatePending() {
-        return frequencyCount - completions;
+        return pending - completions;
     }
 
     public void addPreferredDateTime(PreferredDateTime preferredDateTime) {
@@ -98,8 +101,8 @@ public class ServiceReport implements Serializable {
 
     public void setFrequency(int frequency) {
         this.frequency = frequency;
-        this.frequencyCount = frequency;
-        this.pending = calculatePending(); // Recalculate pending
+  //      this.frequencyCount = frequency;
+ //       this.pending = calculatePending(); // Recalculate pending
     }
 
     public String getFrequencyUnit() {
@@ -108,8 +111,8 @@ public class ServiceReport implements Serializable {
 
     public void setFrequencyUnit(String frequencyUnit) {
         this.frequencyUnit = frequencyUnit;
-        this.frequencyCount = frequency;
-        this.pending = calculatePending(); // Recalculate pending
+ //       this.frequencyCount = frequency;
+ //       this.pending = calculatePending(); // Recalculate pending
     }
 
     public int getCompletions() {
@@ -197,7 +200,24 @@ public class ServiceReport implements Serializable {
         this.color = color;
     }
 
-    // Override toString method for printing the details of ServiceReport
+    
+    public Integer getFrequencyInstance() {
+		return frequencyInstance;
+	}
+
+	public void setFrequencyInstance(Integer frequencyInstance) {
+		this.frequencyInstance = frequencyInstance;
+	}
+
+	public Integer getServiceRating() {
+		return serviceRating;
+	}
+
+	public void setServiceRating(Integer serviceRating) {
+		this.serviceRating = serviceRating;
+	}
+
+	// Override toString method for printing the details of ServiceReport
     @Override
     public String toString() {
         return "ServiceReport{" +
@@ -215,6 +235,10 @@ public class ServiceReport implements Serializable {
                 ", pending=" + pending +
                 ", isAlaCarte=" + isAlaCarte +
                 ", subscriberAlaCarteServicesID=" + subscriberAlaCarteServicesID +
+                ", frequencyInstance=" + frequencyInstance +
+                ", serviceRating=" + serviceRating +
                 '}';
     }
+    
+    
 }

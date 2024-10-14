@@ -132,7 +132,7 @@ public class InteractionServiceImpl implements InteractionService {
         interaction.setCompletionStatus(dto.getCompletionStatus());
        interaction.setPackageID(dto.getPackageID());
         interaction.setDescription(dto.getDescription());
-        
+        interaction.setFrequencyInstance(dto.getFrequencyInstance());
         // Fetch the SubscriberAlaCarteServices entity by its ID
         if (dto.getSubscriberAlaCarteServicesID() != null) {
             SubscriberAlaCarteServices subscriberAlaCarteServices = subscriberAlaCarteServicesRepository
@@ -164,7 +164,7 @@ public class InteractionServiceImpl implements InteractionService {
 
        dto.setPackageID(interaction.getPackageID());
         dto.setDescription(interaction.getDescription());
-
+       dto.setFrequencyInstance(interaction.getFrequencyInstance());
         // Map the `subscriberAlaCarteServicesID` from the Interaction entity
         if (interaction.getSubscriberAlaCarteServices() != null) {
             dto.setSubscriberAlaCarteServicesID(interaction.getSubscriberAlaCarteServices().getSubscriberAlaCarteServicesID());
