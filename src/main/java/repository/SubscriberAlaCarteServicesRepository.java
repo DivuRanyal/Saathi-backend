@@ -58,4 +58,8 @@ public interface SubscriberAlaCarteServicesRepository extends JpaRepository<Subs
 	            @Param("serviceDate") LocalDate serviceDate, 
 	            @Param("serviceTime") LocalTime serviceTime, 
 	            @Param("serviceID") Integer serviceID);
+	 
+	 @Query("SELECT COUNT(s) FROM SubscriberAlaCarteServices s WHERE s.subscriber.subscriberID = :subscriberID AND s.service.serviceID = :serviceID")
+	    int countBySubscriberIdAndServiceId(@Param("subscriberID") Integer subscriberID, @Param("serviceID") Integer serviceID);
+
 }

@@ -3,6 +3,7 @@ package controller;
 import model.AdminUser;
 import model.AlaCarteService;
 import model.PreferredDateTime;
+import model.PackageServices;
 import model.ServiceReport;
 import model.Subscriber;
 import model.SubscriberAlaCarteServices;
@@ -776,11 +777,44 @@ public class SubscriberController {
 
         try {
             // Extract request details
-            String preferredDate = (String) requestBody.get("preferredDate"); // Previously "requestedDate"
-            String preferredTime = (String) requestBody.get("preferredTime"); // Previously "requestedTime"
+            String preferredDate = (String) requestBody.get("preferredDate"); 
+            String preferredTime = (String) requestBody.get("preferredTime");
             Integer subscriberID = (Integer) requestBody.get("subscriberID");
             Integer serviceID = (Integer) requestBody.get("serviceID");
-            Integer frequencyInstance = (Integer) requestBody.get("frequencyInstance");
+
+            // Fetch the subscriber details
+            Subscriber subscriber = subscriberRepository.findById(subscriberID)
+                    .orElseThrow(() -> new RuntimeException("Subscriber not found with ID: " + subscriberID));
+            
+            // Get the packageID from the subscriber's package
+            Integer packageID = subscriber.getSubscriptionPackage().getPackageID();
+            
+            // Fetch the services associated with the package
+            List<PackageServices> packageServices = packageServiceRepository.findServicesByPackageId(packageID);
+            
+            // Variable to hold frequency count
+            Integer frequencyCount = 0;
+
+            // Iterate through the services in the package and get the frequency for the matching service
+            for (PackageServices packageService : packageServices) {
+                if (packageService.getService().getServiceID().equals(serviceID)) {
+                    frequencyCount = packageService.getFrequency();
+                    break;
+                }
+            }
+
+            // Fetch the current frequency instance for the service (based on completed instances)
+            int currentFrequencyInstance = subscriberAlaCarteServicesRepository.countBySubscriberIdAndServiceId(subscriberID, serviceID);
+
+            // Increment the frequencyInstance
+            int frequencyInstance = currentFrequencyInstance + 1;
+
+            // Ensure frequencyInstance doesn't exceed frequencyCount
+            if (frequencyInstance > frequencyCount) {
+                return ResponseEntity.badRequest()
+                        .body("Frequency instance exceeds the allowed count for this service.");
+            }
+
             // Parse the preferredDate and preferredTime from the input strings
             DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
             DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm");
@@ -793,9 +827,10 @@ public class SubscriberController {
 
             // Call the service layer to update the service request
             Map<String, List<ServiceReport>> updatedServiceReportMap = serviceCompletionService.updateServiceRequestedDateTime(
-                    subscriberID, serviceID, false, parsedPreferredDate, parsedPreferredTime, createdDate,frequencyInstance);
+                    subscriberID, serviceID, false, parsedPreferredDate, parsedPreferredTime, createdDate, frequencyInstance);
 
-            System.out.println("updatedServiceReportMap"+updatedServiceReportMap);
+            System.out.println("updatedServiceReportMap" + updatedServiceReportMap);
+            
             // Return the updated list of ServiceReports in the response
             return ResponseEntity.ok(updatedServiceReportMap);
 
@@ -806,6 +841,7 @@ public class SubscriberController {
                     .body("An error occurred while updating the service request.");
         }
     }
+
 
  // Endpoint to rebuild all services for a given subscriber
     @GetMapping("/rebuild/{subscriberID}")
