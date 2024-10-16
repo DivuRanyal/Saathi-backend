@@ -994,7 +994,7 @@ public class SubscriberController {
     }
        
     
-    @GetMapping("/all/{subscriberID}")
+    @GetMapping("/aggregate/{subscriberID}")
     public ResponseEntity<List<AggregatedServiceReport>> getAggregatedServiceReportsFromCache(@PathVariable int subscriberID) {
         try {
         	
