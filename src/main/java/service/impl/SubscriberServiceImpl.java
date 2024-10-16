@@ -185,11 +185,7 @@ public class SubscriberServiceImpl implements SubscriberService {
      // Track services if billingStatus is 1
         if (subscriberDTO.getBillingStatus() != null && subscriberDTO.getBillingStatus() == 1 && updatedSubscriber.getSubscriptionPackage().getPackageID() != 0) {
         	System.out.println(updatedSubscriber.getSubscriptionPackage().getPackageID());
-        	serviceCompletionService.trackSubscriberServices(
-                updatedSubscriber.getSubscriberID(), 
-                 updatedSubscriber.getSubscriptionPackage().getPackageID(), 
-                0 ,null,null// Assuming subscriberAlaCarteServicesID is not relevant here, or you can adjust this value
-            );
+        	serviceCompletionService.rebuildAllServices(subscriberId);
         }
 
         return convertToDTO(updatedSubscriber);    

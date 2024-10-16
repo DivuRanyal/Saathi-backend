@@ -41,4 +41,8 @@ public interface InteractionRepository extends JpaRepository<Interaction, Intege
     // Method to count the completed package services for a given subscriber
     @Query("SELECT COUNT(i) FROM Interaction i WHERE i.subscriberID = :subscriberID AND i.packageServices IS NOT NULL AND i.completionStatus = 1")
     int countCompletedPackageServicesBySubscriber(@Param("subscriberID") Integer subscriberID);
+    
+    @Query("SELECT COUNT(i) FROM Interaction i WHERE i.subscriberID = :subscriberID AND i.packageServices.packageServicesID=:packageServicesID")
+        int countBySubscriberIDAndPackageServices_PackageServicesID(Integer subscriberID, Integer packageServicesID);
 }
+

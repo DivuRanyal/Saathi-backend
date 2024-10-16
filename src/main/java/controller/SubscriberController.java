@@ -1,6 +1,7 @@
 package controller;
 
 import model.AdminUser;
+import model.AggregatedServiceReport;
 import model.AlaCarteService;
 import model.PreferredDateTime;
 import model.PackageServices;
@@ -794,11 +795,12 @@ public class SubscriberController {
             
             // Variable to hold frequency count
             Integer frequencyCount = 0;
-
+            PackageServices matchedPackageService = null;
             // Iterate through the services in the package and get the frequency for the matching service
             for (PackageServices packageService : packageServices) {
                 if (packageService.getService().getServiceID().equals(serviceID)) {
                     frequencyCount = packageService.getFrequency();
+                    matchedPackageService = packageService;
                     break;
                 }
             }
@@ -809,6 +811,12 @@ public class SubscriberController {
             // Increment the frequencyInstance
             int frequencyInstance = currentFrequencyInstance + 1;
 
+            // Count the existing interactions based on subscriberID and packageServiceID
+            int interactionCount = interactionRepository.countBySubscriberIDAndPackageServices_PackageServicesID(
+                    subscriberID, matchedPackageService.getPackageServicesID());
+
+            // Set the frequencyInstance to be interactionCount + 1
+             frequencyInstance = frequencyInstance + interactionCount ;
             // Ensure frequencyInstance doesn't exceed frequencyCount
             if (frequencyInstance > frequencyCount) {
                 return ResponseEntity.badRequest()
@@ -985,4 +993,20 @@ public class SubscriberController {
         return subscriberCounts;
     }
        
-}
+    
+    @GetMapping("/all/{subscriberID}")
+    public ResponseEntity<List<AggregatedServiceReport>> getAggregatedServiceReportsFromCache(@PathVariable int subscriberID) {
+        try {
+        	
+            // Aggregate the service data based on packageServiceID from cache
+            List<AggregatedServiceReport> aggregatedReports = serviceCompletionService.aggregateServiceDataByPackageServiceIDFromCache(subscriberID);
+
+            // Return the aggregated data as the response
+            return ResponseEntity.ok(aggregatedReports);
+
+        } catch (Exception e) {
+            // Handle any exceptions and return an error response
+            return ResponseEntity.status(500).body(null);
+        }
+    }
+} 

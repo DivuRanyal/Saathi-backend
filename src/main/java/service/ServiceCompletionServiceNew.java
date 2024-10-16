@@ -5,6 +5,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -22,6 +23,7 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import exception.RequestedDateTimesExceedsFrequencyException;
+import model.AggregatedServiceReport;
 import model.Interaction;
 import model.PackageServices;
 import model.PreferredDateTime;
@@ -464,6 +466,7 @@ public class ServiceCompletionServiceNew {
                 serviceReport.setCompletionDate(LocalDateTime.now());
                 serviceReport.setFrequencyCount(1);
                 serviceReport.setPending(0);
+                serviceReport.setFrequency(1);
                 serviceReport.setFrequencyInstance(interaction.getFrequencyInstance());
                 completedServiceIds.add(alaCarteService.getService().getServiceID());
             } 
@@ -477,6 +480,7 @@ public class ServiceCompletionServiceNew {
                 serviceReport.setCompletions(1);
                 serviceReport.setCompletionStatus("Completed");
                 serviceReport.setCompletionDate(LocalDateTime.now());
+                serviceReport.setFrequency(interaction.getPackageServices().getFrequency());
                 serviceReport.setFrequencyInstance(interaction.getFrequencyInstance()); // Frequency count
                 serviceReport.setPending(0);
             }
@@ -493,6 +497,7 @@ public class ServiceCompletionServiceNew {
                 serviceReport.setCompletionStatus("Completed");
                 serviceReport.setCompletionDate(LocalDateTime.now());
                 serviceReport.setFrequencyInstance(interaction.getFrequencyInstance()); // Frequency count
+                serviceReport.setFrequency(interaction.getPackageServices().getFrequency());
                 serviceReport.setPending(0);
             }
 
@@ -511,6 +516,7 @@ public class ServiceCompletionServiceNew {
                 serviceReport.setCompletions(0);
                 serviceReport.setCompletionStatus("Pending");
                 serviceReport.setFrequencyCount(1);
+                serviceReport.setFrequency(1);
                 serviceReport.setPending(1);
                 serviceReports.add(serviceReport);
             }
@@ -525,7 +531,6 @@ public class ServiceCompletionServiceNew {
         allServicesMap.put("allServices", serviceReports);
         return allServicesMap;
     }
-
 
     public void addRemainingServices(int subscriberID, Set<Integer> completedServiceIds, List<ServiceReport> serviceReports) {
         Subscriber subscriber = subscriberRepository.findById(subscriberID)
@@ -582,4 +587,74 @@ public class ServiceCompletionServiceNew {
                       .atZone(ZoneId.systemDefault())
                       .toLocalTime();
     }
+    
+    
+    public List<AggregatedServiceReport> aggregateServiceDataByPackageServiceIDFromCache(int subscriberID) throws Exception {
+        // Fetch the cached service reports from Memcached or in-memory
+        Map<String, List<ServiceReport>> allServicesMap = safeGetCachedServices(subscriberID);
+
+        // Check if the services are available in cache
+        if (allServicesMap == null || allServicesMap.get("allServices") == null) {
+            throw new Exception("No services found for subscriber ID: " + subscriberID);
+        }
+
+        // Fetch all service reports for the subscriber
+        List<ServiceReport> allServiceReports = allServicesMap.get("allServices");
+        Map<Integer, AggregatedServiceReport> aggregatedReportsMap = new HashMap<>();
+
+        // Iterate through the service reports and aggregate them by packageServiceID
+        for (ServiceReport serviceReport : allServiceReports) {
+            Integer packageServiceID = serviceReport.getPackageServiceID();
+
+        	
+            // If the packageServiceID already exists in the map, update its pending, completions, and frequencyCount
+            if (aggregatedReportsMap.containsKey(packageServiceID)) {
+                AggregatedServiceReport aggregatedReport = aggregatedReportsMap.get(packageServiceID);
+
+             	System.out.println(serviceReport.getPending());
+             	System.out.println(serviceReport.getCompletions());
+                // Update the aggregated report's pending, completions, and frequencyCount
+                aggregatedReport.setPending(aggregatedReport.getPending() + serviceReport.getPending());
+                aggregatedReport.setCompletions(aggregatedReport.getCompletions() + serviceReport.getCompletions());
+                
+            } else {
+            	System.out.println("hh"+serviceReport);
+            	// Assuming the date string follows the format "yyyy-MM-dd'T'HH:mm:ss"
+            	DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+            	LocalDateTime completionDate = serviceReport.getCompletionDate() != null 
+            	                                ? LocalDateTime.parse(serviceReport.getCompletionDate(), formatter) 
+            	                                : null;
+            	System.out.println(serviceReport.getPending());
+            	System.out.println(serviceReport.getCompletions());
+            	// Create a new AggregatedServiceReport using the constructor
+            	AggregatedServiceReport newReport = new AggregatedServiceReport(
+            	    serviceReport.getFrequencyUnit(),                // frequencyUnit
+            	    serviceReport.getPackageServiceID(),             // packageServiceID
+            	    serviceReport.getPending(),                      // pending
+            	    serviceReport.getCompletions(),                  // completions
+            	    serviceReport.getServiceName(),                  // serviceName
+            	    serviceReport.getFrequency(),                    // frequency
+            	    null,                                            // interactions (if you have it, replace null)
+            	    serviceReport.isAlaCarte(),                      // alaCarte
+     //       	    serviceReport.getPreferredDateTimes(),           // preferredDatesTimes
+            	    null,
+            	    completionDate,              // completionDate
+            	    serviceReport.getPackageName(),                  // packageName
+            	    serviceReport.getCompletionStatus(),             // completionStatus
+            	    serviceReport.getServiceID(),                    // serviceID
+     //       	    serviceReport.getSubscriberAlaCarteServicesID()  // subscriberAlaCarteServicesID
+            	    null
+            	);
+
+            	System.out.println(newReport.toString());  // Print the AggregatedServiceReport object
+
+                // Add to the map
+                aggregatedReportsMap.put(packageServiceID, newReport);
+            }
+        }
+
+        // Convert the map values to a list and return the aggregated service reports
+        return new ArrayList<>(aggregatedReportsMap.values());
+    }
+
 }
