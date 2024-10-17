@@ -69,6 +69,9 @@ public class AdminUser {
     @Column(name = "UpdatedBy")
     private Integer updatedBy;
 
+    @Column(name = "AverageRating")
+    private Double averageRating = 0.0;
+    
     @OneToMany(mappedBy = "saathi")
     @JsonIgnore
     private List<Subscriber> subscribers = new ArrayList<>();
@@ -222,7 +225,16 @@ public class AdminUser {
         this.subscribers = subscribers;
     }
 
-    @PrePersist
+    
+    public Double getAverageRating() {
+		return averageRating;
+	}
+
+	public void setAverageRating(Double averageRating) {
+		this.averageRating = averageRating;
+	}
+
+	@PrePersist
     protected void onCreate() {
         createdDate = new Date();  // Set the current timestamp for createdDate
     }
@@ -231,4 +243,6 @@ public class AdminUser {
     protected void onUpdate() {
         lastUpdatedDate = new Date();  // Set the current timestamp for lastUpdatedDate
     }
+    
+    
 }

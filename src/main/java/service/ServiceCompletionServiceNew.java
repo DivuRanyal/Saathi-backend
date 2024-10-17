@@ -432,6 +432,7 @@ public class ServiceCompletionServiceNew {
                 serviceReport.setServiceID(interaction.getSubscriberAlaCarteServices().getSubscriberAlaCarteServicesID());
                 serviceReport.setServiceName(interaction.getSubscriberAlaCarteServices().getService().getServiceName());
                 serviceReport.setServiceRating(interaction.getServiceRating());
+                
             }
 
             serviceReports.add(serviceReport);

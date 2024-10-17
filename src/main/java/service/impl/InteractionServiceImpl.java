@@ -169,7 +169,23 @@ public class InteractionServiceImpl implements InteractionService {
         if (interaction.getSubscriberAlaCarteServices() != null) {
             dto.setSubscriberAlaCarteServicesID(interaction.getSubscriberAlaCarteServices().getSubscriberAlaCarteServicesID());
         }
-
+        if (interaction.getServiceRating() != null) {
+            dto.setServiceRating(interaction.getServiceRating());
+        }
         return dto;
+    }
+    
+    // Method to update the rating for an interaction
+    @Override
+    public Interaction rateInteraction(int interactionID, int serviceRating) {
+        // Find the interaction by ID
+        Interaction interaction = interactionRepository.findById(interactionID)
+                .orElseThrow(() -> new RuntimeException("Interaction not found"));
+
+        // Update the serviceRating field
+        interaction.setServiceRating(serviceRating);
+
+        // Save the updated interaction
+        return interactionRepository.save(interaction);
     }
 }

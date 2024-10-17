@@ -770,7 +770,6 @@ public class SubscriberController {
         }
     }
    
-    
     @PutMapping("/service/updateRequest")
     public ResponseEntity<?> updateServiceRequest(
             @RequestBody HashMap<String, Object> requestBody) {
