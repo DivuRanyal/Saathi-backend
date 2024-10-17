@@ -667,7 +667,6 @@ public class SubscriberController {
             // Update package service completion with preferred date and time
         	if (subscriberAlaCarteServiceID != null) {
         		
-        		
         	    // Call with preferredDate and preferredTime
         	    updatedServices = serviceCompletionService.updateServiceCompletion(
         	        subscriberID, 
@@ -806,8 +805,9 @@ public class SubscriberController {
             }
 
             // Fetch the current frequency instance for the service (based on completed instances)
-            int currentFrequencyInstance = subscriberAlaCarteServicesRepository.countBySubscriberIdAndServiceId(subscriberID, serviceID);
+            int currentFrequencyInstance = subscriberAlaCarteServicesRepository.countBySubscriberIdAndServiceIdAndIsPackageServiceTrue(subscriberID, serviceID);
 
+            System.out.println("currentFrequencyInstance"+currentFrequencyInstance);
             // Increment the frequencyInstance
             int frequencyInstance = currentFrequencyInstance + 1;
 
