@@ -43,7 +43,7 @@ public interface SubscriberAlaCarteServicesRepository extends JpaRepository<Subs
 	int countAlaCarteServicesBySubscriber(@Param("subscriberID") Integer subscriberID);
 
 	// Find ala-carte services by `subscriberID` and `serviceID` (optional if still needed)
-	SubscriberAlaCarteServices findBySubscriber_SubscriberIDAndServiceID(int subscriberID, int serviceID);
+	SubscriberAlaCarteServices findBySubscriber_SubscriberIDAndServiceID_(int subscriberID, int serviceID);
 	
 //	@Query("SELECT s FROM SubscriberAlaCarteServices s WHERE s.serviceID = :serviceID AND s.subscriber.subscriberID = :subscriberID")
 //    SubscriberAlaCarteServices findByServiceIDAndSubscriberID(@Param("serviceID") int serviceID, @Param("subscriberID") int subscriberID);

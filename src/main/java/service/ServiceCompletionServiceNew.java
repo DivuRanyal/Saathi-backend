@@ -450,6 +450,8 @@ public class ServiceCompletionServiceNew {
         List<ServiceReport> serviceReports = new ArrayList<>();
         Set<Integer> completedServiceIds = new HashSet<>();
         Set<Integer> completedPackageServiceIds = new HashSet<>();
+        Map<Integer, Set<Integer>> completedPackageServiceFrequencies = new HashMap<>();
+
         // Handle interactions (completed services)
         for (Interaction interaction : interactions) {
             ServiceReport serviceReport = new ServiceReport();
@@ -486,7 +488,10 @@ public class ServiceCompletionServiceNew {
                 serviceReport.setFrequency(interaction.getPackageServices().getFrequency());
                 serviceReport.setFrequencyInstance(interaction.getFrequencyInstance()); // Frequency count
                 serviceReport.setPending(0);
-                completedPackageServiceIds.add(interaction.getPackageServices().getService().getServiceID());
+  //              completedPackageServiceIds.add(interaction.getPackageServices().getService().getServiceID());
+             // Track completed frequency instance
+                completedPackageServiceFrequencies.computeIfAbsent(interaction.getPackageServices().getService().getServiceID(), k -> new HashSet<>())
+                        .add(interaction.getFrequencyInstance());
             }
             // Case 3: Package service with preferredDate and preferredTime (with subscriberAlaCarteServicesID)
             else if (interaction.getPackageServices() != null && interaction.getSubscriberAlaCarteServices() != null) {
@@ -536,7 +541,9 @@ public class ServiceCompletionServiceNew {
         }
 
         // Add remaining package services
-        addRemainingServices(subscriberID, completedPackageServiceIds, serviceReports);
+ //       addRemainingServices(subscriberID, completedPackageServiceIds, serviceReports);
+        addRemainingServices(subscriberID, completedPackageServiceFrequencies, serviceReports);
+        
         subscriberServiceMap.put(subscriberID, serviceReports);
         inMemoryServiceTracker.startTracking(subscriberID, serviceReports);
 
@@ -545,18 +552,21 @@ public class ServiceCompletionServiceNew {
         return allServicesMap;
     }
 
-    public void addRemainingServices(int subscriberID, Set<Integer> completedServiceIds, List<ServiceReport> serviceReports) {
+    public void addRemainingServices(int subscriberID, Map<Integer, Set<Integer>> completedPackageServiceFrequencies, List<ServiceReport> serviceReports) {
         Subscriber subscriber = subscriberRepository.findById(subscriberID)
                 .orElseThrow(() -> new RuntimeException("Subscriber not found with ID: " + subscriberID));
-       Integer packageID = subscriber.getSubscriptionPackage().getPackageID();
+        Integer packageID = subscriber.getSubscriptionPackage().getPackageID();
         List<PackageServices> packageServices = packageServiceRepository.findServicesByPackageId(packageID);
-        System.out.println("divya"+completedServiceIds);
+        
         for (PackageServices packageService : packageServices) {
-            if (!completedServiceIds.contains(packageService.getService().getServiceID()) ) {
-                int frequencyCount = packageService.getFrequency();
-                System.out.println(packageService.getPackageServicesID());
-                // Create a separate ServiceReport for each frequency
-                for (int i = 1; i <= frequencyCount; i++) {
+            // Get completed frequencies for this service
+            Set<Integer> completedFrequencies = completedPackageServiceFrequencies.getOrDefault(packageService.getService().getServiceID(), new HashSet<>());
+            int frequencyCount = packageService.getFrequency();
+            System.out.println(packageService.getPackageServicesID());
+            
+            // Create a separate ServiceReport for each frequency
+            for (int i = 1; i <= frequencyCount; i++) {
+                if (!completedFrequencies.contains(i)) {  // Only add pending frequencies
                     ServiceReport serviceReport = new ServiceReport();
                     serviceReport.setServiceID(packageService.getService().getServiceID());
                     serviceReport.setServiceName(packageService.getService().getServiceName());
@@ -575,27 +585,28 @@ public class ServiceCompletionServiceNew {
                     
                     // Use an integer to represent the frequency instance
                     serviceReport.setFrequencyInstance(i);  // Now an integer representing each instance
-  /*                  
-                 // Fetch subscriber's ala-carte services
-                    SubscriberAlaCarteServices subscriberAlaCarteServices = alaCarteServicesRepository
-                            .findBySubscriber_SubscriberIDAndServiceID(subscriberID, packageService.getService().getServiceID());
 
-                    // Prepare the PreferredDateTime list
-                    List<PreferredDateTime> preferredDateTimes = new ArrayList<>();
+   //                 serviceReport.setPreferredDateTimes(null);  // Can add logic for preferred times if needed
+                                      
+                    // Fetch subscriber's ala-carte services
+                       SubscriberAlaCarteServices subscriberAlaCarteServices = alaCarteServicesRepository
+                               .findBySubscriber_SubscriberIDAndServiceID_(subscriberID, packageService.getService().getServiceID());
 
-                    if (subscriberAlaCarteServices != null && subscriberAlaCarteServices.getServiceID()==packageService.getService().getServiceID() && subscriberAlaCarteServices.getServiceDate() != null && subscriberAlaCarteServices.getServiceTime() != null) {
-                        PreferredDateTime newRequestedDateTime = new PreferredDateTime(
-                                subscriberAlaCarteServices.getServiceDate(),
-                                subscriberAlaCarteServices.getServiceTime()
-                        );
-                        newRequestedDateTime.setRequestedDate(LocalDateTime.now());
-                        preferredDateTimes.add(newRequestedDateTime);  // Add the valid PreferredDateTime
-                    } 
+                       // Prepare the PreferredDateTime list
+                       List<PreferredDateTime> preferredDateTimes = new ArrayList<>();
 
-                    // Set the PreferredDateTimes list, even if it's empty
-                    serviceReport.setPreferredDateTimes(preferredDateTimes.isEmpty() ? null : preferredDateTimes);
-  */ 
-                    serviceReport.setPreferredDateTimes(null);
+                       if (subscriberAlaCarteServices != null && subscriberAlaCarteServices.getServiceID()==packageService.getService().getServiceID() && subscriberAlaCarteServices.getServiceDate() != null && subscriberAlaCarteServices.getServiceTime() != null) {
+                           PreferredDateTime newRequestedDateTime = new PreferredDateTime(
+                                   subscriberAlaCarteServices.getServiceDate(),
+                                   subscriberAlaCarteServices.getServiceTime()
+                           );
+                           newRequestedDateTime.setRequestedDate(LocalDateTime.now());
+                           preferredDateTimes.add(newRequestedDateTime);  // Add the valid PreferredDateTime
+                       } 
+
+                       // Set the PreferredDateTimes list, even if it's empty
+                       serviceReport.setPreferredDateTimes(preferredDateTimes.isEmpty() ? null : preferredDateTimes);
+     
                     serviceReports.add(serviceReport);
                 }
             }
@@ -647,7 +658,7 @@ public class ServiceCompletionServiceNew {
                 aggregatedReport.setCompletions(aggregatedReport.getCompletions() + serviceReport.getCompletions());
                 
             } else {
-            	System.out.println("hh"+serviceReport);
+            	System.out.println(serviceReport);
             	// Assuming the date string follows the format "yyyy-MM-dd'T'HH:mm:ss"
             	DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
             	LocalDateTime completionDate = serviceReport.getCompletionDate() != null 
