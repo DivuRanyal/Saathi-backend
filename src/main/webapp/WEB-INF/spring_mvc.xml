@@ -65,7 +65,7 @@
     <property name="host" value="smtpout.secureserver.net"/>
     <property name="port" value="465"/>
     <property name="username" value="info@etheriumtech.com"/>
-    <property name="password" value="Admin@1234"/>
+    <property name="password" value="EtheriumHR@123#@!"/>
     <property name="javaMailProperties">
         <props>
             <prop key="mail.transport.protocol">smtp</prop>

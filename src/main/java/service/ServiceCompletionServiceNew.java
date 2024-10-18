@@ -646,7 +646,6 @@ public class ServiceCompletionServiceNew {
         for (ServiceReport serviceReport : allServiceReports) {
             Integer packageServiceID = serviceReport.getPackageServiceID();
 
-        	
             // If the packageServiceID already exists in the map, update its pending, completions, and frequencyCount
             if (aggregatedReportsMap.containsKey(packageServiceID)) {
                 AggregatedServiceReport aggregatedReport = aggregatedReportsMap.get(packageServiceID);
