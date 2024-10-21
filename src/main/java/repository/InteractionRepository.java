@@ -47,5 +47,12 @@ public interface InteractionRepository extends JpaRepository<Interaction, Intege
       Integer subscriberID, 
         Integer packageServicesID);
 
+ // Query to fetch interactions for a list of subscriber IDs
+    @Query("SELECT i FROM Interaction i WHERE i.subscriberID IN :subscriberIDs AND i.serviceRating IS NOT NULL")
+    List<Interaction> findInteractionsBySubscriberIDs(List<Integer> subscriberIDs);
+    
+    // Alternatively, calculate the average rating directly in the query
+    @Query("SELECT AVG(i.serviceRating) FROM Interaction i WHERE i.subscriberID IN :subscriberIDs AND i.serviceRating IS NOT NULL")
+    Double findAverageRatingBySubscriberIDs(List<Integer> subscriberIDs);
 }
 

@@ -8,6 +8,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import model.Interaction;
+import service.AdminUsersService;
 import service.InteractionService;
 import service.SaathiRatingService;
 
@@ -21,6 +23,9 @@ public class RatingController {
     @Autowired
     private InteractionService interactionService;
 
+    @Autowired
+    private AdminUsersService adminUsersService;
+
     @PostMapping("/{interactionID}/rate")
     public ResponseEntity<String> rateInteraction(@PathVariable int interactionID,
                                                   @RequestParam int serviceRating) {
@@ -29,8 +34,12 @@ public class RatingController {
         }
 
         // Update the interaction rating
-        interactionService.rateInteraction(interactionID, serviceRating);
-
+       Interaction updatedInteraction=  interactionService.rateInteraction(interactionID, serviceRating);
+        Integer saathiID = updatedInteraction.getSaathiID();
+        if (saathiID != null) {
+            // Call method to update the Saathi's average rating
+            adminUsersService.updateSaathiAverageRating(saathiID);
+        }
         return ResponseEntity.ok("Interaction rated successfully.");
     }
     

@@ -27,7 +27,7 @@ public interface AdminUsersService {
     boolean saathiExists(int saathiID) ;
    
     List<AdminUsersDTO> getAllAdminUsersWithSubscribersByUserType();
-    
+    void updateSaathiAverageRating(int saathiID);
     public long countAssignedSaathi();
     public long countUnassignedSaathi();
     AdminUser changePassword(String email, String oldPassword, String newPassword);

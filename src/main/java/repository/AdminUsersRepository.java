@@ -37,4 +37,7 @@ public interface AdminUsersRepository extends JpaRepository<AdminUser, Integer> 
     // Count Saathi users who are not assigned to any subscriber
     @Query("SELECT COUNT(a) FROM AdminUser a WHERE a.userType = 'Saathi' AND a.subscribers IS EMPTY")
     long countUnassignedSaathi();
+    
+ // Method to find AdminUser (Saathi) by ID
+    AdminUser findByAdminUserID(int adminUserID);  // Correct method definition
 }

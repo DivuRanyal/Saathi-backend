@@ -5,6 +5,8 @@ import model.Subscriber;
 import model.dto.AdminUsersDTO;
 import model.dto.SubscriberDTO;
 import repository.AdminUsersRepository;
+import repository.InteractionRepository;
+import repository.SubscriberRepository;
 import service.AdminUsersService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -25,11 +27,18 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import javax.transaction.Transactional;
+
 @Service
 public class AdminUsersServiceImpl implements AdminUsersService {
 
     private final AdminUsersRepository adminUsersRepository;
     
+    @Autowired
+    private final SubscriberRepository subscriberRepository;
+    
+    @Autowired
+    private final InteractionRepository interactionRepository;
     @Autowired
     private PasswordEncoder passwordEncoder;
 
@@ -37,6 +46,8 @@ public class AdminUsersServiceImpl implements AdminUsersService {
     @Autowired
     public AdminUsersServiceImpl(AdminUsersRepository adminUsersRepository) {
         this.adminUsersRepository = adminUsersRepository;
+		this.subscriberRepository = null;
+		this.interactionRepository = null;
     }
 
     @Override
@@ -206,5 +217,33 @@ public class AdminUsersServiceImpl implements AdminUsersService {
         adminUsersRepository.save(adminUser);  // Save updated user
 
         return adminUser;
+    }
+    
+    @Override
+    @Transactional
+    public void updateSaathiAverageRating(int saathiID) {
+        // Step 1: Fetch the Saathi (AdminUser)
+        AdminUser saathi = adminUsersRepository.findByAdminUserID(saathiID);
+
+        if (saathi != null) {
+            // Step 2: Fetch the list of subscribers assigned to this Saathi
+            List<Subscriber> subscribers = subscriberRepository.findSubscribersBySaathiID(saathiID);
+
+            if (subscribers != null && !subscribers.isEmpty()) {
+                // Step 3: Extract subscriber IDs
+                List<Integer> subscriberIDs = subscribers.stream()
+                        .map(Subscriber::getSubscriberID)
+                        .collect(Collectors.toList());
+
+                // Step 4: Calculate the average rating of interactions for these subscribers
+                Double averageRating = interactionRepository.findAverageRatingBySubscriberIDs(subscriberIDs);
+
+                // Step 5: Update the Saathi's average rating
+                if (averageRating != null) {
+                    saathi.setAverageRating(averageRating);
+                    adminUsersRepository.save(saathi);
+                }
+            }
+        }
     }
 }
