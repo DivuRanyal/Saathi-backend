@@ -693,49 +693,45 @@ public class ServiceCompletionServiceNew {
         for (ServiceReport serviceReport : allServiceReports) {
             Integer packageServiceID = serviceReport.getPackageServiceID();
 
-        	
+            // Ignore services without a packageServiceID (e.g., ala-carte services)
+            if (packageServiceID == null) {
+                continue;  // Skip this iteration for ala-carte services
+            }
+
             // If the packageServiceID already exists in the map, update its pending, completions, and frequencyCount
             if (aggregatedReportsMap.containsKey(packageServiceID)) {
                 AggregatedServiceReport aggregatedReport = aggregatedReportsMap.get(packageServiceID);
 
-             	System.out.println(serviceReport.getPending());
-             	System.out.println(serviceReport.getCompletions());
                 // Update the aggregated report's pending, completions, and frequencyCount
                 aggregatedReport.setPending(aggregatedReport.getPending() + serviceReport.getPending());
                 aggregatedReport.setCompletions(aggregatedReport.getCompletions() + serviceReport.getCompletions());
-                
+
             } else {
-            	System.out.println(serviceReport);
-            	// Assuming the date string follows the format "yyyy-MM-dd'T'HH:mm:ss"
-            	DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-            	LocalDateTime completionDate = serviceReport.getCompletionDate() != null 
-            	                                ? LocalDateTime.parse(serviceReport.getCompletionDate(), formatter) 
-            	                                : null;
-            	System.out.println(serviceReport.getPending());
-            	System.out.println(serviceReport.getCompletions());
-            	// Create a new AggregatedServiceReport using the constructor
-            	AggregatedServiceReport newReport = new AggregatedServiceReport(
-            	    serviceReport.getFrequencyUnit(),                // frequencyUnit
-            	    serviceReport.getPackageServiceID(),             // packageServiceID
-            	    serviceReport.getPending(),                      // pending
-            	    serviceReport.getCompletions(),                  // completions
-            	    serviceReport.getServiceName(),                  // serviceName
-            	    serviceReport.getFrequency(),                    // frequency
-            	    null,                                            // interactions (if you have it, replace null)
-            	    serviceReport.isAlaCarte(),                      // alaCarte
-     //       	    serviceReport.getPreferredDateTimes(),           // preferredDatesTimes
-            	    null,
-            	    completionDate,              // completionDate
-            	    serviceReport.getPackageName(),                  // packageName
-            	    serviceReport.getCompletionStatus(),             // completionStatus
-            	    serviceReport.getServiceID(),                    // serviceID
-     //       	    serviceReport.getSubscriberAlaCarteServicesID()  // subscriberAlaCarteServicesID
-            	    null
-            	);
+                // Assuming the date string follows the format "yyyy-MM-dd HH:mm:ss"
+                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+                LocalDateTime completionDate = serviceReport.getCompletionDate() != null
+                        ? LocalDateTime.parse(serviceReport.getCompletionDate(), formatter)
+                        : null;
 
-            	System.out.println(newReport.toString());  // Print the AggregatedServiceReport object
+                // Create a new AggregatedServiceReport using the constructor
+                AggregatedServiceReport newReport = new AggregatedServiceReport(
+                        serviceReport.getFrequencyUnit(),               // frequencyUnit
+                        serviceReport.getPackageServiceID(),            // packageServiceID
+                        serviceReport.getPending(),                     // pending
+                        serviceReport.getCompletions(),                 // completions
+                        serviceReport.getServiceName(),                 // serviceName
+                        serviceReport.getFrequency(),                   // frequency
+                        null,                                           // interactions (replace if needed)
+                        serviceReport.isAlaCarte(),                     // alaCarte
+                        null,                                           // preferredDatesTimes (replace if needed)
+                        completionDate,                                 // completionDate
+                        serviceReport.getPackageName(),                 // packageName
+                        serviceReport.getCompletionStatus(),            // completionStatus
+                        serviceReport.getServiceID(),                   // serviceID
+                        null                                            // subscriberAlaCarteServicesID (replace if needed)
+                );
 
-                // Add to the map
+                // Add the new report to the map
                 aggregatedReportsMap.put(packageServiceID, newReport);
             }
         }

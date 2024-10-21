@@ -924,7 +924,6 @@ public class SubscriberController {
         }
     }
 
-
     @PostMapping("/verify")
     public ResponseEntity<?> verifyOtp(@RequestParam String email, @RequestParam Integer otp) {
         try {
