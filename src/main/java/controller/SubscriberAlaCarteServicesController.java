@@ -49,7 +49,7 @@ public class SubscriberAlaCarteServicesController {
         // Validate and save the service
         SubscriberAlaCarteServices createdService = service.createOrUpdateService(entity);
 
-        // Automatically track subscriber services
+ /*       // Automatically track subscriber services
         Map<String, List<ServiceReport>> trackedServices = serviceCompletionService.trackSubscriberServices(
                 createdService.getSubscriber().getSubscriberID(),
                 0,
@@ -57,7 +57,10 @@ public class SubscriberAlaCarteServicesController {
                 createdService.getServiceDate(),
                 createdService.getServiceTime()
         );
-
+        */
+        Map<String, List<ServiceReport>> trackedServices = serviceCompletionService.rebuildAllServices(createdService.getSubscriber().getSubscriberID());
+        System.out.println("allServicesMap"+trackedServices);
+       
         // If tracking is not needed or empty, return the created service
         if (trackedServices == null || trackedServices.isEmpty()) {
             return new ResponseEntity<>(createdService, HttpStatus.CREATED);

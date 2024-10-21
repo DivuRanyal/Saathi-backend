@@ -84,8 +84,16 @@ public class ServiceCompletionServiceNew {
 
     @CachePut(value = "subscriberServicesCache", key = "#subscriberID")
     public Map<String, List<ServiceReport>> trackSubscriberServices(Integer subscriberID, int packageID, int alaCarteServiceID, LocalDate serviceDate, LocalTime serviceTime) {
-        List<ServiceReport> serviceReports = subscriberServiceMap.getOrDefault(subscriberID, new ArrayList<>());
+    	 // Fetch services for the subscriber
+        Map<String, List<ServiceReport>> services = getSubscriberServices(subscriberID);
+        List<Map<String, Object>> servicesWithInteractions = new ArrayList<>();
 
+        if (services != null && !services.isEmpty() && services.containsKey("allServices")) {
+            List<ServiceReport> serviceReports = services.get("allServices");
+            System.out.println(serviceReports.size());
+        }
+       	List<ServiceReport> serviceReports = subscriberServiceMap.getOrDefault(subscriberID, new ArrayList<>());
+       
         if (packageID != 0) {
             List<PackageServices> packageServices = packageServiceRepository.findServicesByPackageId(packageID);
             if (packageServices != null && !packageServices.isEmpty()) {
@@ -140,18 +148,19 @@ public class ServiceCompletionServiceNew {
                 requestedDates,
                 alaCarteService.getSubscriberAlaCarteServicesID(),1,null
             );
-             alaCarteServiceReport.setPending(1);
+            alaCarteServiceReport.setPending(1);
              System.out.println(alaCarteServiceReport);
             if (!serviceReports.contains(alaCarteServiceReport)) {
+            	System.out.println("hi");
                 serviceReports.add(alaCarteServiceReport);
             }
         }
-
+        System.out.println(serviceReports);
         subscriberServiceMap.put(subscriberID, serviceReports);
         inMemoryServiceTracker.startTracking(subscriberID, serviceReports);
-        Map<String, List<ServiceReport>> services = new HashMap<>();
+        Map<String, List<ServiceReport>> services_ = new HashMap<>();
         services.put("allServices", serviceReports);
-        return services;
+        return services_;
     }
 
     private List<PreferredDateTime> generateRequestedDateTimes(int frequency, LocalDate startDate, LocalTime startTime) {
