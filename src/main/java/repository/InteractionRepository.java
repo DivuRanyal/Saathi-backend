@@ -42,7 +42,10 @@ public interface InteractionRepository extends JpaRepository<Interaction, Intege
     @Query("SELECT COUNT(i) FROM Interaction i WHERE i.subscriberID = :subscriberID AND i.packageServices IS NOT NULL AND i.completionStatus = 1")
     int countCompletedPackageServicesBySubscriber(@Param("subscriberID") Integer subscriberID);
     
-    @Query("SELECT COUNT(i) FROM Interaction i WHERE i.subscriberID = :subscriberID AND i.packageServices.packageServicesID=:packageServicesID")
-        int countBySubscriberIDAndPackageServices_PackageServicesID(Integer subscriberID, Integer packageServicesID);
+    @Query("SELECT COUNT(i) FROM Interaction i WHERE i.subscriberID = :subscriberID AND i.packageServices.packageServicesID = :packageServicesID AND FUNCTION('MONTH', i.createdDate) = FUNCTION('MONTH', CURRENT_DATE) AND FUNCTION('YEAR', i.createdDate) = FUNCTION('YEAR', CURRENT_DATE)")
+    int countBySubscriberIDAndPackageServices_PackageServicesID_CurrentMonth(
+      Integer subscriberID, 
+        Integer packageServicesID);
+
 }
 

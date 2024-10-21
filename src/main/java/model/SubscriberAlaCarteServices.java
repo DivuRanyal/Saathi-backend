@@ -50,7 +50,9 @@ public class SubscriberAlaCarteServices {
     @JoinColumn(name = "SubscriberID")
     private Subscriber subscriber;  // Ensure this field name is 'subscriber', not 'subscriberID'
 
-
+    @Transient
+    private int frequencyInstance;
+    
 	public Integer getSubscriberAlaCarteServicesID() {
 		return SubscriberAlaCarteServicesID;
 	}
@@ -153,6 +155,14 @@ public class SubscriberAlaCarteServices {
 
 	public void setServiceTime(LocalTime serviceTime) {
 		this.serviceTime = serviceTime;
+	}
+
+	public int getFrequencyInstance() {
+		return frequencyInstance;
+	}
+
+	public void setFrequencyInstance(int frequencyInstance) {
+		this.frequencyInstance = frequencyInstance;
 	}
     
 	

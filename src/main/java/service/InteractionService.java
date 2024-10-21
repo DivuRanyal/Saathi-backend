@@ -14,4 +14,5 @@ public interface InteractionService {
     List<InteractionDTO> getInteractionsBySubscriberID(Integer id);
     List<InteractionDTO> getAllInteractions();
     Interaction rateInteraction(int interactionID, int serviceRating);
+    
 }

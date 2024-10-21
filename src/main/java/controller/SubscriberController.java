@@ -811,7 +811,7 @@ public class SubscriberController {
             int frequencyInstance = currentFrequencyInstance + 1;
 
             // Count the existing interactions based on subscriberID and packageServiceID
-            int interactionCount = interactionRepository.countBySubscriberIDAndPackageServices_PackageServicesID(
+            int interactionCount = interactionRepository.countBySubscriberIDAndPackageServices_PackageServicesID_CurrentMonth(
                     subscriberID, matchedPackageService.getPackageServicesID());
 
             // Set the frequencyInstance to be interactionCount + 1
@@ -991,8 +991,7 @@ public class SubscriberController {
         subscriberCounts.put("inactiveSubscribers", subscriberService.countInactiveSubscribers());
         return subscriberCounts;
     }
-       
-    
+           
     @GetMapping("/aggregate/{subscriberID}")
     public ResponseEntity<List<AggregatedServiceReport>> getAggregatedServiceReportsFromCache(@PathVariable int subscriberID) {
         try {

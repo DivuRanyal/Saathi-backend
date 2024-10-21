@@ -47,4 +47,6 @@ public class SaathiRatingService {
         // Update the saathi with the new average rating
         adminUserRepository.save(saathi);
     }
+    
+    
 }

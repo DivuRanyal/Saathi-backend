@@ -42,9 +42,8 @@ public interface SubscriberAlaCarteServicesRepository extends JpaRepository<Subs
 	@Query("SELECT COUNT(s) FROM SubscriberAlaCarteServices s WHERE s.subscriber.subscriberID = :subscriberID")
 	int countAlaCarteServicesBySubscriber(@Param("subscriberID") Integer subscriberID);
 
-	// Find ala-carte services by `subscriberID` and `serviceID` (optional if still needed)
-	SubscriberAlaCarteServices findBySubscriber_SubscriberIDAndServiceID_(int subscriberID, int serviceID);
-	
+	Optional<SubscriberAlaCarteServices> findBySubscriber_SubscriberIDAndServiceIDAndIsPackageServiceTrue(int subscriberID, int serviceID);
+
 //	@Query("SELECT s FROM SubscriberAlaCarteServices s WHERE s.serviceID = :serviceID AND s.subscriber.subscriberID = :subscriberID")
 //    SubscriberAlaCarteServices findByServiceIDAndSubscriberID(@Param("serviceID") int serviceID, @Param("subscriberID") int subscriberID);
 
@@ -60,9 +59,10 @@ public interface SubscriberAlaCarteServicesRepository extends JpaRepository<Subs
 	            @Param("serviceID") Integer serviceID);
 	 
 	 @Query("SELECT COUNT(s) FROM SubscriberAlaCarteServices s WHERE s.subscriber.subscriberID = :subscriberID AND s.service.serviceID = :serviceID")
-	    int countBySubscriberIdAndServiceId(@Param("subscriberID") Integer subscriberID, @Param("serviceID") Integer serviceID);
+	 int countBySubscriberIdAndServiceId(@Param("subscriberID") Integer subscriberID, @Param("serviceID") Integer serviceID);
 
 	 @Query("SELECT COUNT(s) FROM SubscriberAlaCarteServices s WHERE s.subscriber.subscriberID = :subscriberID AND s.service.serviceID = :serviceID AND s.isPackageService = true")
 	 int countBySubscriberIdAndServiceIdAndIsPackageServiceTrue(@Param("subscriberID") Integer subscriberID, @Param("serviceID") Integer serviceID);
+
 
 }
