@@ -9,6 +9,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import model.Interaction;
+import model.Subscriber;
+import repository.SubscriberRepository;
 import service.AdminUsersService;
 import service.InteractionService;
 import service.SaathiRatingService;
@@ -26,6 +28,9 @@ public class RatingController {
     @Autowired
     private AdminUsersService adminUsersService;
 
+    @Autowired
+    private SubscriberRepository subscriberRepository;
+    
     @PostMapping("/{interactionID}/rate")
     public ResponseEntity<String> rateInteraction(@PathVariable int interactionID,
                                                   @RequestParam int serviceRating) {
@@ -35,7 +40,10 @@ public class RatingController {
 
         // Update the interaction rating
        Interaction updatedInteraction=  interactionService.rateInteraction(interactionID, serviceRating);
-        Integer saathiID = updatedInteraction.getSaathiID();
+       Subscriber subscriber = subscriberRepository.findById(updatedInteraction.getSubscriberID())
+               .orElseThrow(() -> new RuntimeException("Subscriber not found with ID: " + updatedInteraction.getSubscriberID()));
+       
+        Integer saathiID = subscriber.getSaathi().getAdminUserID();
         System.out.println(saathiID);
         if (saathiID != null) {
             // Call method to update the Saathi's average rating
