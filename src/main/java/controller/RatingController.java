@@ -36,6 +36,7 @@ public class RatingController {
         // Update the interaction rating
        Interaction updatedInteraction=  interactionService.rateInteraction(interactionID, serviceRating);
         Integer saathiID = updatedInteraction.getSaathiID();
+        System.out.println(saathiID);
         if (saathiID != null) {
             // Call method to update the Saathi's average rating
             adminUsersService.updateSaathiAverageRating(saathiID);
