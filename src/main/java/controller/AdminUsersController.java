@@ -600,12 +600,18 @@ public class AdminUsersController {
 
                     // Loop through each service and process it
                     for (ServiceReport serviceReport : serviceReports) {
-                        if (serviceReport.getFrequencyCount() != 0) {
-                            totalServices += serviceReport.getFrequencyCount();  // Count every service
-
+                    	System.out.println("serviceReport"+serviceReport);
+                    	 // Print the actual completion status to debug
+                        System.out.println("Completion Status: '" + serviceReport.getCompletionStatus() + "'");
+                       
+            //            if (serviceReport.getFrequencyCount() != 0) {
+             //               totalServices += serviceReport.getFrequencyCount();  // Count every service
+                        	 totalServices += 1; 
                             // Determine if the service is completed or pending
+                        	 
                             if ("Completed".equals(serviceReport.getCompletionStatus())) {
                                 totalCompleted++;
+                                System.out.println(totalCompleted);
                             } else {
                                 totalPending++;
                             }
@@ -623,7 +629,7 @@ public class AdminUsersController {
 
                             // Update the map with the new counts
                             serviceBreakdown.put(serviceName, countDTO);
-                        }
+         //               }
                     }
                 }
             }
