@@ -85,13 +85,7 @@ public class ServiceCompletionServiceNew {
     @CachePut(value = "subscriberServicesCache", key = "#subscriberID")
     public Map<String, List<ServiceReport>> trackSubscriberServices(Integer subscriberID, int packageID, int alaCarteServiceID, LocalDate serviceDate, LocalTime serviceTime) {
     	 // Fetch services for the subscriber
-        Map<String, List<ServiceReport>> services = getSubscriberServices(subscriberID);
-        List<Map<String, Object>> servicesWithInteractions = new ArrayList<>();
-
-        if (services != null && !services.isEmpty() && services.containsKey("allServices")) {
-            List<ServiceReport> serviceReports = services.get("allServices");
-            System.out.println(serviceReports.size());
-        }
+      
        	List<ServiceReport> serviceReports = subscriberServiceMap.getOrDefault(subscriberID, new ArrayList<>());
        
         if (packageID != 0) {
@@ -158,9 +152,9 @@ public class ServiceCompletionServiceNew {
         System.out.println(serviceReports);
         subscriberServiceMap.put(subscriberID, serviceReports);
         inMemoryServiceTracker.startTracking(subscriberID, serviceReports);
-        Map<String, List<ServiceReport>> services_ = new HashMap<>();
+        Map<String, List<ServiceReport>> services = new HashMap<>();
         services.put("allServices", serviceReports);
-        return services_;
+        return services;
     }
 
     private List<PreferredDateTime> generateRequestedDateTimes(int frequency, LocalDate startDate, LocalTime startTime) {
@@ -514,11 +508,13 @@ public class ServiceCompletionServiceNew {
 
         // Add remaining pending package services
         addRemainingPendingPackageServices(subscriberID, completedPackageServiceFrequencies, serviceReports);
+        subscriberServiceMap.put(subscriberID, serviceReports);
+        inMemoryServiceTracker.startTracking(subscriberID, serviceReports);
 
-        // Store and return the result
         Map<String, List<ServiceReport>> allServicesMap = new HashMap<>();
         allServicesMap.put("allServices", serviceReports);
         return allServicesMap;
+
     }
 
     public void addRemainingPendingPackageServices(int subscriberID, Map<Integer, Set<Integer>> completedPackageServiceFrequencies, List<ServiceReport> serviceReports) {
@@ -640,17 +636,19 @@ public class ServiceCompletionServiceNew {
 
         	if (optionalBooking.isPresent()) {
         	    booking = optionalBooking.get();
+        	    System.out.println("booking"+booking);
         	    // Continue with your logic for a valid package service
         	} else {
         	    // Handle the case where no booking was found or isPackageService is not true
         	}
-
-        if (booking != null && booking.getFrequencyInstance()==frequencyInstance) {
+        	
+        	if (booking != null && booking.getFrequencyInstance() != null && booking.getFrequencyInstance().intValue() == frequencyInstance) {
             // Service is booked
             serviceReport.setSubscriberAlaCarteServicesID(booking.getSubscriberAlaCarteServicesID());
             PreferredDateTime preferredDateTime = new PreferredDateTime(booking.getServiceDate(), booking.getServiceTime());
             preferredDateTime.setRequestedDate(convertToLocalDateTime(booking.getCreatedDate()));
             serviceReport.addPreferredDateTime(preferredDateTime);
+            System.out.println("frequencyInstance"+frequencyInstance);
         }
     }
 

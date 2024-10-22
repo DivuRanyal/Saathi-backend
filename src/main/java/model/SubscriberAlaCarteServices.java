@@ -50,8 +50,8 @@ public class SubscriberAlaCarteServices {
     @JoinColumn(name = "SubscriberID")
     private Subscriber subscriber;  // Ensure this field name is 'subscriber', not 'subscriberID'
 
-    @Transient
-    private int frequencyInstance;
+    @Column(name = "FrequencyInstance")
+    private Integer frequencyInstance;
     
 	public Integer getSubscriberAlaCarteServicesID() {
 		return SubscriberAlaCarteServicesID;
@@ -157,11 +157,11 @@ public class SubscriberAlaCarteServices {
 		this.serviceTime = serviceTime;
 	}
 
-	public int getFrequencyInstance() {
+	public Integer getFrequencyInstance() {
 		return frequencyInstance;
 	}
 
-	public void setFrequencyInstance(int frequencyInstance) {
+	public void setFrequencyInstance(Integer frequencyInstance) {
 		this.frequencyInstance = frequencyInstance;
 	}
     
