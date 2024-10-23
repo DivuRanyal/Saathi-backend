@@ -863,14 +863,14 @@ public class AdminUsersController {
                                     if ("Pending".equals(serviceReport.getCompletionStatus())) {
                                         saathiPendingPackageServices += 1;
                                     } else {
-                                        saathiCompletedPackageServices += serviceReport.getCompletions();
+                                        saathiCompletedPackageServices += 1;
                                         saathiPendingPackageServices += (serviceReport.getPending() - serviceReport.getCompletions());
                                     }
                                 } else { // Ala-carte services
                                     if ("Pending".equals(serviceReport.getCompletionStatus())) {
                                         saathiPendingAlaCarteServices += 1;
                                     } else {
-                                        saathiCompletedAlaCarteServices += serviceReport.getCompletions();
+                                        saathiCompletedAlaCarteServices += 1;
                                         saathiPendingAlaCarteServices += (serviceReport.getPending() - serviceReport.getCompletions());
                                     }
                                 }
