@@ -856,13 +856,14 @@ public class AdminUsersController {
                         List<ServiceReport> serviceReports = services.get("allServices");
 
                         for (ServiceReport serviceReport : serviceReports) {
-                            if (serviceReport.getFrequencyCount() != 0) {
+           //                 if (serviceReport.getFrequencyCount() != 0) {
                                 totalServices += serviceReport.getFrequencyCount();
-
+                                
                                 if (!serviceReport.isAlaCarte()) { // Package services
                                     if ("Pending".equals(serviceReport.getCompletionStatus())) {
                                         saathiPendingPackageServices += 1;
                                     } else {
+                                    	System.out.println("hh");
                                         saathiCompletedPackageServices += 1;
                                         saathiPendingPackageServices += (serviceReport.getPending() - serviceReport.getCompletions());
                                     }
@@ -874,7 +875,7 @@ public class AdminUsersController {
                                         saathiPendingAlaCarteServices += (serviceReport.getPending() - serviceReport.getCompletions());
                                     }
                                 }
-                            }
+         //                   }
                         }
                     }
                 }
