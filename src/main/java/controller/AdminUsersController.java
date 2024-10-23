@@ -857,29 +857,32 @@ public class AdminUsersController {
 
                         for (ServiceReport serviceReport : serviceReports) {
            //                 if (serviceReport.getFrequencyCount() != 0) {
-                                totalServices += serviceReport.getFrequencyCount();
+                                totalServices += 1;
                                 
                                 if (!serviceReport.isAlaCarte()) { // Package services
                                     if ("Pending".equals(serviceReport.getCompletionStatus())) {
                                         saathiPendingPackageServices += 1;
+                                        System.out.println("hh");
                                     } else {
-                                    	System.out.println("hh");
+                                    	
                                         saathiCompletedPackageServices += 1;
-                                        saathiPendingPackageServices += (serviceReport.getPending() - serviceReport.getCompletions());
+                                        saathiPendingPackageServices =0;
                                     }
                                 } else { // Ala-carte services
                                     if ("Pending".equals(serviceReport.getCompletionStatus())) {
                                         saathiPendingAlaCarteServices += 1;
                                     } else {
                                         saathiCompletedAlaCarteServices += 1;
-                                        saathiPendingAlaCarteServices += (serviceReport.getPending() - serviceReport.getCompletions());
+                                //        saathiPendingAlaCarteServices += (serviceReport.getPending() - serviceReport.getCompletions());
+                                        saathiPendingAlaCarteServices=0;
                                     }
                                 }
          //                   }
                         }
                     }
                 }
-
+                
+                
                 // Add individual Saathi counts to the totals
                 totalPendingPackageServices += saathiPendingPackageServices;
                 totalCompletedPackageServices += saathiCompletedPackageServices;
