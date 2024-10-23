@@ -860,18 +860,18 @@ public class AdminUsersController {
                                 totalServices += serviceReport.getFrequencyCount();
 
                                 if (!serviceReport.isAlaCarte()) { // Package services
-                                    if ("Not Started".equals(serviceReport.getCompletionStatus())) {
-                                        saathiPendingPackageServices += serviceReport.getFrequencyCount();
+                                    if ("Pending".equals(serviceReport.getCompletionStatus())) {
+                                        saathiPendingPackageServices += 1;
                                     } else {
                                         saathiCompletedPackageServices += serviceReport.getCompletions();
-                                        saathiPendingPackageServices += (serviceReport.getFrequencyCount() - serviceReport.getCompletions());
+                                        saathiPendingPackageServices += (serviceReport.getPending() - serviceReport.getCompletions());
                                     }
                                 } else { // Ala-carte services
-                                    if ("Not Started".equals(serviceReport.getCompletionStatus())) {
-                                        saathiPendingAlaCarteServices += serviceReport.getFrequencyCount();
+                                    if ("Pending".equals(serviceReport.getCompletionStatus())) {
+                                        saathiPendingAlaCarteServices += 1;
                                     } else {
                                         saathiCompletedAlaCarteServices += serviceReport.getCompletions();
-                                        saathiPendingAlaCarteServices += (serviceReport.getFrequencyCount() - serviceReport.getCompletions());
+                                        saathiPendingAlaCarteServices += (serviceReport.getPending() - serviceReport.getCompletions());
                                     }
                                 }
                             }
