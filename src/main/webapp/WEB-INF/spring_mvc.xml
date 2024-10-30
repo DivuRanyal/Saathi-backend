@@ -16,6 +16,10 @@
            http://www.springframework.org/schema/data/jpa/spring-jpa.xsd
            http://www.springframework.org/schema/tx 
            http://www.springframework.org/schema/tx/spring-tx.xsd">
+           
+           <!-- Load properties from application.properties -->
+    <context:property-placeholder location="classpath:application.properties" ignore-unresolvable="true"/>
+           
     <!-- Enable component scanning -->
     <context:component-scan base-package="controller,service,model,repository,config" />
     <!-- Enable Spring MVC configuration -->

@@ -3,6 +3,7 @@ package controller;
 import model.AdminUser;
 import model.AggregatedServiceReport;
 import model.AlaCarteService;
+import model.Order;
 import model.PreferredDateTime;
 import model.PackageServices;
 import model.ServiceReport;
@@ -16,10 +17,12 @@ import model.dto.SubscriberDTO;
 import model.dto.SubscriberSaathiDTO;
 import repository.AlaCarteServiceRepository;
 import repository.InteractionRepository;
+import repository.OrderRepository;
 import repository.PackageServiceRepository;
 import repository.SubscriberAlaCarteServicesRepository;
 import repository.SubscriberRepository;
 import service.AdminUsersService;
+import service.CashfreeService;
 import service.EmailService;
 import service.InteractionService;
 import service.PatronService;
@@ -34,6 +37,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import exception.EmailAlreadyRegisteredException;
@@ -53,6 +58,7 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -69,6 +75,8 @@ public class SubscriberController {
     @Autowired
     private SubscriberService subscriberService;
     
+    @Autowired
+    private CashfreeService cashfreeService;
     @Autowired
     private AdminUsersService adminUsersService;
  //   @Autowired
@@ -88,7 +96,9 @@ public class SubscriberController {
     @Autowired
     private ServiceCompletionServiceNew serviceCompletionService;
 
- 
+    @Autowired
+    private OrderRepository orderRepository;
+
     @Autowired
     private InteractionService interactionService;
     
@@ -1006,4 +1016,52 @@ public class SubscriberController {
             return ResponseEntity.status(500).body(null);
         }
     }
+    
+    @PostMapping("/create-order")
+    public ResponseEntity<Order> createOrder(@RequestBody Map<String, String> orderData) throws JsonMappingException, JsonProcessingException {
+        // Extract subscriberId, orderAmount, and currency from the request data
+        String orderAmount = orderData.get("orderAmount");
+        String subscriberID = orderData.get("subscriberID");
+        String currency = orderData.get("currency");
+
+        // Fetch subscriber details from the database
+        SubscriberDTO subscriber = subscriberService.getSubscriberById(Integer.parseInt(subscriberID));
+        if (subscriber == null) {
+            return ResponseEntity.badRequest().body(null);  // Handle case when subscriber is not found
+        }
+
+        // Create a new Order object and set initial details
+        Order order = new Order();
+        order.setSubscriberID(subscriber.getSubscriberID());
+        order.setAmount(Double.parseDouble(orderAmount));
+        order.setCurrency(currency != null ? currency : "INR"); // Default currency to INR if not provided
+        order.setCreatedAt(new Date());
+
+        // Save the initial order to generate orderID
+        order = orderRepository.save(order);
+
+        // Call the service to create the order and update it with response details
+        Order updatedOrder = cashfreeService.createOrder(
+            order.getOrderID(), 
+            orderAmount, 
+            subscriber.getSubscriberID(), 
+            subscriber.getCountryCode() + subscriber.getContactNo(), 
+            subscriber.getFirstName() + " " + subscriber.getLastName()
+        );
+
+        // Update the saved order with response details
+        order.setCfOrderID(updatedOrder.getCfOrderID());
+        order.setOrderStatus(updatedOrder.getOrderStatus());
+        order.setPaymentSessionID(updatedOrder.getPaymentSessionID());
+        order.setOrderExpiryTime(updatedOrder.getOrderExpiryTime());
+        order.setUpdatedAt(new Date());  // Set the update time
+
+        // Save the updated order in the database
+        order = orderRepository.save(order);
+
+        // Return the populated Order object
+        return ResponseEntity.ok(order);
+    }
+
+
 } 
