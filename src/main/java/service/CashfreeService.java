@@ -69,6 +69,7 @@ public class CashfreeService {
     public Order createOrder(Integer orderId, String orderAmount, Integer customerId, String customerPhone, String customerName) throws JsonMappingException, JsonProcessingException {
         RestTemplate restTemplate = new RestTemplate();
 
+        System.out.println("orderId"+orderId);
         // Set headers
         HttpHeaders headers = new HttpHeaders();
         headers.set("accept", "application/json");
@@ -96,6 +97,7 @@ public class CashfreeService {
         // Wrap request body in HttpEntity
         HttpEntity<Map<String, Object>> request = new HttpEntity<>(requestBody, headers);
 
+        System.out.println(request);
         // Send POST request to Cashfree API and parse the response
         ResponseEntity<String> response = restTemplate.exchange(createOrderUrl, HttpMethod.POST, request, String.class);
 

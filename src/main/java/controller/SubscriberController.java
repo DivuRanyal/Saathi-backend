@@ -9,12 +9,14 @@ import model.PackageServices;
 import model.ServiceReport;
 import model.Subscriber;
 import model.SubscriberAlaCarteServices;
+import model.SubscriptionPackage;
 import model.dto.CreditCardDTO;
 import model.dto.InteractionDTO;
 import model.dto.PatronDTO;
 import model.dto.PatronServiceDTO;
 import model.dto.SubscriberDTO;
 import model.dto.SubscriberSaathiDTO;
+import model.dto.SubscriptionPackageDTO;
 import repository.AlaCarteServiceRepository;
 import repository.InteractionRepository;
 import repository.OrderRepository;
@@ -30,6 +32,7 @@ import service.PatronService;
 import service.ServiceCompletionServiceNew;
 import service.SubscriberAlaCarteServicesService;
 import service.SubscriberService;
+import service.SubscriptionPackageService;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -113,6 +116,10 @@ public class SubscriberController {
     
     @Autowired
     private PackageServiceRepository packageServiceRepository;
+    
+    @Autowired
+    private SubscriptionPackageService subscriptionPackageService;  // Service to fetch SubscriptionPackage
+
     @PostMapping
     public ResponseEntity<?> createSubscriber(@RequestBody SubscriberDTO subscriberDTO) throws MessagingException, IOException, TemplateException {
         try {
@@ -1020,9 +1027,9 @@ public class SubscriberController {
     @PostMapping("/create-order")
     public ResponseEntity<Order> createOrder(@RequestBody Map<String, String> orderData) throws JsonMappingException, JsonProcessingException {
         // Extract subscriberId, orderAmount, and currency from the request data
-        String orderAmount = orderData.get("orderAmount");
+    	 String packageID = orderData.get("packageID");
         String subscriberID = orderData.get("subscriberID");
-        String currency = orderData.get("currency");
+        String currency = "INR";
 
         // Fetch subscriber details from the database
         SubscriberDTO subscriber = subscriberService.getSubscriberById(Integer.parseInt(subscriberID));
@@ -1030,6 +1037,15 @@ public class SubscriberController {
             return ResponseEntity.badRequest().body(null);  // Handle case when subscriber is not found
         }
 
+     // Fetch package details using packageID
+        SubscriptionPackageDTO subscriptionPackage = subscriptionPackageService.getSubscriptionPackageById(Integer.parseInt(packageID));
+        if (subscriptionPackage == null) {
+            return ResponseEntity.badRequest().body(null); // Handle case when package is not found
+        }
+
+        // Convert priceINR to String for orderAmount
+        String orderAmount = subscriptionPackage.getPriceINR().toPlainString();
+        
         // Create a new Order object and set initial details
         Order order = new Order();
         order.setSubscriberID(subscriber.getSubscriberID());
