@@ -67,9 +67,7 @@ public class CashfreeService {
 	    private String cashfreeSecretKey;
 	 private final String createOrderUrl = "https://sandbox.cashfree.com/pg/orders";
     public Order createOrder(Integer orderId, String orderAmount, Integer customerId, String customerPhone, String customerName) throws JsonMappingException, JsonProcessingException {
-        RestTemplate restTemplate = new RestTemplate();
-
-        System.out.println("orderId"+orderId);
+        RestTemplate restTemplate = new RestTemplate(); 
         // Set headers
         HttpHeaders headers = new HttpHeaders();
         headers.set("accept", "application/json");
@@ -77,7 +75,6 @@ public class CashfreeService {
         headers.set("x-api-version", "2023-08-01");
         headers.set("x-client-id", cashfreeAppId);
         headers.set("x-client-secret", cashfreeSecretKey);
-
         // Create request body
         Map<String, Object> requestBody = new HashMap<>();
 

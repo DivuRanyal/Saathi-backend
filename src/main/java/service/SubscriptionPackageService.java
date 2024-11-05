@@ -2,7 +2,6 @@ package service;
 
 import java.util.List;
 
-import model.SubscriptionPackage;
 import model.dto.PackageServiceDTO;
 import model.dto.SubscriptionPackageDTO;
 
