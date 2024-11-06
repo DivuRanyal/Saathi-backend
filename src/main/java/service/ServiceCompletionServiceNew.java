@@ -412,7 +412,7 @@ public class ServiceCompletionServiceNew {
     @Cacheable(value = "subscriberServicesCache", key = "#subscriberID")
     public Map<String, List<ServiceReport>> getSubscriberServices(Integer subscriberID) {
         List<ServiceReport> serviceReports = subscriberServiceMap.get(subscriberID);
-        System.out.println("--"+serviceReports.size());
+        
         if (serviceReports == null || serviceReports.isEmpty()) {
             List<Interaction> interactions = interactionRepository.findBySubscriberID(subscriberID);
 
