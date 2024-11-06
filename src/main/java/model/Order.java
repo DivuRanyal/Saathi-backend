@@ -38,6 +38,9 @@ public class Order {
     @Temporal(TemporalType.TIMESTAMP)
     private Date updatedAt;
 
+    @Column(name = "packageID")
+    private Integer packageID;
+
     // Getters and Setters
 	public Integer getOrderID() {
 		return orderID;
@@ -117,6 +120,14 @@ public class Order {
 
 	public void setUpdatedAt(Date updatedAt) {
 		this.updatedAt = updatedAt;
+	}
+
+	public Integer getPackageID() {
+		return packageID;
+	}
+
+	public void setPackageID(Integer packageID) {
+		this.packageID = packageID;
 	}
 
     

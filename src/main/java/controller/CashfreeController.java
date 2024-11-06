@@ -23,8 +23,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import model.Order;
 import model.Subscriber;
+import model.SubscriptionPackage;
 import repository.OrderRepository;
 import repository.SubscriberRepository;
+import repository.SubscriptionPackageRepository;
 
 @Controller
 @RequestMapping("/cashfree")
@@ -36,6 +38,9 @@ public class CashfreeController {
 	@Autowired
     private SubscriberRepository subscriberRepository;
 	
+	@Autowired
+    private SubscriptionPackageRepository subscriptionPackageRepository;
+
 	private final ObjectMapper objectMapper = new ObjectMapper();
     @Value("${CASHFREE_APP_ID}")
     private String clientId;
@@ -59,6 +64,7 @@ public class CashfreeController {
 
         HttpEntity<String> entity = new HttpEntity<>(headers);
         ResponseEntity<String> response;
+        Integer packageID=null;
 
         try {
             response = restTemplate.exchange(url, HttpMethod.GET, entity, String.class);
@@ -79,7 +85,7 @@ public class CashfreeController {
         Optional<Order> existingOrderOptional = orderRepository.findById(orderID);
         if (existingOrderOptional.isPresent()) {
             Order existingOrder = existingOrderOptional.get();
-
+            packageID=existingOrder.getPackageID();
             boolean isUpdated = false;
 
             if (fetchedOrderStatus != null && !fetchedOrderStatus.equals(existingOrder.getOrderStatus())) {
@@ -98,10 +104,14 @@ public class CashfreeController {
             // Step 3: Update billing status if order status is "PAID"
             if ("PAID".equalsIgnoreCase(fetchedOrderStatus)) {
                 Integer subscriberID = existingOrder.getSubscriberID();
+                SubscriptionPackage subscriptionPackage = subscriptionPackageRepository.findById(packageID)
+                        .orElseThrow(() -> new RuntimeException("SubscriptionPackage not found with this ID "));
+           
                 Optional<Subscriber> subscriberOptional = subscriberRepository.findById(subscriberID);
                 if (subscriberOptional.isPresent()) {
                     Subscriber subscriber = subscriberOptional.get();
                     subscriber.setBillingStatus(1);  // Set billing status to 1
+                    subscriber.setSubscriptionPackage(subscriptionPackage);
                     subscriberRepository.save(subscriber);  // Save updated subscriber
                 } else {
                     return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Subscriber not found.");

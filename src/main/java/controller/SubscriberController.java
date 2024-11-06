@@ -1071,7 +1071,7 @@ public class SubscriberController {
         order.setPaymentSessionID(updatedOrder.getPaymentSessionID());
         order.setOrderExpiryTime(updatedOrder.getOrderExpiryTime());
         order.setUpdatedAt(new Date());  // Set the update time
-
+        order.setPackageID(Integer.parseInt(packageID));
         // Save the updated order in the database
         order = orderRepository.save(order);
 
