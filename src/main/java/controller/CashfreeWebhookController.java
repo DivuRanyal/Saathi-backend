@@ -11,10 +11,10 @@ import org.springframework.web.bind.annotation.*;
 public class CashfreeWebhookController {
 
     @PostMapping("/cashfree")
-    public HashMap handleCashfreeWebhook(@RequestBody HashMap payload) {
-    	
+    public ResponseEntity<String> handleCashfreeWebhook(@RequestBody HashMap payload) {
+    	System.out.println("hello");
     	System.out.println(payload);
-		return payload;
+		return null;
         // Verify signature to ensure the request is from Cashfree
     	
     }
