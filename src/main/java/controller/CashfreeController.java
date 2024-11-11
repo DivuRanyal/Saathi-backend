@@ -113,9 +113,10 @@ public class CashfreeController {
 
             Payment payment = fetchAndSavePaymentDetails(orderID);
             String paymentStatus = payment.getPaymentStatus();
-            
+            System.out.println(paymentStatus);
             // Check if order status should be updated based on payment status
             if (!"PAID".equalsIgnoreCase(existingOrder.getOrderStatus()) && paymentStatus != null) {
+            	 System.out.println(paymentStatus);
                 existingOrder.setOrderStatus(paymentStatus);
                 existingOrder.setUpdatedAt(new Date());
                 orderRepository.save(existingOrder);
