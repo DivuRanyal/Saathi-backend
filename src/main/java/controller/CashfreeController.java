@@ -4,7 +4,10 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.Date;
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -111,12 +114,12 @@ public class CashfreeController {
                 orderRepository.save(existingOrder);
             }
 
-            Payment payment = fetchAndSavePaymentDetails(orderID);
+            Payment payment = fetchAndSaveLatestPaymentDetails(orderID);
             String paymentStatus = payment.getPaymentStatus();
-            System.out.println(paymentStatus);
+           
             // Check if order status should be updated based on payment status
             if (!"PAID".equalsIgnoreCase(existingOrder.getOrderStatus()) && paymentStatus != null) {
-            	 System.out.println(paymentStatus);
+            	 
                 existingOrder.setOrderStatus(paymentStatus);
                 existingOrder.setUpdatedAt(new Date());
                 orderRepository.save(existingOrder);
@@ -204,8 +207,9 @@ public class CashfreeController {
     }
     
     
-    public Payment fetchAndSavePaymentDetails(Integer orderID) {
+    public Payment fetchAndSaveLatestPaymentDetails(Integer orderID) {
         String url = BASE_URL + orderID + "/payments";
+        
         HttpHeaders headers = new HttpHeaders();
         headers.set("x-api-version", API_VERSION);
         headers.set("x-client-id", clientId);
@@ -222,39 +226,53 @@ public class CashfreeController {
                 throw new RuntimeException("Failed to fetch data from Cashfree");
             }
 
-            // Parse JSON response and map it to Payment object
-            JsonNode rootNode = objectMapper.readTree(response.getBody());
-            Payment payment = parsePaymentFromResponse(rootNode);
+            // Parse JSON array response and map each element to a Payment object
+            JsonNode rootArray = objectMapper.readTree(response.getBody());
+            List<Payment> payments = new ArrayList<>();
 
-            // Save payment details in the database
-            paymentService.savePayment(payment);
+            if (rootArray.isArray()) {
+                for (JsonNode paymentNode : rootArray) {
+                    Payment payment = parsePaymentFromResponse(paymentNode);
+                    paymentService.savePayment(payment);  // Save each payment in the database
+                    payments.add(payment);  // Add payment to the list
+                }
+            } else {
+                throw new RuntimeException("Expected an array of payments in response");
+            }
 
-            return payment;
+            // Find the latest payment based on payment_completion_time
+            Optional<Payment> latestPayment = payments.stream()
+                    .max(Comparator.comparing(Payment::getPaymentCompletionTime));
+
+            return latestPayment.orElseThrow(() -> new RuntimeException("No payments found for the given order ID"));
+
         } catch (Exception e) {
             throw new RuntimeException("Error while processing Cashfree API response: " + e.getMessage(), e);
         }
     }
-
-
-    private Payment parsePaymentFromResponse(JsonNode rootNode) throws IOException {
+    private Payment parsePaymentFromResponse(JsonNode paymentNode) throws IOException {
         Payment payment = new Payment();
 
-        // Assuming the rootNode contains the JSON response structure from Cashfree
-        payment.setCfPaymentID(rootNode.path("cf_payment_id").asText());
-        payment.setEntity(rootNode.path("entity").asText());
-        payment.setIsCaptured(rootNode.path("is_captured").asBoolean());
-        payment.setOrderAmount(rootNode.path("order_amount").asDouble());
-        payment.setOrderID(rootNode.path("order_id").asText());
-        payment.setPaymentAmount(rootNode.path("payment_amount").asDouble());
-        payment.setPaymentCompletionTime(objectMapper.convertValue(rootNode.path("payment_completion_time"), LocalDateTime.class));
-        payment.setPaymentCurrency(rootNode.path("payment_currency").asText());
-        payment.setPaymentGroup(rootNode.path("payment_group").asText());
-        payment.setPaymentStatus(rootNode.path("payment_status").asText());
-        payment.setPaymentTime(objectMapper.convertValue(rootNode.path("payment_time"), LocalDateTime.class));
+        // Mapping fields from the payment JSON node
+        payment.setCfPaymentID(paymentNode.path("cf_payment_id").asText());
+        payment.setEntity(paymentNode.path("entity").asText());
+        payment.setIsCaptured(paymentNode.path("is_captured").asBoolean());
+        payment.setOrderAmount(paymentNode.path("order_amount").asDouble());
+        payment.setOrderID(paymentNode.path("order_id").asText());
+        payment.setPaymentAmount(paymentNode.path("payment_amount").asDouble());
+
+        // Parsing date-time fields
+        DateTimeFormatter formatter = DateTimeFormatter.ISO_OFFSET_DATE_TIME;
+        payment.setPaymentCompletionTime(LocalDateTime.parse(paymentNode.path("payment_completion_time").asText(), formatter));
+        payment.setPaymentTime(LocalDateTime.parse(paymentNode.path("payment_time").asText(), formatter));
+
+        payment.setPaymentCurrency(paymentNode.path("payment_currency").asText());
+        payment.setPaymentGroup(paymentNode.path("payment_group").asText());
+        payment.setPaymentStatus(paymentNode.path("payment_status").asText());
 
         // PaymentGatewayDetails mapping
         Payment.PaymentGatewayDetails gatewayDetails = new Payment.PaymentGatewayDetails();
-        JsonNode gatewayNode = rootNode.path("payment_gateway_details");
+        JsonNode gatewayNode = paymentNode.path("payment_gateway_details");
         gatewayDetails.setGatewayName(gatewayNode.path("gateway_name").asText());
         gatewayDetails.setGatewayOrderID(gatewayNode.path("gateway_order_id").asText());
         gatewayDetails.setGatewayPaymentID(gatewayNode.path("gateway_payment_id").asText());
@@ -265,10 +283,11 @@ public class CashfreeController {
 
         // PaymentMethod mapping
         Payment.PaymentMethod paymentMethod = new Payment.PaymentMethod();
-        JsonNode upiNode = rootNode.path("payment_method").path("upi");
+        JsonNode upiNode = paymentNode.path("payment_method").path("upi");
         paymentMethod.setChannel(upiNode.path("channel").asText());
         payment.setPaymentMethod(paymentMethod);
 
         return payment;
     }
+
 }
