@@ -1,5 +1,9 @@
 package controller;
 
+import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.Optional;
 
@@ -22,11 +26,14 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import model.Order;
+import model.Payment;
 import model.Subscriber;
 import model.SubscriptionPackage;
 import repository.OrderRepository;
 import repository.SubscriberRepository;
 import repository.SubscriptionPackageRepository;
+import service.PaymentService;
+import service.SubscriberService;
 
 @Controller
 @RequestMapping("/cashfree")
@@ -41,6 +48,9 @@ public class CashfreeController {
 	@Autowired
     private SubscriptionPackageRepository subscriptionPackageRepository;
 
+	@Autowired
+    private PaymentService paymentService;
+    
 	private final ObjectMapper objectMapper = new ObjectMapper();
     @Value("${CASHFREE_APP_ID}")
     private String clientId;
@@ -101,7 +111,15 @@ public class CashfreeController {
                 orderRepository.save(existingOrder);
             }
 
-            // Step 3: Update billing status if order status is "PAID"
+            Payment payment = fetchAndSavePaymentDetails(orderID);
+            String paymentStatus = payment.getPaymentStatus();
+            
+            // Check if order status should be updated based on payment status
+            if (!"PAID".equalsIgnoreCase(existingOrder.getOrderStatus()) && paymentStatus != null) {
+                existingOrder.setOrderStatus(paymentStatus);
+                existingOrder.setUpdatedAt(new Date());
+                orderRepository.save(existingOrder);
+            } // Step 3: Update billing status if order status is "PAID"
             if ("PAID".equalsIgnoreCase(fetchedOrderStatus)) {
                 Integer subscriberID = existingOrder.getSubscriberID();
                 SubscriptionPackage subscriptionPackage = subscriptionPackageRepository.findById(packageID)
@@ -122,6 +140,8 @@ public class CashfreeController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Order not found in the database.");
         }
     }
+    
+    
 
     // Placeholder methods for parsing orderStatus and paymentSessionID from Cashfree API response
     private String parseOrderStatus(String responseBody) {
@@ -160,6 +180,7 @@ public class CashfreeController {
             // Save the updated order
             orderRepository.save(existingOrder);
 
+           
             // Check if order status is "PAID" and update billing status of the subscriber
             if ("PAID".equalsIgnoreCase(updatedOrder.getOrderStatus())) {
                 Integer subscriberID = existingOrder.getSubscriberID();
@@ -173,10 +194,80 @@ public class CashfreeController {
                 }
             }
 
+            
+            
             return ResponseEntity.ok("Order and billing status updated successfully.");
         } else {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Order not found.");
         }
     }
     
+    
+    public Payment fetchAndSavePaymentDetails(Integer orderID) {
+        String url = BASE_URL + orderID + "/payments";
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("x-api-version", API_VERSION);
+        headers.set("x-client-id", clientId);
+        headers.set("x-client-secret", clientSecret);
+
+        HttpEntity<String> entity = new HttpEntity<>(headers);
+        ResponseEntity<String> response;
+
+        try {
+            // Fetch payment details from Cashfree API
+            response = restTemplate.exchange(url, HttpMethod.GET, entity, String.class);
+
+            if (!response.getStatusCode().is2xxSuccessful()) {
+                throw new RuntimeException("Failed to fetch data from Cashfree");
+            }
+
+            // Parse JSON response and map it to Payment object
+            JsonNode rootNode = objectMapper.readTree(response.getBody());
+            Payment payment = parsePaymentFromResponse(rootNode);
+
+            // Save payment details in the database
+            paymentService.savePayment(payment);
+
+            return payment;
+        } catch (Exception e) {
+            throw new RuntimeException("Error while processing Cashfree API response: " + e.getMessage(), e);
+        }
+    }
+
+
+    private Payment parsePaymentFromResponse(JsonNode rootNode) throws IOException {
+        Payment payment = new Payment();
+
+        // Assuming the rootNode contains the JSON response structure from Cashfree
+        payment.setCfPaymentID(rootNode.path("cf_payment_id").asText());
+        payment.setEntity(rootNode.path("entity").asText());
+        payment.setIsCaptured(rootNode.path("is_captured").asBoolean());
+        payment.setOrderAmount(rootNode.path("order_amount").asDouble());
+        payment.setOrderID(rootNode.path("order_id").asText());
+        payment.setPaymentAmount(rootNode.path("payment_amount").asDouble());
+        payment.setPaymentCompletionTime(objectMapper.convertValue(rootNode.path("payment_completion_time"), LocalDateTime.class));
+        payment.setPaymentCurrency(rootNode.path("payment_currency").asText());
+        payment.setPaymentGroup(rootNode.path("payment_group").asText());
+        payment.setPaymentStatus(rootNode.path("payment_status").asText());
+        payment.setPaymentTime(objectMapper.convertValue(rootNode.path("payment_time"), LocalDateTime.class));
+
+        // PaymentGatewayDetails mapping
+        Payment.PaymentGatewayDetails gatewayDetails = new Payment.PaymentGatewayDetails();
+        JsonNode gatewayNode = rootNode.path("payment_gateway_details");
+        gatewayDetails.setGatewayName(gatewayNode.path("gateway_name").asText());
+        gatewayDetails.setGatewayOrderID(gatewayNode.path("gateway_order_id").asText());
+        gatewayDetails.setGatewayPaymentID(gatewayNode.path("gateway_payment_id").asText());
+        gatewayDetails.setGatewayOrderReferenceID(gatewayNode.path("gateway_order_reference_id").asText());
+        gatewayDetails.setGatewayStatusCode(gatewayNode.path("gateway_status_code").asText());
+        gatewayDetails.setGatewaySettlement(gatewayNode.path("gateway_settlement").asText());
+        payment.setPaymentGatewayDetails(gatewayDetails);
+
+        // PaymentMethod mapping
+        Payment.PaymentMethod paymentMethod = new Payment.PaymentMethod();
+        JsonNode upiNode = rootNode.path("payment_method").path("upi");
+        paymentMethod.setChannel(upiNode.path("channel").asText());
+        payment.setPaymentMethod(paymentMethod);
+
+        return payment;
+    }
 }
