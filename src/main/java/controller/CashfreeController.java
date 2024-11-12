@@ -113,9 +113,12 @@ public class CashfreeController {
                 existingOrder.setUpdatedAt(new Date());
                 orderRepository.save(existingOrder);
             }
-
+            String paymentStatus=null;
             Payment payment = fetchAndSaveLatestPaymentDetails(orderID);
-            String paymentStatus = payment.getPaymentStatus();
+            if(payment!=null) {
+            	 paymentStatus = payment.getPaymentStatus();
+            }
+           
            
             // Check if order status should be updated based on payment status
             if (!"PAID".equalsIgnoreCase(existingOrder.getOrderStatus()) && paymentStatus != null) {
@@ -123,7 +126,14 @@ public class CashfreeController {
                 existingOrder.setOrderStatus(paymentStatus);
                 existingOrder.setUpdatedAt(new Date());
                 orderRepository.save(existingOrder);
-            } // Step 3: Update billing status if order status is "PAID"
+            } 
+            if (!"PAID".equalsIgnoreCase(existingOrder.getOrderStatus()) && paymentStatus == null) {
+           	 
+                existingOrder.setOrderStatus("CANCELLED");
+                existingOrder.setUpdatedAt(new Date());
+                orderRepository.save(existingOrder);
+            } 
+            // Step 3: Update billing status if order status is "PAID"
             if ("PAID".equalsIgnoreCase(fetchedOrderStatus)) {
                 Integer subscriberID = existingOrder.getSubscriberID();
                 SubscriptionPackage subscriptionPackage = subscriptionPackageRepository.findById(packageID)
@@ -244,8 +254,8 @@ public class CashfreeController {
             Optional<Payment> latestPayment = payments.stream()
                     .max(Comparator.comparing(Payment::getPaymentCompletionTime));
 
-            return latestPayment.orElseThrow(() -> new RuntimeException("No payments found for the given order ID"));
-
+  //          return latestPayment.orElseThrow(() -> new RuntimeException("No payments found for the given order ID"));
+            return latestPayment.orElseThrow(() -> null);
         } catch (Exception e) {
             throw new RuntimeException("Error while processing Cashfree API response: " + e.getMessage(), e);
         }
