@@ -240,7 +240,7 @@ public class CashfreeController {
             JsonNode rootArray = objectMapper.readTree(response.getBody());
             List<Payment> payments = new ArrayList<>();
 
-            if (rootArray.isArray()) {
+            if (rootArray.isArray() && rootArray.size() > 0) {
                 for (JsonNode paymentNode : rootArray) {
                     Payment payment = parsePaymentFromResponse(paymentNode);
                     paymentService.savePayment(payment);  // Save each payment in the database
@@ -251,15 +251,15 @@ public class CashfreeController {
             }
 
             // Find the latest payment based on payment_completion_time
-            Optional<Payment> latestPayment = payments.stream()
-                    .max(Comparator.comparing(Payment::getPaymentCompletionTime));
-
-  //          return latestPayment.orElseThrow(() -> new RuntimeException("No payments found for the given order ID"));
-            return latestPayment.orElseThrow(() -> null);
+            return payments.stream()
+                    .max(Comparator.comparing(Payment::getPaymentCompletionTime))
+                    .orElse(null); // Return null if no payments are found
         } catch (Exception e) {
-            throw new RuntimeException("Error while processing Cashfree API response: " + e.getMessage(), e);
+            // Improved error handling and logging
+            throw new RuntimeException("Error while processing Cashfree API response: " + (e.getMessage() != null ? e.getMessage() : "null"), e);
         }
     }
+
     private Payment parsePaymentFromResponse(JsonNode paymentNode) throws IOException {
         Payment payment = new Payment();
 
