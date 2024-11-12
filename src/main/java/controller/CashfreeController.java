@@ -247,7 +247,7 @@ public class CashfreeController {
                     payments.add(payment);  // Add payment to the list
                 }
             } else {
-                throw new RuntimeException("Expected an array of payments in response");
+                return null;
             }
 
             // Find the latest payment based on payment_completion_time
