@@ -64,7 +64,7 @@ public class EmailService {
     }
 
     
-  
+    @Async
     public void sendEmail(String to, String subject, String templateName, Map<String, Object> model) throws MessagingException, IOException, TemplateException {
         // Create a MimeMessage
         MimeMessage message = mailSender.createMimeMessage();
