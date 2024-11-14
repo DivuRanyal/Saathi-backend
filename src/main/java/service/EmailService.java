@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.ui.freemarker.FreeMarkerTemplateUtils;
 
@@ -34,6 +35,7 @@ public class EmailService {
     @Autowired
     private Configuration freemarkerConfig;
 
+    @Async
     public void sendSaathiAssignedEmail(String saathiEmail, Map<String, Object> model) throws MessagingException, IOException, TemplateException {
         MimeMessage message = mailSender.createMimeMessage();
         MimeMessageHelper helper = new MimeMessageHelper(message, true);
@@ -53,6 +55,7 @@ public class EmailService {
         mailSender.send(message);
     }
 
+    
     private String processTemplateIntoString(String templateName, Map<String, Object> model) throws IOException, TemplateException {
         Template template = freemarkerConfig.getTemplate(templateName);  // Get the template
         StringWriter stringWriter = new StringWriter();  // Create a StringWriter to capture the output
@@ -60,6 +63,8 @@ public class EmailService {
         return stringWriter.toString();  // Return the resulting string
     }
 
+    
+  
     public void sendEmail(String to, String subject, String templateName, Map<String, Object> model) throws MessagingException, IOException, TemplateException {
         // Create a MimeMessage
         MimeMessage message = mailSender.createMimeMessage();
@@ -83,6 +88,7 @@ public class EmailService {
         mailSender.send(message);
     }
     
+    @Async
     public void sendSimpleEmail(String to, String subject, String text) {
         SimpleMailMessage message = new SimpleMailMessage();
  //       message.setFrom("divyasharma@etheriumtech.com"); // Set your sender email address
@@ -92,6 +98,7 @@ public class EmailService {
         mailSender.send(message);
     }
     
+    @Async
     public void sendAdminEmail(String password,AdminUser adminUser) throws MessagingException, IOException, TemplateException {
         // Create a MimeMessage
         MimeMessage message = mailSender.createMimeMessage();
@@ -123,6 +130,7 @@ public class EmailService {
         mailSender.send(message);
     }
     
+    @Async
     public void sendSaathiEmail(String password, AdminUser saathiUser) throws MessagingException, IOException, TemplateException {
         // Create a MimeMessage
         MimeMessage message = mailSender.createMimeMessage();
@@ -159,6 +167,7 @@ public class EmailService {
         mailSender.send(message);
     }
 
+    @Async
     public void sendSaathiDetailsEmail(String toEmail, String subscriberName, String saathiName, 
             String saathiPhone, String saathiEmail) throws MessagingException, IOException, TemplateException {
 // Create a MimeMessage

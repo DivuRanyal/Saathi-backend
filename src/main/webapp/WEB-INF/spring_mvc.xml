@@ -6,6 +6,7 @@
        xmlns:jpa="http://www.springframework.org/schema/data/jpa"
        xmlns:cache="http://www.springframework.org/schema/cache"
        xmlns:tx="http://www.springframework.org/schema/tx"
+       xmlns:task="http://www.springframework.org/schema/task"
        xsi:schemaLocation="http://www.springframework.org/schema/beans 
            http://www.springframework.org/schema/beans/spring-beans.xsd
            http://www.springframework.org/schema/context 
@@ -15,7 +16,12 @@
            http://www.springframework.org/schema/data/jpa 
            http://www.springframework.org/schema/data/jpa/spring-jpa.xsd
            http://www.springframework.org/schema/tx 
-           http://www.springframework.org/schema/tx/spring-tx.xsd">
+           http://www.springframework.org/schema/tx/spring-tx.xsd
+           http://www.springframework.org/schema/task
+           http://www.springframework.org/schema/task/spring-task.xsd">
+           
+           <!-- Enable asynchronous processing -->
+    <task:annotation-driven />
            
            <!-- Load properties from application.properties -->
     <context:property-placeholder location="classpath:application.properties" ignore-unresolvable="true"/>

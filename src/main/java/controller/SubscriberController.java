@@ -140,10 +140,8 @@ public class SubscriberController {
 
             // Assuming you have an email service that sends Freemarker templated emails
             emailService.sendEmail(adminEmail, subject, "subscriber-added-email.ftlh", model);
-            
             // Return the created subscriber details
             return new ResponseEntity<>(createdSubscriber, HttpStatus.CREATED);
-            
         } catch (EmailAlreadyRegisteredException e) {
             // Return a 409 Conflict response if the email is already registered
             return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
