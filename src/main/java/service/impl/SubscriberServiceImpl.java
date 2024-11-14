@@ -42,6 +42,7 @@ import javax.transaction.Transactional;
 @Service
 public class SubscriberServiceImpl implements SubscriberService {
 
+	
     @Autowired
     private AdminUsersRepository adminUserRepository;
 

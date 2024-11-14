@@ -36,11 +36,16 @@ import repository.OrderRepository;
 import repository.SubscriberRepository;
 import repository.SubscriptionPackageRepository;
 import service.PaymentService;
+import service.ServiceCompletionServiceNew;
+import service.SubscriberService;
 
 @Controller
 @RequestMapping("/cashfree")
 public class CashfreeController {
 
+	 @Autowired
+	 private ServiceCompletionServiceNew serviceCompletionService;
+	     
 	@Autowired
     private OrderRepository orderRepository;
 	
@@ -143,6 +148,7 @@ public class CashfreeController {
                     subscriber.setBillingStatus(1);
                     subscriber.setSubscriptionPackage(subscriptionPackage);
                     subscriberRepository.save(subscriber);
+                    serviceCompletionService.rebuildAllServices(subscriberID);
                 } else {
                     return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
                 }
