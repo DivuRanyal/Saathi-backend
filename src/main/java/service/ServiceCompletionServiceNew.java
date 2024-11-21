@@ -23,6 +23,9 @@ import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import exception.RequestedDateTimesExceedsFrequencyException;
 import model.AggregatedServiceReport;
 import model.Interaction;
@@ -172,7 +175,7 @@ public class ServiceCompletionServiceNew {
 
         // Fetch the cached service reports from Memcached or in-memory
         Map<String, List<ServiceReport>> allServicesMap = safeGetCachedServices(subscriberID);
-
+        
         if (allServicesMap == null || allServicesMap.get("allServices") == null) {
             throw new Exception("No services found for subscriber ID: " + subscriberID);
         }
@@ -242,18 +245,30 @@ public class ServiceCompletionServiceNew {
 
 
     private Map<String, List<ServiceReport>> safeGetCachedServices(int subscriberID) throws Exception {
+        // Try fetching data from cache
         Object cachedData = cacheManager.getCache("subscriberServicesCache").get(subscriberID, Object.class);
 
-        if (cachedData instanceof Map) {
+        if (cachedData != null) {
             try {
-                return (Map<String, List<ServiceReport>>) cachedData;
-            } catch (ClassCastException e) {
-                throw new Exception("Cached data is not in the expected format for subscriber ID: " + subscriberID);
+                // Deserialize using Jackson for type safety
+                ObjectMapper objectMapper = new ObjectMapper();
+                return objectMapper.convertValue(cachedData, new TypeReference<Map<String, List<ServiceReport>>>() {});
+            } catch (IllegalArgumentException e) {
+                throw new Exception("Cached data is not in the expected format for subscriber ID: " + subscriberID, e);
             }
         } else {
-            throw new Exception("Cached data is missing or invalid for subscriber ID: " + subscriberID);
+            // Fallback to in-memory map if no cached data is available
+            List<ServiceReport> serviceReports = subscriberServiceMap.get(subscriberID);
+
+            if (serviceReports == null || serviceReports.isEmpty()) {
+                throw new Exception("No services found for subscriber ID: " + subscriberID);
+            }
+
+            // Wrap the list in a map structure similar to the cache format
+            return Map.of("allServices", serviceReports);
         }
     }
+
 
    
     @CachePut(value = "subscriberServicesCache", key = "#subscriberID")
