@@ -243,7 +243,6 @@ public class ServiceCompletionServiceNew {
         return allServicesMap;
     }
 
-
     private Map<String, List<ServiceReport>> safeGetCachedServices(int subscriberID) throws Exception {
         // Try fetching data from cache
         Object cachedData = cacheManager.getCache("subscriberServicesCache").get(subscriberID, Object.class);

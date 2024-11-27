@@ -43,4 +43,6 @@ public interface SubscriberRepository extends JpaRepository<Subscriber, Integer>
 	    @Query("SELECT COUNT(s) FROM Subscriber s WHERE s.status = 0")
 	    long countInactiveSubscribers();
 
+	    @Query("SELECT s.billingStatus FROM Subscriber s WHERE s.subscriberID = :subscriberID")
+	    Integer findBillingStatusBySubscriberID(@Param("subscriberID") int subscriberID);
 }

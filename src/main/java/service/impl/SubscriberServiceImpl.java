@@ -477,7 +477,7 @@ public class SubscriberServiceImpl implements SubscriberService {
             // Handle the case where subscription package is null, if needed
             dto.setPackageID(null); // Or handle it in another appropriate way
         }
-        
+        dto.setBillingStatus(subscriber.getBillingStatus());
         AdminUser saathi = subscriber.getSaathi();
         if (saathi != null) {
             dto.setSaathi(saathi);
@@ -631,4 +631,7 @@ public class SubscriberServiceImpl implements SubscriberService {
         return subscriberRepository.countInactiveSubscribers();
     }
     
+    public Integer getBillingStatus(int subscriberID) {
+        return subscriberRepository.findBillingStatusBySubscriberID(subscriberID);
+    }
 }

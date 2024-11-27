@@ -66,7 +66,9 @@ public interface SubscriberService {
     int verifyOtp(String email, Integer otp); 
     SubscriberDTO completeRegistration(String email, SubscriberDTO additionalDetails); 
     
-    public long countActiveSubscribersWithBillingStatusZero();
-    public long countActiveSubscribersWithBillingStatusOne();
-    public long countInactiveSubscribers();
+    long countActiveSubscribersWithBillingStatusZero();
+   long countActiveSubscribersWithBillingStatusOne();
+   long countInactiveSubscribers();
+    
+    Integer getBillingStatus(int subscriberID);
 }

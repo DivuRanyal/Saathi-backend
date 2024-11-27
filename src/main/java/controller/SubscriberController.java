@@ -1077,5 +1077,15 @@ public class SubscriberController {
         return ResponseEntity.ok(order);
     }
 
+    @GetMapping("/{subscriberID}/billing-status")
+    public ResponseEntity<Integer> getBillingStatus(@PathVariable int subscriberID) {
+        Integer billingStatus = subscriberService.getBillingStatus(subscriberID);
+        
+        if (billingStatus == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+
+        return ResponseEntity.ok(billingStatus);
+    }
 
 } 
