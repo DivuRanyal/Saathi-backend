@@ -205,7 +205,18 @@ public class CashfreeController {
             Integer subscriberID = existingOrder.getSubscriberID();
             Optional<Subscriber> subscriberOptional = subscriberRepository.findById(subscriberID);
             
-           
+            try {
+                emailService.sendPaymentSuccessEmail(
+                   "ranyal123divya@gmail.com",
+                    "Divya",
+                    "suchigupta@etheriumtech.com"
+                );
+                System.out.println("Email sent successfully.");
+            } catch (Exception e) {
+                System.out.println("Error while sending email: " + e.getMessage());
+                e.printStackTrace();
+            }
+
             // Check if order status is "PAID" and update billing status of the subscriber
             if ("PAID".equalsIgnoreCase(updatedOrder.getOrderStatus())) {
             	System.out.println("hello");
