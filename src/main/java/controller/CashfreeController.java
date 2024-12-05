@@ -137,34 +137,18 @@ public class CashfreeController {
           
             // Check if order status should be updated based on payment status
             if (!"PAID".equalsIgnoreCase(existingOrder.getOrderStatus()) && paymentStatus != null) {
-            	System.out.println("stage 1");
+            	
                 existingOrder.setOrderStatus(paymentStatus);
                 existingOrder.setUpdatedAt(new Date());
                 orderRepository.save(existingOrder);
-                if (subscriberOptional.isPresent()) {
-                    Subscriber subscriber = subscriberOptional.get();
-           	 
-           	emailService.sendPaymentFailureEmail(
-           	        subscriber.getEmail(),
-           	        subscriber.getFirstName(),
-           	        "suchigupta@etheriumtech.com"
-           	    );
-            }
+               
             }
             if (!"PAID".equalsIgnoreCase(existingOrder.getOrderStatus()) && paymentStatus == null) {
-            	System.out.println("stage 2");
+            
                 existingOrder.setOrderStatus("CANCELLED");
                 existingOrder.setUpdatedAt(new Date());
                 orderRepository.save(existingOrder);
-                if (subscriberOptional.isPresent()) {
-                    Subscriber subscriber = subscriberOptional.get();
-           	 
-           	emailService.sendPaymentFailureEmail(
-           	        subscriber.getEmail(),
-           	        subscriber.getFirstName(),
-           	        "suchigupta@etheriumtech.com"
-           	    );
-            }
+               
             }
             // Step 3: Update billing status if order status is "PAID"
             if ("PAID".equalsIgnoreCase(fetchedOrderStatus)) {
@@ -187,7 +171,15 @@ public class CashfreeController {
                 }
             }
             else {
-            	System.out.println("stage 3");
+            	 if (subscriberOptional.isPresent()) {
+                     Subscriber subscriber = subscriberOptional.get();
+            	 
+            	emailService.sendPaymentFailureEmail(
+            	        subscriber.getEmail(),
+            	        subscriber.getFirstName(),
+            	        "suchigupta@etheriumtech.com"
+            	    );
+             }
             }
             
             return ResponseEntity.ok(existingOrder);
