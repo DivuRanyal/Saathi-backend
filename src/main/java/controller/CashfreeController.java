@@ -78,7 +78,7 @@ public class CashfreeController {
     private final RestTemplate restTemplate = new RestTemplate();
 
     @GetMapping("/order/{orderID}")
-    public ResponseEntity<Order> fetchAndUpdateOrderDetails(@PathVariable("orderID") Integer orderID) {
+    public ResponseEntity<Order> fetchAndUpdateOrderDetails(@PathVariable("orderID") Integer orderID) throws MessagingException, IOException, TemplateException {
         // Step 1: Fetch order details from Cashfree API
         String url = BASE_URL + orderID;
         HttpHeaders headers = new HttpHeaders();
@@ -142,23 +142,41 @@ public class CashfreeController {
                 existingOrder.setUpdatedAt(new Date());
                 orderRepository.save(existingOrder);
             }
-
+            Integer subscriberID = existingOrder.getSubscriberID();
+            
+            Optional<Subscriber> subscriberOptional = subscriberRepository.findById(subscriberID);
+            
             // Step 3: Update billing status if order status is "PAID"
             if ("PAID".equalsIgnoreCase(fetchedOrderStatus)) {
-                Integer subscriberID = existingOrder.getSubscriberID();
                 SubscriptionPackage subscriptionPackage = subscriptionPackageRepository.findById(packageID)
                         .orElseThrow(() -> new RuntimeException("SubscriptionPackage not found with this ID"));
 
-                Optional<Subscriber> subscriberOptional = subscriberRepository.findById(subscriberID);
                 if (subscriberOptional.isPresent()) {
                     Subscriber subscriber = subscriberOptional.get();
                     subscriber.setBillingStatus(1);
                     subscriber.setSubscriptionPackage(subscriptionPackage);
                     subscriberRepository.save(subscriber);
                     serviceCompletionService.rebuildAllServices(subscriberID);
+                    emailService.sendPaymentSuccessEmail(
+                            subscriber.getEmail(),
+                            subscriber.getFirstName(),
+                            "suchigupta@etheriumtech.com"
+                        );
                 } else {
                     return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
                 }
+            }
+            else
+            {
+            	 if (subscriberOptional.isPresent()) {
+                     Subscriber subscriber = subscriberOptional.get();
+            	 
+            	emailService.sendPaymentFailureEmail(
+            	        subscriber.getEmail(),
+            	        subscriber.getFirstName(),
+            	        "suchigupta@etheriumtech.com"
+            	    );
+            }
             }
             return ResponseEntity.ok(existingOrder);
         } else {
@@ -205,18 +223,7 @@ public class CashfreeController {
             Integer subscriberID = existingOrder.getSubscriberID();
             Optional<Subscriber> subscriberOptional = subscriberRepository.findById(subscriberID);
             
-            try {
-                emailService.sendPaymentSuccessEmail(
-                   "ranyal123divya@gmail.com",
-                    "Divya",
-                    "suchigupta@etheriumtech.com"
-                );
-                System.out.println("Email sent successfully.");
-            } catch (Exception e) {
-                System.out.println("Error while sending email: " + e.getMessage());
-                e.printStackTrace();
-            }
-
+          
             // Check if order status is "PAID" and update billing status of the subscriber
             if ("PAID".equalsIgnoreCase(updatedOrder.getOrderStatus())) {
             	System.out.println("hello");
