@@ -137,6 +137,7 @@ public class CashfreeController {
           
             // Check if order status should be updated based on payment status
             if (!"PAID".equalsIgnoreCase(existingOrder.getOrderStatus()) && paymentStatus != null) {
+            	System.out.println("stage 1");
                 existingOrder.setOrderStatus(paymentStatus);
                 existingOrder.setUpdatedAt(new Date());
                 orderRepository.save(existingOrder);
@@ -151,6 +152,7 @@ public class CashfreeController {
             }
             }
             if (!"PAID".equalsIgnoreCase(existingOrder.getOrderStatus()) && paymentStatus == null) {
+            	System.out.println("stage 2");
                 existingOrder.setOrderStatus("CANCELLED");
                 existingOrder.setUpdatedAt(new Date());
                 orderRepository.save(existingOrder);
@@ -184,7 +186,9 @@ public class CashfreeController {
                     return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
                 }
             }
-           
+            else {
+            	System.out.println("stage 3");
+            }
             
             return ResponseEntity.ok(existingOrder);
         } else {
@@ -192,7 +196,6 @@ public class CashfreeController {
         }
     }
     
-
     // Placeholder methods for parsing orderStatus and paymentSessionID from Cashfree API response
     private String parseOrderStatus(String responseBody) {
         try {
