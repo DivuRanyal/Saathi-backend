@@ -640,151 +640,117 @@ public class SubscriberController {
     public ResponseEntity<String> updateServiceCompletion(
             @PathVariable Integer subscriberID,
             @PathVariable Integer serviceID,
-            @RequestParam(value = "file", required = false) MultipartFile file,
+            @RequestParam(value = "files", required = false) List<MultipartFile> files,
             @RequestParam("description") String description,
             @RequestParam("isAlaCarte") Boolean isAlaCarte,
-            @RequestParam(name="frequencyInstance",required=false) Integer frequencyInstance,
+            @RequestParam(name = "frequencyInstance", required = false) Integer frequencyInstance,
             @RequestParam(name = "subscriberAlaCarteServicesID", required = false) Integer subscriberAlaCarteServiceID, // Distinguish ala-carte services
             @RequestParam(name = "preferredDate", required = false) String preferredDate, // Required for package services
             @RequestParam(name = "preferredTime", required = false) String preferredTime // Required for package services
     ) {
+        try {
+            // Step 1: Fetch the packageServiceID associated with the subscriber
+            Integer packageID = subscriberService.getPackageIDBySubscriber(subscriberID);
+            System.out.println("packageID: " + packageID);
 
-        // Step 1: Fetch the packageServiceID associated with the subscriber
-        Integer packageID = subscriberService.getPackageIDBySubscriber(subscriberID);
-        System.out.println("packageID: " + packageID);
-
-        // Parse the preferredDate and preferredTime from the input strings
-        DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-        DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm");
-        LocalDate parsedPreferredDate=null;
-        LocalTime parsedPreferredTime=null;
-        if (preferredDate != null && preferredTime != null) {
-         parsedPreferredDate = LocalDate.parse(preferredDate, dateFormatter);
-         parsedPreferredTime = LocalTime.parse(preferredTime, timeFormatter);
-        }
-        // If no valid package or ala-carte service found for the subscriber
-        if (packageID == null && subscriberAlaCarteServiceID == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No valid package or ala-carte service found for the subscriber.");
-        }
-
-        // Ensure preferredDate and preferredTime are provided for package services
- //       if (!isAlaCarte && (preferredDate == null || preferredTime == null)) {
- //           return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Preferred date and time must be provided for package services.");
- //       }
-
-        // Step 2: Update service completion logic
-        Map<String, List<ServiceReport>> updatedServices;
-
-        if (isAlaCarte) {
-            // Update ala-carte service completion
-            updatedServices = serviceCompletionService.updateServiceCompletion(subscriberID, serviceID, subscriberAlaCarteServiceID, true, null, null,frequencyInstance);
-        } else {
-            // Update package service completion with preferred date and time
-        	if (subscriberAlaCarteServiceID != null) {
-        		
-        	    // Call with preferredDate and preferredTime
-        	    updatedServices = serviceCompletionService.updateServiceCompletion(
-        	        subscriberID, 
-        	        serviceID, 
-        	        subscriberAlaCarteServiceID, 
-        	        false, 
-        	        parsedPreferredDate, 
-        	        parsedPreferredTime,frequencyInstance
-        	    );
-        	} else {
-        	    // Call with null for preferredDate and preferredTime
-        		System.out.println("hhh");
-        	    updatedServices = serviceCompletionService.updateServiceCompletion(
-        	        subscriberID, 
-        	        serviceID, 
-        	        null, 
-        	        false, 
-        	        null, 
-        	        null,frequencyInstance
-        	    );
-        	}
-       }
-        if (updatedServices != null) {
-            try {
-                String filePath = null;
-                String fileUrl=null;
-                if (file != null && !file.isEmpty()) {
-                	// Fetch the adminUserID using the subscriberID
-                    Integer adminUserID = subscriberService.getAdminUserIDBySubscriber(subscriberID); // Adjust the service name
-                    // Build the folder path for the uploaded file
-                    String uploadDirectory = "/home/saathi/tomcat/webapps/saathi_images/" + adminUserID + "/" + subscriberID + "/";
-  //            String uploadDirectory="C:\\Users\\ether\\OneDrive\\Documents\\New folder\\"+ adminUserID + "\\" + subscriberID + "\\";
-                    File directory = new File(uploadDirectory);
-                    if (!directory.exists()) {
-                        directory.mkdirs(); // Create the directory if it doesn't exist
-                    }
-                    // Define the file path and save it to the server
-                    String fileName = file.getOriginalFilename();
-                    filePath = uploadDirectory + fileName;
-                    File dest = new File(filePath);
-                    file.transferTo(dest);
-
-                    // Construct the file URL for use in the response or storage
-                     fileUrl = "https://saathi.etheriumtech.com:444/saathi_images/" + adminUserID + "/" + subscriberID + "/" + fileName;
-                }
-                // Step 4: Create and add interaction when the service is completed
-                InteractionDTO interactionDTO = new InteractionDTO();
-                interactionDTO.setSubscriberID(subscriberID);
-                if(subscriberAlaCarteServiceID!=null) {
-                	 interactionDTO.setSubscriberAlaCarteServicesID(subscriberAlaCarteServiceID);
-                }
-                if(frequencyInstance!=null) {
-                	System.out.println("frequencyCount"+frequencyInstance);
-               	 interactionDTO.setFrequencyInstance(frequencyInstance);
-               }	
-                interactionDTO.setDescription(description); // Get the description from the request payload
-                interactionDTO.setDocuments(fileUrl);  // Store the file path in the documents attribute
-                List<ServiceReport> services = updatedServices.get("allServices");
-                if (services != null) {
-                    for (ServiceReport service : services) {
-                        // Check both serviceID and the type (Ala-carte or Package) to make sure it's the correct service
-                        if (service.getServiceID() == serviceID) {
-                        	 System.out.println("service.getPackageServiceID()"+service.getPackageServiceID());
-                            // Check if the request indicates it's an Ala-carte service and match it with the existing service report
-                            if (isAlaCarte && service.getSubscriberAlaCarteServicesID() != null && service.getSubscriberAlaCarteServicesID()==subscriberAlaCarteServiceID) {
-                                // This is the matching ala-carte service
-                                System.out.println("Processing ala-carte service...");
-                               interactionDTO.setSubscriberAlaCarteServicesID(service.getSubscriberAlaCarteServicesID());
-                 //               interactionDTO.setSubscriberAlaCarteServicesID(subscriberAlaCarteServiceID);
-                                interactionDTO.setPackageServicesID(null); 
-                                break;// Clear packageServiceID for ala-carte service
-                            }
-                          
-                            // Check if it's a package service by ensuring isAlaCarte is false and there's a valid packageServiceID
-                            else if (!isAlaCarte && service.getPackageServiceID() != null && service.getPackageServiceID() != 0) {
-                                // This is the matching package service
-                                System.out.println("Processing package service...");
-                                interactionDTO.setPackageServicesID(service.getPackageServiceID()); // Set the packageServiceID
-                                interactionDTO.setSubscriberAlaCarteServicesID(subscriberAlaCarteServiceID); 
-                                break;// Clear ala-carte ID for package service
-                            }
-                            // Set the completion status only if the service is fully completed
-                            interactionDTO.setCompletionStatus("Completed".equals(service.getCompletionStatus()) ? 1 : 0);
-                            // Since the matching service is found, break the loop
-                           
-                        }
-                    }
-                }
-                // Step 6: Save the interaction to the database
-                interactionService.createInteraction(interactionDTO);
-                // Return a success message
-                return ResponseEntity.ok("Service completion updated successfully and interaction with file added.");
-            } catch (IOException e) {
-                e.printStackTrace();
-                // If file upload fails, return an internal server error response
-                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("File upload failed");
+            // Parse the preferredDate and preferredTime from the input strings
+            DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+            DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm");
+            LocalDate parsedPreferredDate = null;
+            LocalTime parsedPreferredTime = null;
+            if (preferredDate != null && preferredTime != null) {
+                parsedPreferredDate = LocalDate.parse(preferredDate, dateFormatter);
+                parsedPreferredTime = LocalTime.parse(preferredTime, timeFormatter);
             }
-        } else {
-            // If the service is not found for the subscriber, return a 404 response
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Service not found for the subscriber.");
+
+            // If no valid package or ala-carte service found for the subscriber
+            if (packageID == null && subscriberAlaCarteServiceID == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body("No valid package or ala-carte service found for the subscriber.");
+            }
+
+            // Step 2: Update service completion logic
+            Map<String, List<ServiceReport>> updatedServices;
+            if (isAlaCarte) {
+                // Update ala-carte service completion
+                updatedServices = serviceCompletionService.updateServiceCompletion(
+                        subscriberID, serviceID, subscriberAlaCarteServiceID, true, null, null, frequencyInstance);
+            } else {
+                // Update package service completion with preferred date and time
+                updatedServices = serviceCompletionService.updateServiceCompletion(
+                        subscriberID, serviceID, subscriberAlaCarteServiceID, false, parsedPreferredDate, parsedPreferredTime, frequencyInstance);
+            }
+
+            if (updatedServices == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Service not found for the subscriber.");
+            }
+
+            // Step 3: Handle file uploads
+            StringBuilder fileUrls = new StringBuilder(); // To store file URLs
+            if (files != null && !files.isEmpty()) {
+                Integer adminUserID = subscriberService.getAdminUserIDBySubscriber(subscriberID);
+                String uploadDirectory = "/home/saathi/tomcat/webapps/saathi_images/" + adminUserID + "/" + subscriberID + "/";
+                File directory = new File(uploadDirectory);
+                if (!directory.exists() && !directory.mkdirs()) {
+                    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to create directory for file uploads.");
+                }
+
+                for (MultipartFile file : files) {
+                    if (!file.isEmpty()) {
+                        String fileName = file.getOriginalFilename();
+                        String filePath = uploadDirectory + fileName;
+                        File dest = new File(filePath);
+                        file.transferTo(dest); // Save file to server
+                        String fileUrl = "https://saathi.etheriumtech.com:444/saathi_images/" + adminUserID + "/" + subscriberID + "/" + fileName;
+                        fileUrls.append(fileUrl).append(","); // Append URL
+                    }
+                }
+            }
+
+            // Trim trailing comma from file URLs
+            String uploadedFileUrls = fileUrls.toString();
+            if (uploadedFileUrls.endsWith(",")) {
+                uploadedFileUrls = uploadedFileUrls.substring(0, uploadedFileUrls.length() - 1);
+            }
+
+            // Step 4: Create and save interaction
+            InteractionDTO interactionDTO = new InteractionDTO();
+            interactionDTO.setSubscriberID(subscriberID);
+            interactionDTO.setSubscriberAlaCarteServicesID(subscriberAlaCarteServiceID);
+            interactionDTO.setFrequencyInstance(frequencyInstance);
+            interactionDTO.setDescription(description);
+            interactionDTO.setDocuments(uploadedFileUrls); // Save file URLs
+
+            List<ServiceReport> services = updatedServices.get("allServices");
+            if (services != null) {
+                for (ServiceReport service : services) {
+                    if (service.getServiceID() == serviceID) {
+                        if (isAlaCarte && service.getSubscriberAlaCarteServicesID() != null
+                                && service.getSubscriberAlaCarteServicesID().equals(subscriberAlaCarteServiceID)) {
+                            interactionDTO.setSubscriberAlaCarteServicesID(service.getSubscriberAlaCarteServicesID());
+                            interactionDTO.setPackageServicesID(null);
+                        } else if (!isAlaCarte && service.getPackageServiceID() != null && service.getPackageServiceID() != 0) {
+                            interactionDTO.setPackageServicesID(service.getPackageServiceID());
+                            interactionDTO.setSubscriberAlaCarteServicesID(subscriberAlaCarteServiceID);
+                        }
+                        interactionDTO.setCompletionStatus("Completed".equals(service.getCompletionStatus()) ? 1 : 0);
+                        break;
+                    }
+                }
+            }
+
+            interactionService.createInteraction(interactionDTO);
+
+            // Return success response
+            return ResponseEntity.ok("Service completion updated successfully and interaction with files added.");
+        } catch (IOException e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("File upload failed.");
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occurred while updating service completion.");
         }
     }
-   
     @PutMapping("/service/updateRequest")
     public ResponseEntity<?> updateServiceRequest(
             @RequestBody HashMap<String, Object> requestBody) {
@@ -1088,4 +1054,19 @@ public class SubscriberController {
         return ResponseEntity.ok(billingStatus);
     }
 
+    @PutMapping("/{id}/deactivate")
+    public ResponseEntity<String> deactivateSubscriber(@PathVariable("id") int subscriberID) {
+        Optional<Subscriber> optionalSubscriber = subscriberRepository.findById(subscriberID);
+
+        if (optionalSubscriber.isPresent()) {
+            Subscriber subscriber = optionalSubscriber.get();
+            subscriber.setDeactivated(1); // Set the subscriber as deactivated
+            subscriberRepository.save(subscriber);
+            return ResponseEntity.ok("Subscriber deactivated successfully.");
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Subscriber not found.");
+        }
+    }
+    
+    
 } 

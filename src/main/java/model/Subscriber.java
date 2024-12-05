@@ -112,6 +112,17 @@ public class Subscriber {
     @Temporal(TemporalType.TIMESTAMP)
     private Date otpGeneratedTime;
     
+    @Column(name = "Deactivated", columnDefinition = "TINYINT(1) DEFAULT 0")
+    private int deactivated; // 0 for active, 1 for deactivated
+
+    public int getDeactivated() {
+        return deactivated;
+    }
+
+    public void setDeactivated(int deactivated) {
+        this.deactivated = deactivated;
+    }
+
  public Integer getOtp() {
 		return otp;
 	}

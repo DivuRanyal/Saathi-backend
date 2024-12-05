@@ -10,6 +10,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
+import javax.mail.MessagingException;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
@@ -28,6 +30,7 @@ import org.springframework.web.client.RestTemplate;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import freemarker.template.TemplateException;
 import model.Order;
 import model.Payment;
 import model.Subscriber;
@@ -35,6 +38,7 @@ import model.SubscriptionPackage;
 import repository.OrderRepository;
 import repository.SubscriberRepository;
 import repository.SubscriptionPackageRepository;
+import service.EmailService;
 import service.PaymentService;
 import service.ServiceCompletionServiceNew;
 import service.SubscriberService;
@@ -54,6 +58,9 @@ public class CashfreeController {
 	
 	@Autowired
     private SubscriptionPackageRepository subscriptionPackageRepository;
+
+	@Autowired
+    private EmailService emailService;
 
 	@Autowired
     private PaymentService paymentService;
@@ -183,12 +190,11 @@ public class CashfreeController {
     }
     
     @PutMapping("/order/{orderID}")
-    public ResponseEntity<String> updateOrder(@PathVariable Integer orderID, @RequestBody Order updatedOrder) {
+    public ResponseEntity<String> updateOrder(@PathVariable Integer orderID, @RequestBody Order updatedOrder) throws MessagingException, IOException, TemplateException {
         Optional<Order> existingOrderOptional = orderRepository.findById(orderID);
 
         if (existingOrderOptional.isPresent()) {
             Order existingOrder = existingOrderOptional.get();
-
             
             if (updatedOrder.getOrderStatus() != null) existingOrder.setOrderStatus(updatedOrder.getOrderStatus());
  //           if (updatedOrder.getPaymentSessionID() != null) existingOrder.setPaymentSessionID(updatedOrder.getPaymentSessionID());
@@ -196,29 +202,43 @@ public class CashfreeController {
 
             // Save the updated order
             orderRepository.save(existingOrder);
-
+            Integer subscriberID = existingOrder.getSubscriberID();
+            Optional<Subscriber> subscriberOptional = subscriberRepository.findById(subscriberID);
+            
            
             // Check if order status is "PAID" and update billing status of the subscriber
             if ("PAID".equalsIgnoreCase(updatedOrder.getOrderStatus())) {
-                Integer subscriberID = existingOrder.getSubscriberID();
-                Optional<Subscriber> subscriberOptional = subscriberRepository.findById(subscriberID);
                 if (subscriberOptional.isPresent()) {
                     Subscriber subscriber = subscriberOptional.get();
                     subscriber.setBillingStatus(1);  // Set billing status to 1
                     subscriberRepository.save(subscriber);  // Save updated subscriber
+                    
+                    emailService.sendPaymentSuccessEmail(
+                            subscriber.getEmail(),
+                            subscriber.getFirstName(),
+                            "suchigupta@etheriumtech.com"
+                        );
                 } else {
                     return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Subscriber not found.");
                 }
             }
-
-            
-            
+            else
+            {
+            	 if (subscriberOptional.isPresent()) {
+                     Subscriber subscriber = subscriberOptional.get();
+            	 
+            	emailService.sendPaymentFailureEmail(
+            	        subscriber.getEmail(),
+            	        subscriber.getFirstName(),
+            	        "admin@etheriumtech.com"
+            	    );
+            }
+            }
             return ResponseEntity.ok("Order and billing status updated successfully.");
         } else {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Order not found.");
         }
     }
-    
     
     public Payment fetchAndSaveLatestPaymentDetails(Integer orderID) {
         String url = BASE_URL + orderID + "/payments";

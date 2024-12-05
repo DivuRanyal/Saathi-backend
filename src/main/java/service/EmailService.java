@@ -35,6 +35,24 @@ public class EmailService {
     @Autowired
     private Configuration freemarkerConfig;
 
+
+    @Async
+    public void sendPaymentSuccessEmail(String subscriberEmail, String subscriberName, String adminEmail) throws MessagingException, IOException, TemplateException {
+        // Send email to subscriber
+        sendEmail(subscriberEmail, "Payment Successful", "payment-success.ftlh", Map.of("subscriberName", subscriberName));
+
+        // Send email to admin
+        sendEmail(adminEmail, "Payment Successful for Subscriber", "payment-success-admin.ftlh", Map.of("subscriberName", subscriberName));
+    }
+
+    @Async
+    public void sendPaymentFailureEmail(String subscriberEmail, String subscriberName, String adminEmail) throws MessagingException, IOException, TemplateException {
+        // Send email to subscriber
+        sendEmail(subscriberEmail, "Payment Failed", "payment-failure.ftlh", Map.of("subscriberName", subscriberName));
+
+        // Send email to admin
+        sendEmail(adminEmail, "Payment Failure for Subscriber", "payment-failure-admin.ftlh", Map.of("subscriberName", subscriberName));
+    }
     @Async
     public void sendSaathiAssignedEmail(String saathiEmail, Map<String, Object> model) throws MessagingException, IOException, TemplateException {
         MimeMessage message = mailSender.createMimeMessage();

@@ -673,8 +673,7 @@ public class AdminUsersController {
 
         return saathiCounts;
     }
-
-    
+   
     @GetMapping("/subscribers/services/all/saathis")
     public ResponseEntity<?> getAllSaathiSubscribersServices() {
         try {

@@ -34,6 +34,9 @@ public class LoginController {
         Subscriber subscriber = subscriberService.findByEmailAndPassword(email, password);
       
         if (subscriber != null) {
+        	 if (subscriber.getDeactivated() == 1) {
+                 return ResponseEntity.status(403).body("Your account has been deactivated. Please contact support.");
+             }
             return ResponseEntity.ok(subscriber);
         } else {
             return ResponseEntity.status(401).body("Invalid credentials for Subscriber");
