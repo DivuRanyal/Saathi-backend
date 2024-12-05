@@ -208,6 +208,7 @@ public class CashfreeController {
            
             // Check if order status is "PAID" and update billing status of the subscriber
             if ("PAID".equalsIgnoreCase(updatedOrder.getOrderStatus())) {
+            	System.out.println("hello");
                 if (subscriberOptional.isPresent()) {
                     Subscriber subscriber = subscriberOptional.get();
                     subscriber.setBillingStatus(1);  // Set billing status to 1
@@ -218,6 +219,7 @@ public class CashfreeController {
                             subscriber.getFirstName(),
                             "suchigupta@etheriumtech.com"
                         );
+                	System.out.println("Sending email");
                 } else {
                     return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Subscriber not found.");
                 }
@@ -230,7 +232,7 @@ public class CashfreeController {
             	emailService.sendPaymentFailureEmail(
             	        subscriber.getEmail(),
             	        subscriber.getFirstName(),
-            	        "admin@etheriumtech.com"
+            	        "suchigupta@etheriumtech.com"
             	    );
             }
             }

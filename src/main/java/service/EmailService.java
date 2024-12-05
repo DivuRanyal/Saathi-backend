@@ -40,9 +40,10 @@ public class EmailService {
     public void sendPaymentSuccessEmail(String subscriberEmail, String subscriberName, String adminEmail) throws MessagingException, IOException, TemplateException {
         // Send email to subscriber
         sendEmail(subscriberEmail, "Payment Successful", "payment-success.ftlh", Map.of("subscriberName", subscriberName));
-
+        System.out.println("Sent email");
         // Send email to admin
         sendEmail(adminEmail, "Payment Successful for Subscriber", "payment-success-admin.ftlh", Map.of("subscriberName", subscriberName));
+        System.out.println("Sent email");
     }
 
     @Async
