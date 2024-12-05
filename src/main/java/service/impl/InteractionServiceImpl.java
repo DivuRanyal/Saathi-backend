@@ -14,6 +14,8 @@ import repository.SubscriberAlaCarteServicesRepository;  // Make sure to import 
 import service.InteractionService;
 
 import java.time.LocalDateTime;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -61,7 +63,14 @@ public class InteractionServiceImpl implements InteractionService {
         interaction.setSubscriberID(interactionDTO.getSubscriberID());
         interaction.setSaathiID(interactionDTO.getSaathiID());
         interaction.setInteractionType(interactionDTO.getInteractionType());
-        interaction.setDocuments(interactionDTO.getDocuments());
+        if (interactionDTO.getDocuments() != null && !interactionDTO.getDocuments().isEmpty()) {
+            // Join the list of URLs into a comma-separated string
+            String documentString = String.join(",", interactionDTO.getDocuments());
+            interaction.setDocuments(documentString); // Set the string into the interaction
+        } else {
+            interaction.setDocuments(null); // Set to null or an empty string if the list is empty
+        }
+
         interaction.setCompletionStatus(interactionDTO.getCompletionStatus());
         // Fetch and set the PackageServices entity
         if (interactionDTO.getPackageServicesID() != null) {
@@ -128,7 +137,13 @@ public class InteractionServiceImpl implements InteractionService {
         interaction.setSubscriberID(dto.getSubscriberID());
         interaction.setSaathiID(dto.getSaathiID());
         interaction.setInteractionType(dto.getInteractionType());
-        interaction.setDocuments(dto.getDocuments());
+        if (dto.getDocuments() != null && !dto.getDocuments().isEmpty()) {
+            // Join the list of URLs into a comma-separated string
+            String documentString = String.join(",", dto.getDocuments());
+            interaction.setDocuments(documentString); // Set the string into the interaction
+        } else {
+            interaction.setDocuments(null); // Set to null or an empty string if the list is empty
+        }
         interaction.setCompletionStatus(dto.getCompletionStatus());
        interaction.setPackageID(dto.getPackageID());
         interaction.setDescription(dto.getDescription());
@@ -151,7 +166,14 @@ public class InteractionServiceImpl implements InteractionService {
         dto.setSubscriberID(interaction.getSubscriberID());
         dto.setSaathiID(interaction.getSaathiID());
         dto.setInteractionType(interaction.getInteractionType());
-        dto.setDocuments(interaction.getDocuments());
+        if (interaction.getDocuments() != null && !interaction.getDocuments().isEmpty()) {
+            // Split the comma-separated string into a list of URLs
+            List<String> documentList = Arrays.asList(interaction.getDocuments().split(","));
+            dto.setDocuments(documentList); // Set the list into the DTO
+        } else {
+            dto.setDocuments(Collections.emptyList()); // Set an empty list if no documents
+        }
+
         dto.setCreatedDate(interaction.getCreatedDate());
         dto.setLastUpdatedDate(interaction.getLastUpdatedDate());
         dto.setCompletionStatus(interaction.getCompletionStatus());

@@ -61,6 +61,7 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -560,7 +561,7 @@ public class SubscriberController {
                 	            return interaction.getSubscriberAlaCarteServicesID() != null &&
                 	                   interaction.getSubscriberAlaCarteServicesID().equals(serviceReport.getSubscriberAlaCarteServicesID()) &&
                 	                   interaction.getFrequencyInstance().equals(serviceReport.getFrequencyInstance());
-                	        } 
+                	        }
                 	        // Check for package services by PackageServicesID and frequencyCount
                 	        else if (serviceReport.getPackageServiceID() != 0 && interaction.getPackageServicesID() != null) {
                 	            return interaction.getPackageServicesID().equals(serviceReport.getPackageServiceID()) &&
@@ -570,14 +571,17 @@ public class SubscriberController {
                 	        }
                 	    })
                 	    .map(interaction -> {
-                	        // If the interaction contains documents, you can prepend a base URL if required
+                	        // Ensure documents are processed if they exist
                 	        if (interaction.getDocuments() != null && !interaction.getDocuments().isEmpty()) {
-                	            String documentUrl = interaction.getDocuments();
-                	            interaction.setDocuments(documentUrl); // Set the document URL in the response
+                	            List<String> documentUrls = interaction.getDocuments(); // Already a List<String>
+
+                	            
+                	            interaction.setDocuments(documentUrls); // Update the documents list
                 	        }
                 	        return interaction;
                 	    })
                 	    .collect(Collectors.toList());
+
 
                 // Add the interactions to the service
                 serviceWithInteraction.put("interactions", relatedInteractions);
@@ -713,13 +717,16 @@ public class SubscriberController {
                 uploadedFileUrls = uploadedFileUrls.substring(0, uploadedFileUrls.length() - 1);
             }
 
-            // Step 4: Create and save interaction
+            // Split the file URLs into a list and set it in InteractionDTO
+            List<String> documentList = Arrays.asList(uploadedFileUrls.split(","));
+             // Step 4: Create and save interaction
             InteractionDTO interactionDTO = new InteractionDTO();
             interactionDTO.setSubscriberID(subscriberID);
             interactionDTO.setSubscriberAlaCarteServicesID(subscriberAlaCarteServiceID);
             interactionDTO.setFrequencyInstance(frequencyInstance);
             interactionDTO.setDescription(description);
-            interactionDTO.setDocuments(uploadedFileUrls); // Save file URLs
+            interactionDTO.setDocuments(documentList); // Save file URLs as a list
+            
 
             List<ServiceReport> services = updatedServices.get("allServices");
             if (services != null) {

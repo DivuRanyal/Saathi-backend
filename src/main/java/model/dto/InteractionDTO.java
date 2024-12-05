@@ -3,6 +3,7 @@ package model.dto;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.util.Date;
+import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 
@@ -12,7 +13,7 @@ public class InteractionDTO {
     private Integer subscriberID;
     private Integer saathiID;
     private String interactionType;
-    private String documents;
+    private List<String> documents;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private Date createdDate;
 
@@ -64,14 +65,13 @@ public class InteractionDTO {
         this.interactionType = interactionType;
     }
 
-    public String getDocuments() {
+    public List<String> getDocuments() { // Updated getter
         return documents;
     }
 
-    public void setDocuments(String documents) {
+    public void setDocuments(List<String> documents) { // Updated setter
         this.documents = documents;
     }
-
     public String getCreatedDate() {
         return createdDate != null ? DATE_FORMAT.format(createdDate) : null;
     }
