@@ -130,22 +130,40 @@ public class CashfreeController {
             if (payment != null) {
                 paymentStatus = payment.getPaymentStatus();
             }
-
+            Integer subscriberID = existingOrder.getSubscriberID();
+            
+            Optional<Subscriber> subscriberOptional = subscriberRepository.findById(subscriberID);
+            
+          
             // Check if order status should be updated based on payment status
             if (!"PAID".equalsIgnoreCase(existingOrder.getOrderStatus()) && paymentStatus != null) {
                 existingOrder.setOrderStatus(paymentStatus);
                 existingOrder.setUpdatedAt(new Date());
                 orderRepository.save(existingOrder);
+                if (subscriberOptional.isPresent()) {
+                    Subscriber subscriber = subscriberOptional.get();
+           	 
+           	emailService.sendPaymentFailureEmail(
+           	        subscriber.getEmail(),
+           	        subscriber.getFirstName(),
+           	        "suchigupta@etheriumtech.com"
+           	    );
+            }
             }
             if (!"PAID".equalsIgnoreCase(existingOrder.getOrderStatus()) && paymentStatus == null) {
                 existingOrder.setOrderStatus("CANCELLED");
                 existingOrder.setUpdatedAt(new Date());
                 orderRepository.save(existingOrder);
+                if (subscriberOptional.isPresent()) {
+                    Subscriber subscriber = subscriberOptional.get();
+           	 
+           	emailService.sendPaymentFailureEmail(
+           	        subscriber.getEmail(),
+           	        subscriber.getFirstName(),
+           	        "suchigupta@etheriumtech.com"
+           	    );
             }
-            Integer subscriberID = existingOrder.getSubscriberID();
-            
-            Optional<Subscriber> subscriberOptional = subscriberRepository.findById(subscriberID);
-            
+            }
             // Step 3: Update billing status if order status is "PAID"
             if ("PAID".equalsIgnoreCase(fetchedOrderStatus)) {
                 SubscriptionPackage subscriptionPackage = subscriptionPackageRepository.findById(packageID)
@@ -166,18 +184,8 @@ public class CashfreeController {
                     return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
                 }
             }
-            else
-            {
-            	 if (subscriberOptional.isPresent()) {
-                     Subscriber subscriber = subscriberOptional.get();
-            	 
-            	emailService.sendPaymentFailureEmail(
-            	        subscriber.getEmail(),
-            	        subscriber.getFirstName(),
-            	        "suchigupta@etheriumtech.com"
-            	    );
-            }
-            }
+           
+            
             return ResponseEntity.ok(existingOrder);
         } else {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
@@ -226,7 +234,7 @@ public class CashfreeController {
           
             // Check if order status is "PAID" and update billing status of the subscriber
             if ("PAID".equalsIgnoreCase(updatedOrder.getOrderStatus())) {
-            	System.out.println("hello");
+            	
                 if (subscriberOptional.isPresent()) {
                     Subscriber subscriber = subscriberOptional.get();
                     subscriber.setBillingStatus(1);  // Set billing status to 1
@@ -244,6 +252,7 @@ public class CashfreeController {
             }
             else
             {
+            	System.out.println("hello");
             	 if (subscriberOptional.isPresent()) {
                      Subscriber subscriber = subscriberOptional.get();
             	 
