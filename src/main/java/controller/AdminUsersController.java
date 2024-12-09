@@ -8,6 +8,7 @@ import model.SubscriptionPackage;
 import model.dto.AdminUsersDTO;
 import model.dto.ChangePasswordRequest;
 import model.dto.CombinedSaathiSubscriberDTO;
+import model.dto.InteractionDTO;
 import model.dto.PackageDetailDTO;
 import model.dto.SaathiServiceCountDTO;
 import model.dto.SaathiServiceSummaryDTO;
@@ -19,6 +20,7 @@ import model.dto.SubscriberServicesDTO;
 import model.dto.SubscriptionPackageDTO;
 import service.AdminUsersService;
 import service.EmailService;
+import service.InteractionService;
 import service.ServiceCompletionServiceNew;
 import service.SubscriberService;
 import service.SubscriptionPackageService;
@@ -73,6 +75,9 @@ public class AdminUsersController {
     @Autowired
     private SubscriptionPackageService subscriptionPackageService;
  
+    @Autowired
+    private InteractionService interactionService;
+    
 
     @Autowired
     public AdminUsersController(AdminUsersService adminUsersService, SubscriberService subscriberService) {
@@ -956,4 +961,56 @@ public class AdminUsersController {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
+    
+    @GetMapping("/saathis/subscribers/interactions")
+    public ResponseEntity<?> getSaathisWithSubscribersAndInteractions() {
+        try {
+            // Fetch all Saathi users
+            List<AdminUser> saathiUsers = adminUsersService.getAllSaathiUsers();
+
+            // Prepare a list to hold Saathi details
+            List<Map<String, Object>> saathiList = new ArrayList<>();
+
+            for (AdminUser saathi : saathiUsers) {
+                // Fetch subscribers for the current Saathi
+                List<SubscriberDTO> subscribers = subscriberService.getSubscribersBySaathiID(saathi.getAdminUserID());
+
+                // Create a list to hold subscriber details
+                List<Map<String, Object>> subscriberDetails = new ArrayList<>();
+
+                for (SubscriberDTO subscriber : subscribers) {
+                    // Fetch interactions related to the subscriber
+                    List<InteractionDTO> interactions = interactionService.getInteractionsBySubscriberID(subscriber.getSubscriberID());
+
+                    // Prepare a map for subscriber data
+                    Map<String, Object> subscriberData = new HashMap<>();
+                    subscriberData.put("subscriber", subscriber);
+                    subscriberData.put("interactions", interactions);
+
+                    subscriberDetails.add(subscriberData);
+                }
+
+                // Prepare Saathi details including their subscribers
+                Map<String, Object> saathiData = new HashMap<>();
+                saathiData.put("saathi", saathi); // Add the Saathi object directly
+                saathiData.put("subscribers", subscriberDetails); // Add subscribers and interactions
+
+                saathiList.add(saathiData);
+            }
+
+            // Wrap the Saathi list into a response map
+            Map<String, Object> response = new HashMap<>();
+            response.put("saathi-list", saathiList);
+
+            // Return the response
+            return ResponseEntity.ok(response);
+
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (Exception e) {
+            // Handle any other exceptions and return an internal server error response
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An unexpected error occurred: " + e.getMessage());
+        }
+    }
+
 }
