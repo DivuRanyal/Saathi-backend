@@ -72,7 +72,7 @@ public class CashfreeController {
     @Value("${CASHFREE_SECRET_KEY}")
     private String clientSecret;
 
-    private static final String BASE_URL = "https://sandbox.cashfree.com/pg/orders/";
+    private static final String BASE_URL = "https://api.cashfree.com/pg/orders/";
     private static final String API_VERSION = "2023-08-01";
 
     private final RestTemplate restTemplate = new RestTemplate();
