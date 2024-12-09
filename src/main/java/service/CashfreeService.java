@@ -65,7 +65,7 @@ public class CashfreeService {
 
 	    @Value("${CASHFREE_SECRET_KEY}")
 	    private String cashfreeSecretKey;
-	 private final String createOrderUrl = "https://sandbox.cashfree.com/pg/orders";
+	 private final String createOrderUrl = "https://api.cashfree.com/pg/orders";
 	 
     public Order createOrder(Integer orderId, String orderAmount, Integer customerId, String customerPhone, String customerName) throws JsonMappingException, JsonProcessingException {
         RestTemplate restTemplate = new RestTemplate(); 
