@@ -280,7 +280,7 @@ public class SubscriberController {
     @PostMapping("/services")
  //   public ResponseEntity<SubscriberAlaCarteServices> createService(@RequestBody SubscriberAlaCarteServices serviceRequest) {
     public ResponseEntity<?> createService(@RequestBody String serviceRequest) {
-    	 System.out.println(serviceRequest);
+   // 	 System.out.println(serviceRequest);
  //       SubscriberAlaCarteServices createdService = service.createOrUpdateService(serviceRequest);
  //       System.out.println(createdService);
         return new ResponseEntity<>(serviceRequest, HttpStatus.CREATED);
