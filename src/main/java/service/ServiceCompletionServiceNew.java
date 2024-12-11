@@ -25,6 +25,7 @@ import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 import exception.RequestedDateTimesExceedsFrequencyException;
 import model.AggregatedServiceReport;
@@ -249,8 +250,11 @@ public class ServiceCompletionServiceNew {
 
         if (cachedData != null) {
             try {
-                // Deserialize using Jackson for type safety
+                // Configure ObjectMapper with JSR310 module
                 ObjectMapper objectMapper = new ObjectMapper();
+                objectMapper.registerModule(new JavaTimeModule()); // Register the JavaTimeModule for LocalDate/LocalDateTime
+
+                // Deserialize cached data into the required type
                 return objectMapper.convertValue(cachedData, new TypeReference<Map<String, List<ServiceReport>>>() {});
             } catch (IllegalArgumentException e) {
                 throw new Exception("Cached data is not in the expected format for subscriber ID: " + subscriberID, e);
