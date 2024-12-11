@@ -175,8 +175,9 @@ public class ServiceCompletionServiceNew {
             LocalDate parsedPreferredDate, LocalTime parsedPreferredTime, LocalDateTime createdDate, Integer frequencyInstance) throws Exception {
 
         // Fetch the cached service reports from Memcached or in-memory
-        Map<String, List<ServiceReport>> allServicesMap = safeGetCachedServices(subscriberID);
-        
+     //   Map<String, List<ServiceReport>> allServicesMap = safeGetCachedServices(subscriberID);
+    	 Map<String, List<ServiceReport>> allServicesMap = getSubscriberServices(subscriberID);
+         
         if (allServicesMap == null || allServicesMap.get("allServices") == null) {
             throw new Exception("No services found for subscriber ID: " + subscriberID);
         }
