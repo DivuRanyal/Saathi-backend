@@ -824,7 +824,7 @@ public class SubscriberController {
             Map<String, List<ServiceReport>> updatedServiceReportMap = serviceCompletionService.updateServiceRequestedDateTime(
                     subscriberID, serviceID, false, parsedPreferredDate, parsedPreferredTime, createdDate, frequencyInstance);
 
-  //          System.out.println("updatedServiceReportMap" + updatedServiceReportMap);
+            System.out.println("updatedServiceReportMap" + updatedServiceReportMap);
             
             // Return the updated list of ServiceReports in the response
             return ResponseEntity.ok(updatedServiceReportMap);
