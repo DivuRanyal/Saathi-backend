@@ -10,13 +10,12 @@ public class MemcachedCache implements Cache {
 
     private final String name;
     private MemcachedClient memcachedClient;
-    private static final int EXPIRATION_TIME_SECONDS = 36000000; // 1 hour expiration
+    private static final int EXPIRATION_TIME_SECONDS = 36; // 1 hour expiration
 
     public MemcachedCache(String name, MemcachedClient memcachedClient) {
         this.name = name;
         this.memcachedClient = memcachedClient;
     }
-
     @Override
     public String getName() {
         return name;
