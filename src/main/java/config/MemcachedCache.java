@@ -10,7 +10,7 @@ public class MemcachedCache implements Cache {
 
     private final String name;
     private MemcachedClient memcachedClient;
-    private static final int EXPIRATION_TIME_SECONDS = 36; // 1 hour expiration
+//    private static final int EXPIRATION_TIME_SECONDS = 36000000; // 1 hour expiration
 
     public MemcachedCache(String name, MemcachedClient memcachedClient) {
         this.name = name;
@@ -53,7 +53,7 @@ public class MemcachedCache implements Cache {
 
             // Set the cache value with the expiration time
             System.out.println("Storing key: " + key + " in Memcached with value: " + value);
-            memcachedClient.set(key.toString(), EXPIRATION_TIME_SECONDS, value);
+            memcachedClient.set(key.toString(),0, value);
 
         } catch (Exception e) {
             System.out.println("Failed to store key: " + key + " in Memcached. Error: " + e.getMessage());

@@ -219,7 +219,7 @@ public class SubscriberController {
                                 if (serviceReport.isAlaCarte()) {
                                     return interaction.getSubscriberAlaCarteServicesID() != null &&
                                            interaction.getSubscriberAlaCarteServicesID().equals(serviceReport.getSubscriberAlaCarteServicesID());
-                                } else if (serviceReport.getPackageServiceID() != 0 && interaction.getPackageServicesID() != null) {
+                                } else if ( serviceReport.getPackageServiceID() != 0 && interaction.getPackageServicesID() != null) {
                                     return interaction.getPackageServicesID().equals(serviceReport.getPackageServiceID());
                                 } else {
                                     return false; // No matching service
