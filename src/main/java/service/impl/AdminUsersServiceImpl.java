@@ -237,7 +237,7 @@ public class AdminUsersServiceImpl implements AdminUsersService {
 
                 // Step 4: Calculate the average rating of interactions for these subscribers
                 Double averageRating = interactionRepository.findAverageRatingBySubscriberIDs(subscriberIDs);
-                System.out.println("averageRating"+averageRating);
+//                System.out.println("averageRating"+averageRating);
                 // Step 5: Update the Saathi's average rating
                 if (averageRating != null) {
                     saathi.setAverageRating(averageRating);
